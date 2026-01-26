@@ -305,6 +305,32 @@ class Repository:
             updated_at=datetime.fromisoformat(row["updated_at"]),
         )
 
+    def get_run_value(self, run_id: int) -> tuple[int, float]:
+        """
+        Calculate total value of a run's loot.
+
+        Returns:
+            Tuple of (raw_fe_gained, total_value_fe)
+            - raw_fe_gained: Just the FE currency picked up
+            - total_value_fe: FE + value of other items based on prices
+        """
+        from titrack.parser.patterns import FE_CONFIG_BASE_ID
+
+        summary = self.get_run_summary(run_id)
+        raw_fe = summary.get(FE_CONFIG_BASE_ID, 0)
+        total_value = float(raw_fe)
+
+        for config_id, quantity in summary.items():
+            if config_id == FE_CONFIG_BASE_ID:
+                continue
+            if quantity <= 0:
+                continue
+            price = self.get_price(config_id)
+            if price and price.price_fe > 0:
+                total_value += price.price_fe * quantity
+
+        return raw_fe, total_value
+
     # --- Log Position ---
 
     def save_log_position(self, file_path: Path, position: int, file_size: int) -> None:

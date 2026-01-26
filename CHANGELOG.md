@@ -8,10 +8,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Phase 2: Web UI with FastAPI backend
-- Phase 3: Price engine with import/export
-- Phase 4: Net worth and profit/hour calculations
-- Phase 5: PyInstaller portable EXE packaging
+- Phase 3: Manual price editing UI, import/export
+- Phase 4: PyInstaller portable EXE packaging
+
+## [0.2.0] - 2026-01-26
+
+### Added
+
+#### Web Dashboard
+- FastAPI backend with REST API
+- Browser-based dashboard at `http://localhost:8000`
+- Real-time stats display: Total FE, Net Worth, Value/Hour, Runs, Prices
+- Interactive charts using Chart.js:
+  - Cumulative Value over time
+  - Value/Hour over time (rolling 1-hour window)
+- Recent Runs table with total loot value per run
+- Run details modal showing loot breakdown with quantities and FE values
+- Sortable inventory panel (click Qty/Value headers to sort)
+- Auto-refresh every 5 seconds (toggleable)
+- Dark theme matching game aesthetic
+
+#### Exchange Price Learning
+- `ExchangeMessageParser` for multi-line exchange protocol messages
+- Parses `XchgSearchPrice` send/receive messages from game logs
+- Correlates requests (item searched) with responses (price listings)
+- Extracts FE-denominated prices from exchange responses
+- Calculates reference price using 10th percentile of listings
+- Stores learned prices with `source="exchange"`
+- Console output when prices are learned: `[Price] Item Name: 0.021000 FE`
+
+#### Value-Based Calculations
+- Run value = raw FE + sum(item_qty × item_price) for priced items
+- Value/Hour stat using total loot value instead of raw FE
+- Net worth = Total FE + valued inventory items
+- Loot details show both quantity and FE value per item
+- Items without prices show "no price" indicator
+
+#### API Endpoints
+- `GET /api/status` - Server status, collector state, counts
+- `GET /api/runs` - Paginated runs with `total_value` field
+- `GET /api/runs/{id}` - Single run with loot breakdown
+- `GET /api/runs/stats` - Aggregated stats with `value_per_hour`
+- `GET /api/inventory` - Inventory with sort params (`sort_by`, `sort_order`)
+- `GET /api/items` - Item database with search
+- `GET /api/prices` - All learned prices
+- `PUT /api/prices/{id}` - Update/create price
+- `GET /api/stats/history` - Time-series data for charts
+
+#### CLI
+- `serve` command to start web server with background collector
+- Options: `--port`, `--host`, `--no-browser`
+- Graceful shutdown with Ctrl+C
+
+#### Infrastructure
+- Thread-safe database connections with locking
+- Separate DB connections for collector and API
+- Pydantic schemas for API request/response validation
+- CORS middleware for local development
+- Static file serving for dashboard
+
+### Changed
+- Dependencies: Added `fastapi>=0.109.0`, `uvicorn[standard]>=0.27.0`
+- Collector now accepts `on_price_update` callback
+- Repository adds `get_run_value()` method for value calculations
+
+### Fixed
+- Variable shadowing bug in runs API that caused runs to disappear
+- FE currency now correctly valued at 1:1 in inventory and loot displays
+
+### Technical
+- 118 tests passing (85 Phase 1 + 20 API + 13 exchange parser)
+- Thread-safe SQLite access with `threading.Lock`
 
 ## [0.1.1] - 2026-01-26
 
@@ -102,13 +169,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tlidb_items_seed_en.json` with 1,811 items
 - Includes name_en, name_cn, icon URLs, TLIDB links
 
-#### Test Suite (80 tests)
+#### Test Suite (85 tests)
 - Unit tests for all modules
 - Integration tests for full collector workflow
 - Sample log fixture for testing
 
 ### Technical Details
 - Python 3.11+ required
-- Zero runtime dependencies (stdlib only)
+- Zero runtime dependencies for Phase 1 (stdlib only)
 - SQLite WAL mode for concurrent access
 - Position persistence for resume after restart

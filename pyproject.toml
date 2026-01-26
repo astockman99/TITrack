@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "titrack"
-version = "0.1.0"
+version = "0.2.0"
 description = "Torchlight Infinite Local Loot Tracker"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,8 +24,11 @@ classifiers = [
     "Topic :: Games/Entertainment",
 ]
 
-# No runtime dependencies for Phase 1 - stdlib only
-dependencies = []
+# Phase 2: Add web server dependencies
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+]
 
 [project.optional-dependencies]
 dev = [

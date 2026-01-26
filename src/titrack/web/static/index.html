@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TITrack - Torchlight Infinite Loot Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TITrack</h1>
+            <div class="header-stats">
+                <div class="stat-card primary">
+                    <span class="stat-label">Total FE</span>
+                    <span id="total-fe" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Net Worth</span>
+                    <span id="net-worth" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Value/Hour</span>
+                    <span id="value-per-hour" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Runs</span>
+                    <span id="total-runs" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Prices</span>
+                    <span id="prices-count" class="stat-value">0</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <label class="toggle">
+                    <input type="checkbox" id="auto-refresh" checked>
+                    <span>Auto-refresh</span>
+                </label>
+                <span id="status-indicator" class="status-dot"></span>
+            </div>
+        </header>
+
+        <section class="charts-row">
+            <div class="chart-panel">
+                <h2>Cumulative Value</h2>
+                <canvas id="cumulative-value-chart"></canvas>
+            </div>
+            <div class="chart-panel">
+                <h2>Value / Hour</h2>
+                <canvas id="value-rate-chart"></canvas>
+            </div>
+        </section>
+
+        <main>
+            <section class="panel">
+                <h2>Recent Runs</h2>
+                <table id="runs-table">
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th>Duration</th>
+                            <th>Value</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="runs-body">
+                        <tr><td colspan="4" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="panel">
+                <h2>Current Inventory</h2>
+                <table id="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="sortable" data-sort="quantity" onclick="sortInventory('quantity')">
+                                Qty <span class="sort-indicator" id="sort-quantity"></span>
+                            </th>
+                            <th class="sortable active" data-sort="value" onclick="sortInventory('value')">
+                                Value <span class="sort-indicator" id="sort-value"></span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body">
+                        <tr><td colspan="3" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <footer>
+            <span id="last-update">Last updated: --</span>
+            <span id="collector-status">Collector: --</span>
+        </footer>
+    </div>
+
+    <div id="loot-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Run Details</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

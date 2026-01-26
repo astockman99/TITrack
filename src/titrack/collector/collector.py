@@ -12,6 +12,7 @@ from titrack.core.models import (
     ParsedBagEvent,
     ParsedContextMarker,
     ParsedLevelEvent,
+    Price,
     Run,
 )
 from titrack.core.run_segmenter import RunSegmenter
@@ -19,6 +20,12 @@ from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.log_parser import parse_line
 from titrack.parser.log_tailer import LogTailer
+from titrack.parser.exchange_parser import (
+    ExchangeMessageParser,
+    ExchangePriceRequest,
+    ExchangePriceResponse,
+    calculate_reference_price,
+)
 
 
 class Collector:
@@ -36,6 +43,7 @@ class Collector:
         on_delta: Optional[Callable[[ItemDelta], None]] = None,
         on_run_start: Optional[Callable[[Run], None]] = None,
         on_run_end: Optional[Callable[[Run], None]] = None,
+        on_price_update: Optional[Callable[[Price], None]] = None,
     ) -> None:
         """
         Initialize collector.
@@ -46,20 +54,26 @@ class Collector:
             on_delta: Callback for each delta (for live display)
             on_run_start: Callback when a run starts
             on_run_end: Callback when a run ends
+            on_price_update: Callback when a price is learned from exchange
         """
         self.db = db
         self.repository = Repository(db)
         self.tailer = LogTailer(log_path)
         self.delta_calc = DeltaCalculator()
         self.run_segmenter = RunSegmenter()
+        self.exchange_parser = ExchangeMessageParser()
 
         self._on_delta = on_delta
         self._on_run_start = on_run_start
         self._on_run_end = on_run_end
+        self._on_price_update = on_price_update
 
         # Context tracking
         self._current_context = EventContext.OTHER
         self._current_proto_name: Optional[str] = None
+
+        # Exchange price tracking: SynId -> ConfigBaseId
+        self._pending_price_searches: dict[int, int] = {}
 
         self._running = False
 
@@ -98,6 +112,13 @@ class Collector:
             timestamp: Event timestamp (defaults to now)
         """
         timestamp = timestamp or datetime.now()
+
+        # Try exchange message parsing first (multi-line stateful)
+        exchange_event = self.exchange_parser.parse_line(line)
+        if exchange_event is not None:
+            self._handle_exchange_event(exchange_event, timestamp)
+
+        # Standard single-line event parsing
         event = parse_line(line)
 
         if event is None:
@@ -156,6 +177,41 @@ class Collector:
             new_run.id = run_id
             if self._on_run_start:
                 self._on_run_start(new_run)
+
+    def _handle_exchange_event(
+        self,
+        event: ExchangePriceRequest | ExchangePriceResponse,
+        timestamp: datetime,
+    ) -> None:
+        """Handle exchange price search events."""
+        if isinstance(event, ExchangePriceRequest):
+            # Store pending search for correlation
+            self._pending_price_searches[event.syn_id] = event.config_base_id
+
+        elif isinstance(event, ExchangePriceResponse):
+            # Find the corresponding request
+            config_base_id = self._pending_price_searches.pop(event.syn_id, None)
+            if config_base_id is None:
+                return  # No matching request found
+
+            if not event.prices_fe:
+                return  # No prices to process
+
+            # Calculate reference price (10th percentile by default)
+            ref_price = calculate_reference_price(event.prices_fe, method="percentile_10")
+
+            # Create and store price
+            price = Price(
+                config_base_id=config_base_id,
+                price_fe=ref_price,
+                source="exchange",
+                updated_at=timestamp,
+            )
+            self.repository.upsert_price(price)
+
+            # Notify callback
+            if self._on_price_update:
+                self._on_price_update(price)
 
     def process_file(self, from_beginning: bool = False) -> int:
         """

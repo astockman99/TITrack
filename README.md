@@ -4,40 +4,37 @@ A privacy-focused, fully local Windows desktop application that tracks loot from
 
 Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
-## Current Status: Phase 1 Complete ✓
+## Current Status: Phase 2 Complete ✓
 
-**Phase 1 (Foundation)** implements the core log parsing and database infrastructure:
-
-| Component | Status | Description |
-|-----------|--------|-------------|
-| Log Parser | ✓ Complete | Regex-based parsing of BagMgr, ItemChange, SceneLevelMgr events |
-| Delta Calculator | ✓ Complete | Computes inventory changes from absolute stack counts |
-| Run Segmenter | ✓ Complete | Detects map vs hub zones, tracks run boundaries |
-| Database Layer | ✓ Complete | SQLite with WAL mode, full CRUD repository |
-| Log Tailer | ✓ Complete | Incremental file reading with position persistence |
-| Collector | ✓ Complete | Orchestrates parsing, computation, and storage |
-| CLI | ✓ Complete | Commands for init, parse, tail, show-runs, show-state |
-| Item Database | ✓ Complete | 1,811 items seeded from TLIDB |
-| Test Suite | ✓ Complete | 80 unit + integration tests passing |
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 1 | ✓ Complete | Log parsing, delta tracking, run segmentation, CLI |
+| Phase 2 | ✓ Complete | Web UI, REST API, charts, exchange price learning |
+| Phase 3 | Planned | Manual price editing UI, import/export |
+| Phase 4 | Planned | PyInstaller portable EXE packaging |
 
 ### What Works Now
 
-- Parse game log files and extract item pickup events
-- Track Flame Elementium (FE) gains per map run
-- Detect run boundaries (entering/leaving maps vs hubs)
-- Persist all data to local SQLite database
-- Resume tracking from last position after restart
-- Display inventory state and run history via CLI
-- Zone name mapping (internal Chinese names → English display names)
+- **Web Dashboard** at `http://localhost:8000` with:
+  - Real-time stats: Total FE, Net Worth, Value/Hour, Run Count, Prices Learned
+  - Interactive charts: Cumulative Value and Value/Hour over time
+  - Recent Runs table with total loot value per run
+  - Sortable Inventory panel (by value or quantity)
+  - Run details modal showing loot breakdown with values
+  - Auto-refresh every 5 seconds
 
-**Tested with live game data** - successfully tracked multiple map runs with accurate FE and loot tallies.
+- **Exchange Price Learning**:
+  - Automatically captures prices when you search items on the in-game exchange
+  - Parses `XchgSearchPrice` messages from game logs
+  - Calculates reference price (10th percentile of listings)
+  - Updates inventory valuations and run values automatically
 
-### What's Planned (Future Phases)
+- **Value Calculations**:
+  - Run value = FE gained + (item quantity × item price) for all priced items
+  - Value/Hour calculated from rolling 1-hour windows
+  - Net worth = Total FE + valued inventory items
 
-- **Phase 2**: Web UI with FastAPI backend
-- **Phase 3**: Price engine with manual editing and import/export
-- **Phase 4**: Net worth calculation and profit/hour metrics
-- **Phase 5**: PyInstaller packaging for portable EXE distribution
+- **CLI Commands**: init, parse-file, tail, show-runs, show-state, serve
 
 ## Installation
 
@@ -54,7 +51,7 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 git clone <repo-url>
 cd TITrack
 
-# Install in development mode
+# Install with dependencies
 pip install -e ".[dev]"
 
 # Initialize database and seed items
@@ -63,22 +60,47 @@ python -m titrack init --seed tlidb_items_seed_en.json
 
 ## Usage
 
+### Start the Web Dashboard
+
+```bash
+# Start server (opens browser automatically)
+python -m titrack serve
+
+# Options
+python -m titrack serve --port 8080        # Custom port
+python -m titrack serve --no-browser       # Don't open browser
+```
+
+The dashboard shows:
+- **Header Stats**: Total FE, Net Worth, Value/Hour, Runs, Learned Prices
+- **Charts**: Cumulative value and value/hour over time
+- **Recent Runs**: Click "Details" to see loot breakdown with values
+- **Inventory**: Sortable by Value or Quantity (click column headers)
+
+### Learn Item Prices
+
+1. Start the tracker: `python -m titrack serve`
+2. In game, open the Exchange and search for any item
+3. The tracker captures the price automatically
+4. Console shows: `[Price] Item Name: 0.021000 FE`
+5. All values update to reflect the new price
+
 ### CLI Commands
 
 ```bash
 # Initialize database (first time setup)
 python -m titrack init --seed tlidb_items_seed_en.json
 
-# Parse an existing log file
-python -m titrack parse-file "path/to/UE_game.log"
+# Start web server with live tracking
+python -m titrack serve
 
-# Live tail the log file (Ctrl+C to stop)
-python -m titrack tail "path/to/UE_game.log"
+# Live tail the log file (CLI mode)
+python -m titrack tail
 
-# Show recent runs with FE gains
+# Show recent runs
 python -m titrack show-runs
 
-# Show current inventory state
+# Show current inventory
 python -m titrack show-state
 ```
 
@@ -89,87 +111,46 @@ python -m titrack show-state
 --portable      # Use portable mode (data stored beside executable)
 ```
 
-### Log File Location
+## API Endpoints
 
-The game log is typically located at:
-```
-C:\Program Files (x86)\Steam\steamapps\common\Torchlight Infinite\UE_Game\Torchlight\Saved\Logs\UE_game.log
-```
-
-The CLI will auto-detect common Steam library locations.
-
-## Example Output
-
-```
-$ python -m titrack parse-file UE_game.log
-
-=== Entered: MainHub_Social (hub) ===
-  +500 Flame Elementium
-
-=== Entered: Map_Desert_T16_001 ===
-  +50 Flame Elementium [PICK_ITEMS]
-  +75 Flame Elementium [PICK_ITEMS]
-  +3 Ember Crystal [PICK_ITEMS]
-
---- Run ended: 4m 32s ---
-  FE gained: 200
-  +3 Ember Crystal
-
-$ python -m titrack show-runs
-
-Recent Runs (last 5):
-------------------------------------------------------------
-  #  5 [hub] MainHub_Social                     active FE: +0
-  #  4 Map_Forest_T14_002                  3m 15s FE: +150
-  #  3 [hub] MainHub_Social                      0m 45s FE: +0
-  #  2 Map_Desert_T16_001                  4m 32s FE: +200
-  #  1 [hub] MainHub_Social                      1m 20s FE: +0
-------------------------------------------------------------
-
-$ python -m titrack show-state
-
-Current Inventory:
-----------------------------------------
-      1250 Flame Elementium (FE)
-        12 Ember Crystal
-         5 Divine Orb
-----------------------------------------
-Total item types: 3
-```
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/status` | Server status and counts |
+| `GET /api/runs` | List runs with values and loot |
+| `GET /api/runs/{id}` | Single run details |
+| `GET /api/runs/stats` | Aggregated statistics |
+| `GET /api/inventory` | Current inventory (sortable) |
+| `GET /api/items` | Item database |
+| `GET /api/prices` | Learned prices |
+| `PUT /api/prices/{id}` | Update a price |
+| `GET /api/stats/history` | Time-series data for charts |
 
 ## Project Structure
 
 ```
 TITrack/
 ├── src/titrack/
-│   ├── __init__.py              # Package version
-│   ├── __main__.py              # Entry point
-│   ├── core/                    # Pure domain logic (no I/O)
-│   │   ├── models.py            # Dataclasses: ItemDelta, SlotState, Run
-│   │   ├── delta_calculator.py  # Compute deltas from slot state
-│   │   └── run_segmenter.py     # Track run boundaries
-│   ├── parser/
-│   │   ├── patterns.py          # Compiled regex patterns
-│   │   ├── log_parser.py        # Parse lines to typed events
-│   │   └── log_tailer.py        # Incremental file reading
-│   ├── db/
-│   │   ├── schema.py            # SQLite DDL statements
-│   │   ├── connection.py        # Database connection (WAL mode)
-│   │   └── repository.py        # CRUD operations
-│   ├── collector/
-│   │   └── collector.py         # Main orchestration loop
-│   ├── config/
-│   │   └── settings.py          # Configuration and auto-detection
-│   └── cli/
-│       └── commands.py          # CLI command implementations
-├── tests/
-│   ├── fixtures/                # Sample log files
-│   ├── unit/                    # Unit tests (74 tests)
-│   └── integration/             # Integration tests (6 tests)
-├── pyproject.toml               # Project configuration
-├── tlidb_items_seed_en.json     # Item database (1,811 items)
-├── CLAUDE.md                    # AI assistant instructions
-└── TI_Local_Loot_Tracker_PRD.md # Product requirements document
+│   ├── api/                    # FastAPI backend
+│   │   ├── app.py              # App factory
+│   │   ├── schemas.py          # Pydantic models
+│   │   └── routes/             # API endpoints
+│   ├── web/static/             # Dashboard frontend
+│   │   ├── index.html
+│   │   ├── app.js
+│   │   └── style.css
+│   ├── core/                   # Domain logic
+│   ├── parser/                 # Log parsing
+│   │   ├── log_parser.py
+│   │   ├── log_tailer.py
+│   │   └── exchange_parser.py  # Price message parsing
+│   ├── db/                     # SQLite layer
+│   ├── collector/              # Main collection loop
+│   ├── config/                 # Settings
+│   └── cli/                    # CLI commands
+├── tests/                      # 118 tests
+├── pyproject.toml
+├── tlidb_items_seed_en.json    # 1,811 items
+└── CLAUDE.md
 ```
 
 ## Architecture
@@ -180,32 +161,41 @@ TITrack/
 Game Log File
       │
       ▼
-┌─────────────┐
-│ Log Tailer  │  ← Incremental reading, position tracking
-└─────────────┘
+┌─────────────────┐
+│   Log Tailer    │ ← Incremental reading
+└─────────────────┘
       │
-      ▼
-┌─────────────┐
-│ Log Parser  │  ← Regex matching, typed event creation
-└─────────────┘
-      │
-      ▼
-┌─────────────┐
-│ Collector   │  ← Context tracking, orchestration
-└─────────────┘
-      │
-      ├──────────────────┐
-      ▼                  ▼
-┌─────────────┐   ┌──────────────┐
-│   Delta     │   │     Run      │
-│ Calculator  │   │  Segmenter   │
-└─────────────┘   └──────────────┘
-      │                  │
-      └────────┬─────────┘
-               ▼
-        ┌─────────────┐
-        │  Repository │  ← SQLite persistence
-        └─────────────┘
+      ├─────────────────────────┐
+      ▼                         ▼
+┌─────────────────┐   ┌─────────────────────┐
+│   Log Parser    │   │  Exchange Parser    │
+│  (game events)  │   │  (price messages)   │
+└─────────────────┘   └─────────────────────┘
+      │                         │
+      └───────────┬─────────────┘
+                  ▼
+           ┌─────────────┐
+           │  Collector  │ ← Orchestration
+           └─────────────┘
+                  │
+      ┌───────────┼───────────┐
+      ▼           ▼           ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐
+│  Delta   │ │   Run    │ │  Price   │
+│Calculator│ │Segmenter │ │ Storage  │
+└──────────┘ └──────────┘ └──────────┘
+      │           │           │
+      └───────────┴───────────┘
+                  ▼
+           ┌─────────────┐
+           │  SQLite DB  │
+           └─────────────┘
+                  │
+                  ▼
+           ┌─────────────┐
+           │ FastAPI +   │
+           │ Web Dashboard│
+           └─────────────┘
 ```
 
 ### Key Concepts
@@ -213,91 +203,38 @@ Game Log File
 - **Flame Elementium (FE)**: Primary currency, ConfigBaseId = `100300`
 - **ConfigBaseId**: Integer item type identifier from game logs
 - **Delta**: Change in quantity (current - previous) for a slot
-- **SlotState**: Current `(ConfigBaseId, Num)` for each `(PageId, SlotId)`
-- **Run**: Time period in a single zone, bounded by OpenMainWorld events
-- **Context**: Whether an item change occurred during PickItems (loot) or other actions
-
-### Database Schema
-
-| Table | Purpose |
-|-------|---------|
-| `settings` | Key/value configuration |
-| `runs` | Map run records with timestamps |
-| `item_deltas` | Per-item quantity changes |
-| `slot_state` | Current inventory state |
-| `items` | Item metadata (name, icon, etc.) |
-| `prices` | Item valuations in FE |
-| `log_position` | File position for resume |
+- **Run Value**: FE gained + sum(item_qty × item_price) for priced items
+- **Reference Price**: 10th percentile of exchange listings
 
 ## Development
 
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all 118 tests
 pytest tests/
 
 # Run with coverage
 pytest tests/ --cov=titrack --cov-report=html
 
 # Run specific test file
-pytest tests/unit/test_delta_calculator.py -v
+pytest tests/unit/test_exchange_parser.py -v
 ```
 
 ### Code Quality
 
 ```bash
-# Format code
 black .
-
-# Lint
 ruff check .
 ```
-
-### Test Coverage
-
-All 80 tests passing:
-- `test_patterns.py` - Regex pattern matching
-- `test_log_parser.py` - Line parsing to typed events
-- `test_delta_calculator.py` - Inventory change computation
-- `test_run_segmenter.py` - Run boundary detection
-- `test_log_tailer.py` - File reading and position tracking
-- `test_repository.py` - Database CRUD operations
-- `test_collector.py` - Full integration tests
 
 ## Design Principles
 
 1. **Privacy First**: All data stored locally, no network calls
-2. **No Cheating**: Only reads log files, no memory hooks or game modification
-3. **Pure Core**: Domain logic has no I/O, easy to test
-4. **Incremental Processing**: Resume from last position, handle log rotation
-5. **Zero Runtime Dependencies**: Phase 1 uses only Python stdlib
-
-## Log Format Reference
-
-The parser recognizes these log patterns:
-
-```
-# Item pickup block
-GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
-GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 671
-GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
-
-# Level transitions (actual game format)
-SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/...
-```
-
-## Zone Name Mapping
-
-Internal map paths use Chinese pinyin names. Edit `src/titrack/data/zones.py` to add English mappings:
-
-```python
-ZONE_NAMES = {
-    "XZ_YuJinZhiXiBiNanSuo": "Hideout - Ember's Rest",
-    "KD_YuanSuKuangDong": "Elemental Cave",
-    # Add more as you discover them
-}
-```
+2. **No Cheating**: Only reads log files, no memory hooks
+3. **Passive Price Learning**: Prices learned from your own exchange searches
+4. **Pure Core**: Domain logic has no I/O, easy to test
+5. **Incremental Processing**: Resume from last position, handle log rotation
 
 ## License
 

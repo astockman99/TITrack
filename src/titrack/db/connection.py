@@ -1,6 +1,7 @@
 """SQLite connection management with WAL mode."""
 
 import sqlite3
+import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
@@ -9,7 +10,7 @@ from titrack.db.schema import ALL_CREATE_STATEMENTS, SCHEMA_VERSION
 
 
 class Database:
-    """SQLite database connection manager."""
+    """SQLite database connection manager with thread safety."""
 
     def __init__(self, db_path: Path) -> None:
         """
@@ -20,6 +21,7 @@ class Database:
         """
         self.db_path = db_path
         self._connection: sqlite3.Connection | None = None
+        self._lock = threading.Lock()
 
     def connect(self) -> None:
         """Open database connection and initialize schema."""
@@ -88,18 +90,22 @@ class Database:
 
     def execute(self, sql: str, params: tuple = ()) -> sqlite3.Cursor:
         """Execute a single SQL statement."""
-        return self.connection.execute(sql, params)
+        with self._lock:
+            return self.connection.execute(sql, params)
 
     def executemany(self, sql: str, params_seq: list[tuple]) -> sqlite3.Cursor:
         """Execute a SQL statement for each parameter set."""
-        return self.connection.executemany(sql, params_seq)
+        with self._lock:
+            return self.connection.executemany(sql, params_seq)
 
     def fetchone(self, sql: str, params: tuple = ()) -> sqlite3.Row | None:
         """Execute SQL and fetch one row."""
-        cursor = self.execute(sql, params)
-        return cursor.fetchone()
+        with self._lock:
+            cursor = self.connection.execute(sql, params)
+            return cursor.fetchone()
 
     def fetchall(self, sql: str, params: tuple = ()) -> list[sqlite3.Row]:
         """Execute SQL and fetch all rows."""
-        cursor = self.execute(sql, params)
-        return cursor.fetchall()
+        with self._lock:
+            cursor = self.connection.execute(sql, params)
+            return cursor.fetchall()

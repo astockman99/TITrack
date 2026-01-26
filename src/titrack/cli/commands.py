@@ -4,6 +4,8 @@ import argparse
 import json
 import signal
 import sys
+import threading
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -289,6 +291,112 @@ def cmd_show_runs(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace) -> int:
+    """Start the web server with optional background collector."""
+    # Import here to avoid loading FastAPI when not needed
+    try:
+        import uvicorn
+        from titrack.api.app import create_app
+    except ImportError:
+        print("Error: FastAPI and Uvicorn are required for the serve command.")
+        print("Install with: pip install fastapi uvicorn[standard]")
+        return 1
+
+    settings = Settings.from_args(
+        log_path=args.file,
+        db_path=args.db,
+        portable=args.portable,
+    )
+
+    print(f"Database: {settings.db_path}")
+
+    collector = None
+    collector_thread = None
+    collector_db = None
+
+    # Start collector in background if log file is available
+    if settings.log_path and settings.log_path.exists():
+        print(f"Log file: {settings.log_path}")
+
+        # Collector gets its own database connection
+        collector_db = Database(settings.db_path)
+        collector_db.connect()
+
+        collector_repo = Repository(collector_db)
+
+        def on_price_update(price):
+            item_name = collector_repo.get_item_name(price.config_base_id)
+            print(f"  [Price] {item_name}: {price.price_fe:.6f} FE")
+
+        collector = Collector(
+            db=collector_db,
+            log_path=settings.log_path,
+            on_delta=lambda d: None,  # Silent operation
+            on_run_start=lambda r: None,
+            on_run_end=lambda r: None,
+            on_price_update=on_price_update,
+        )
+        collector.initialize()
+
+        def run_collector():
+            try:
+                collector.tail(poll_interval=settings.poll_interval)
+            except Exception as e:
+                print(f"Collector error: {e}")
+
+        collector_thread = threading.Thread(target=run_collector, daemon=True)
+        collector_thread.start()
+        print("Collector started in background")
+    else:
+        print("No log file found - collector not started")
+        if settings.log_path:
+            print(f"  Expected: {settings.log_path}")
+
+    # API gets its own database connection
+    api_db = Database(settings.db_path)
+    api_db.connect()
+
+    # Create FastAPI app
+    app = create_app(
+        db=api_db,
+        log_path=settings.log_path,
+        collector_running=collector is not None,
+    )
+
+    # Set up graceful shutdown
+    def signal_handler(sig, frame):
+        print("\nShutting down...")
+        if collector:
+            collector.stop()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Open browser unless disabled
+    url = f"http://127.0.0.1:{args.port}"
+    if not args.no_browser:
+        print(f"Opening browser at {url}")
+        webbrowser.open(url)
+
+    print(f"Starting server on port {args.port}")
+    print("Press Ctrl+C to stop\n")
+
+    # Run server
+    uvicorn.run(
+        app,
+        host=args.host,
+        port=args.port,
+        log_level="warning",
+    )
+
+    if collector:
+        collector.stop()
+    if collector_db:
+        collector_db.close()
+    api_db.close()
+    return 0
+
+
 def create_parser() -> argparse.ArgumentParser:
     """Create the argument parser."""
     parser = argparse.ArgumentParser(
@@ -357,6 +465,32 @@ def create_parser() -> argparse.ArgumentParser:
         help="Number of runs to show (default: 20)",
     )
 
+    # serve command
+    serve_parser = subparsers.add_parser("serve", help="Start web server")
+    serve_parser.add_argument(
+        "file",
+        type=str,
+        nargs="?",
+        help="Log file to monitor (auto-detects if not specified)",
+    )
+    serve_parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to run server on (default: 8000)",
+    )
+    serve_parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        help="Host to bind to (default: 127.0.0.1)",
+    )
+    serve_parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Don't open browser automatically",
+    )
+
     return parser
 
 
@@ -375,6 +509,7 @@ def main() -> int:
         "tail": cmd_tail,
         "show-state": cmd_show_state,
         "show-runs": cmd_show_runs,
+        "serve": cmd_serve,
     }
 
     cmd_func = commands.get(args.command)
