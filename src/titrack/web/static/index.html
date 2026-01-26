@@ -14,20 +14,24 @@
             <h1>TITrack</h1>
             <div class="header-stats">
                 <div class="stat-card primary">
-                    <span class="stat-label">Total FE</span>
-                    <span id="total-fe" class="stat-value">0</span>
-                </div>
-                <div class="stat-card">
                     <span class="stat-label">Net Worth</span>
                     <span id="net-worth" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Value/Hour</span>
+                    <span class="stat-label">Value/Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></span>
                     <span id="value-per-hour" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Value/Map</span>
+                    <span id="value-per-map" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-label">Runs</span>
                     <span id="total-runs" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Avg Run Time</span>
+                    <span id="avg-run-time" class="stat-value">--</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-label">Prices</span>
@@ -35,6 +39,9 @@
                 </div>
             </div>
             <div class="header-controls">
+                <button class="export-btn" onclick="exportPrices()">Export Prices</button>
+                <button class="edit-items-btn" onclick="openEditItemModal()">Edit Items</button>
+                <button id="reset-stats-btn" class="reset-btn" onclick="resetStats()">Reset Stats</button>
                 <label class="toggle">
                     <input type="checkbox" id="auto-refresh" checked>
                     <span>Auto-refresh</span>
@@ -49,7 +56,7 @@
                 <canvas id="cumulative-value-chart"></canvas>
             </div>
             <div class="chart-panel">
-                <h2>Value / Hour</h2>
+                <h2>Value / Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></h2>
                 <canvas id="value-rate-chart"></canvas>
             </div>
         </section>
@@ -106,6 +113,40 @@
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="edit-item-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Item Names</h3>
+                <button class="close-btn" onclick="closeEditItemModal()">&times;</button>
+            </div>
+            <div id="edit-item-body">
+                <div class="edit-item-search">
+                    <input type="text" id="item-search-input" placeholder="Search by name or ID..." onkeyup="searchItems(event)">
+                    <button onclick="performItemSearch()">Search</button>
+                </div>
+                <div id="item-search-results"></div>
+                <div id="item-edit-form" class="hidden">
+                    <div class="edit-item-current">
+                        <img id="edit-item-icon" src="" alt="" class="edit-item-icon">
+                        <div class="edit-item-info">
+                            <span id="edit-item-id" class="edit-item-id"></span>
+                            <span id="edit-item-current-name" class="edit-item-current-name"></span>
+                        </div>
+                    </div>
+                    <div class="edit-item-field">
+                        <label for="edit-item-name">New Name:</label>
+                        <input type="text" id="edit-item-name" placeholder="Enter corrected name">
+                    </div>
+                    <div class="edit-item-actions">
+                        <button onclick="saveItemName()" class="save-btn">Save</button>
+                        <button onclick="cancelItemEdit()" class="cancel-btn">Cancel</button>
+                    </div>
+                    <p class="edit-item-note">Note: Please report corrections so the seed file can be updated for future versions.</p>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -1,6 +1,7 @@
 """Runs API routes."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel
 
 from titrack.api.schemas import (
     LootItem,
@@ -13,6 +14,14 @@ from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
 
 router = APIRouter(prefix="/api/runs", tags=["runs"])
+
+
+class ResetResponse(BaseModel):
+    """Response model for reset endpoint."""
+
+    success: bool
+    runs_deleted: int
+    message: str
 
 
 def get_repository() -> Repository:
@@ -128,6 +137,27 @@ def get_stats(
         total_duration_seconds=round(total_duration, 2),
         fe_per_hour=round(fe_per_hour, 2),
         value_per_hour=round(value_per_hour, 2),
+    )
+
+
+@router.post("/reset", response_model=ResetResponse)
+def reset_stats(
+    request: Request,
+    repo: Repository = Depends(get_repository),
+) -> ResetResponse:
+    """Reset all run tracking data (clears runs and item_deltas)."""
+    # Use collector's database connection if available (ensures same connection)
+    collector = getattr(request.app.state, 'collector', None)
+    if collector is not None and hasattr(collector, 'clear_run_data'):
+        runs_deleted = collector.clear_run_data()
+    else:
+        # Fallback to API's repository
+        runs_deleted = repo.clear_run_data()
+
+    return ResetResponse(
+        success=True,
+        runs_deleted=runs_deleted,
+        message=f"Cleared {runs_deleted} runs and all associated loot data.",
     )
 
 

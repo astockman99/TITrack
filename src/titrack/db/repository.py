@@ -85,6 +85,13 @@ class Repository:
         row = self.db.fetchone("SELECT MAX(id) as max_id FROM runs")
         return row["max_id"] or 0
 
+    def get_unique_zones(self) -> list[str]:
+        """Get all unique zone signatures from runs."""
+        rows = self.db.fetchall(
+            "SELECT DISTINCT zone_signature FROM runs ORDER BY zone_signature"
+        )
+        return [row["zone_signature"] for row in rows]
+
     def _row_to_run(self, row) -> Run:
         return Run(
             id=row["id"],
@@ -256,6 +263,13 @@ class Repository:
         row = self.db.fetchone("SELECT COUNT(*) as cnt FROM items")
         return row["cnt"] if row else 0
 
+    def update_item_name(self, config_base_id: int, name_en: str) -> None:
+        """Update an item's English name."""
+        self.db.execute(
+            "UPDATE items SET name_en = ? WHERE config_base_id = ?",
+            (name_en, config_base_id),
+        )
+
     def _row_to_item(self, row) -> Item:
         return Item(
             config_base_id=row["config_base_id"],
@@ -297,6 +311,28 @@ class Repository:
         rows = self.db.fetchall("SELECT * FROM prices")
         return [self._row_to_price(row) for row in rows]
 
+    def get_price_count(self) -> int:
+        """Get total number of prices in database."""
+        row = self.db.fetchone("SELECT COUNT(*) as cnt FROM prices")
+        return row["cnt"] if row else 0
+
+    def upsert_prices_batch(self, prices: list[Price]) -> None:
+        """Insert or update multiple prices."""
+        self.db.executemany(
+            """INSERT OR REPLACE INTO prices
+               (config_base_id, price_fe, source, updated_at)
+               VALUES (?, ?, ?, ?)""",
+            [
+                (
+                    price.config_base_id,
+                    price.price_fe,
+                    price.source,
+                    price.updated_at.isoformat(),
+                )
+                for price in prices
+            ],
+        )
+
     def _row_to_price(self, row) -> Price:
         return Price(
             config_base_id=row["config_base_id"],
@@ -331,16 +367,60 @@ class Repository:
 
         return raw_fe, total_value
 
+    # --- Data Management ---
+
+    def clear_run_data(self) -> int:
+        """
+        Clear all run tracking data (runs and item_deltas).
+
+        Preserves: items, prices, settings, slot_state, log_position.
+
+        Returns:
+            Number of runs deleted.
+        """
+        # Get count before deletion
+        row = self.db.fetchone("SELECT COUNT(*) as cnt FROM runs")
+        run_count = row["cnt"] if row else 0
+
+        # Get raw connection for direct control
+        conn = self.db.connection
+
+        # Use explicit transaction for deletion
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            # Delete item_deltas first (foreign key reference)
+            conn.execute("DELETE FROM item_deltas")
+            # Delete runs
+            conn.execute("DELETE FROM runs")
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+
+        # Force WAL checkpoint to ensure changes are written to main database
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+
+        return run_count
+
     # --- Log Position ---
 
     def save_log_position(self, file_path: Path, position: int, file_size: int) -> None:
         """Save current log file position for resume."""
-        self.db.execute(
-            """INSERT OR REPLACE INTO log_position
-               (id, file_path, position, file_size, updated_at)
-               VALUES (1, ?, ?, ?, ?)""",
-            (str(file_path), position, file_size, datetime.now().isoformat()),
-        )
+        conn = self.db.connection
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            conn.execute(
+                """INSERT OR REPLACE INTO log_position
+                   (id, file_path, position, file_size, updated_at)
+                   VALUES (1, ?, ?, ?, ?)""",
+                (str(file_path), position, file_size, datetime.now().isoformat()),
+            )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+        # Force checkpoint
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
     def get_log_position(self) -> Optional[tuple[Path, int, int]]:
         """

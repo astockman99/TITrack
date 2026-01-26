@@ -117,3 +117,48 @@ Seeds the `items` table on first run.
 6. Editable price list with import/export
 7. Net worth from latest inventory
 8. Packaged portable EXE
+
+## API Endpoints
+
+### Runs
+- `GET /api/runs` - List recent runs with pagination
+- `GET /api/runs/stats` - Summary statistics (value/hour, avg per run, etc.)
+- `GET /api/runs/{run_id}` - Get single run details
+- `POST /api/runs/reset` - Clear all run tracking data (preserves prices, items, settings)
+
+### Items
+- `GET /api/items` - List items (with search)
+- `GET /api/items/{id}` - Get item by ConfigBaseId
+- `PATCH /api/items/{id}` - Update item name
+
+### Prices
+- `GET /api/prices` - List all prices
+- `GET /api/prices/export` - Export prices as seed-compatible JSON
+- `GET /api/prices/{id}` - Get price for item
+- `PUT /api/prices/{id}` - Update price
+
+### Stats
+- `GET /api/stats/history` - Time-series data for charts
+- `GET /api/stats/zones` - List all zones encountered (for translation)
+
+### Other
+- `GET /api/inventory` - Current inventory state
+- `GET /api/status` - Server status
+
+## Dashboard Features
+
+- **Stats Header**: Net Worth, Value/Hour, Value/Map, Runs, Avg Run Time, Prices count
+- **Charts**: Cumulative Value, Value/Hour (rolling)
+- **Recent Runs**: Zone, duration, value with details modal
+- **Current Inventory**: Sortable by quantity or value
+- **Controls**: Reset Stats, Edit Items, Export Prices, Auto-refresh toggle
+
+## Zone Translation
+
+Zone names are mapped in `src/titrack/data/zones.py`. The `ZONE_NAMES` dictionary maps internal zone path patterns to English display names. Use `/api/stats/zones` to see all encountered zones and identify which need translation.
+
+## Price Seeding
+
+Prices can be seeded on init: `titrack init --seed items.json --prices-seed prices.json`
+
+Export current prices via the UI "Export Prices" button or `GET /api/prices/export`.

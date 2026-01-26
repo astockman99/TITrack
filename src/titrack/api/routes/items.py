@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from titrack.api.schemas import ItemListResponse, ItemResponse
+from titrack.api.schemas import ItemListResponse, ItemResponse, ItemUpdateRequest
 from titrack.db.repository import Repository
 
 router = APIRouter(prefix="/api/items", tags=["items"])
@@ -64,6 +64,32 @@ def get_item(
     item = repo.get_item(config_base_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
+
+    return ItemResponse(
+        config_base_id=item.config_base_id,
+        name_en=item.name_en,
+        name_cn=item.name_cn,
+        type_cn=item.type_cn,
+        icon_url=item.icon_url,
+        url_en=item.url_en,
+        url_cn=item.url_cn,
+    )
+
+
+@router.patch("/{config_base_id}", response_model=ItemResponse)
+def update_item(
+    config_base_id: int,
+    request: ItemUpdateRequest,
+    repo: Repository = Depends(get_repository),
+) -> ItemResponse:
+    """Update an item's name."""
+    item = repo.get_item(config_base_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    if request.name_en is not None:
+        repo.update_item_name(config_base_id, request.name_en)
+        item = repo.get_item(config_base_id)
 
     return ItemResponse(
         config_base_id=item.config_base_id,

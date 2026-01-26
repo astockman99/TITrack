@@ -96,12 +96,60 @@ class Collector:
         max_run_id = self.repository.get_max_run_id()
         self.run_segmenter.set_next_run_id(max_run_id + 1)
 
+        # Load log position and apply to tailer
+        position_data = self.repository.get_log_position()
+        if position_data:
+            file_path, position, file_size = position_data
+            if file_path == self.tailer.file_path:
+                self.tailer.set_position(position, file_size)
+
+    def reinitialize(self) -> None:
+        """
+        Reinitialize collector state from database.
+
+        Call this after clearing run data to sync in-memory state.
+        """
+        # Reset run segmenter
+        self.run_segmenter._current_run = None
+        max_run_id = self.repository.get_max_run_id()
+        self.run_segmenter.set_next_run_id(max_run_id + 1)
+
+        # Reload slot states
+        states = self.repository.get_all_slot_states()
+        self.delta_calc.load_state(states)
+
         # Load log position
         position_data = self.repository.get_log_position()
         if position_data:
             file_path, position, file_size = position_data
             if file_path == self.tailer.file_path:
                 self.tailer.set_position(position, file_size)
+
+    def clear_run_data(self) -> int:
+        """
+        Clear all run tracking data using the collector's database connection.
+
+        This ensures data is cleared in the same connection the collector uses.
+        Also updates log position to current end so old events aren't re-parsed.
+
+        Returns:
+            Number of runs deleted.
+        """
+        # Clear database
+        runs_deleted = self.repository.clear_run_data()
+
+        # Reset in-memory state
+        self.run_segmenter._current_run = None
+        self.run_segmenter.set_next_run_id(1)
+
+        # Update log position to current position so we don't re-parse old events
+        self.repository.save_log_position(
+            self.tailer.file_path,
+            self.tailer.position,
+            self.tailer.file_size
+        )
+
+        return runs_deleted
 
     def process_line(self, line: str, timestamp: Optional[datetime] = None) -> None:
         """

@@ -58,6 +58,26 @@ async function fetchPrices() {
     return fetchJson('/prices');
 }
 
+function exportPrices() {
+    // Trigger download by opening the export URL
+    window.location.href = `${API_BASE}/prices/export`;
+}
+
+async function postResetStats() {
+    try {
+        const response = await fetch(`${API_BASE}/runs/reset`, {
+            method: 'POST',
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error resetting stats:', error);
+        return null;
+    }
+}
+
 // --- Rendering ---
 
 function formatDuration(seconds) {
@@ -94,11 +114,17 @@ function formatValue(value) {
 }
 
 function renderStats(stats, inventory, prices) {
-    document.getElementById('total-fe').textContent = formatNumber(inventory?.total_fe || 0);
     document.getElementById('net-worth').textContent = formatNumber(Math.round(inventory?.net_worth_fe || 0));
     document.getElementById('value-per-hour').textContent = formatNumber(Math.round(stats?.value_per_hour || 0));
+    document.getElementById('value-per-map').textContent = formatNumber(Math.round(stats?.avg_value_per_run || 0));
     document.getElementById('total-runs').textContent = formatNumber(stats?.total_runs || 0);
     document.getElementById('prices-count').textContent = formatNumber(prices?.total || 0);
+
+    // Calculate and display average run time
+    const avgRunTime = (stats?.total_runs > 0 && stats?.total_duration_seconds > 0)
+        ? stats.total_duration_seconds / stats.total_runs
+        : null;
+    document.getElementById('avg-run-time').textContent = formatDuration(avgRunTime);
 }
 
 function renderRuns(data, forceRender = false) {
@@ -380,8 +406,145 @@ document.getElementById('loot-modal').addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeModal();
+        closeEditItemModal();
     }
 });
+
+// --- Edit Item Modal ---
+
+let currentEditItemId = null;
+
+function openEditItemModal() {
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+    document.getElementById('item-search-input').value = '';
+    document.getElementById('item-search-results').innerHTML = '';
+    document.getElementById('item-edit-form').classList.add('hidden');
+    document.getElementById('item-search-input').focus();
+}
+
+function closeEditItemModal() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+    currentEditItemId = null;
+}
+
+// Close edit item modal on outside click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'edit-item-modal') {
+        closeEditItemModal();
+    }
+});
+
+function searchItems(event) {
+    if (event.key === 'Enter') {
+        performItemSearch();
+    }
+}
+
+async function performItemSearch() {
+    const query = document.getElementById('item-search-input').value.trim();
+    if (!query) return;
+
+    const resultsDiv = document.getElementById('item-search-results');
+    resultsDiv.innerHTML = '<p class="loading">Searching...</p>';
+    document.getElementById('item-edit-form').classList.add('hidden');
+
+    // Check if query is a number (config_base_id)
+    const isId = /^\d+$/.test(query);
+
+    if (isId) {
+        // Fetch single item by ID
+        const item = await fetchJson(`/items/${query}`);
+        if (item) {
+            resultsDiv.innerHTML = '';
+            showItemForEdit(item);
+        } else {
+            resultsDiv.innerHTML = `<p class="no-results">No item found with ID ${query}</p>`;
+        }
+    } else {
+        // Search by name
+        const data = await fetchJson(`/items?search=${encodeURIComponent(query)}&limit=20`);
+        if (data && data.items && data.items.length > 0) {
+            resultsDiv.innerHTML = data.items.map(item => `
+                <div class="item-search-result" onclick="selectItemForEdit(${item.config_base_id})">
+                    ${item.icon_url ? `<img src="${item.icon_url}" alt="" class="search-result-icon" onerror="this.style.display='none'">` : ''}
+                    <span class="search-result-name">${escapeHtml(item.name_en || 'Unknown')}</span>
+                    <span class="search-result-id">#${item.config_base_id}</span>
+                </div>
+            `).join('');
+        } else {
+            resultsDiv.innerHTML = '<p class="no-results">No items found</p>';
+        }
+    }
+}
+
+async function selectItemForEdit(configBaseId) {
+    const item = await fetchJson(`/items/${configBaseId}`);
+    if (item) {
+        document.getElementById('item-search-results').innerHTML = '';
+        showItemForEdit(item);
+    }
+}
+
+function showItemForEdit(item) {
+    currentEditItemId = item.config_base_id;
+
+    const iconEl = document.getElementById('edit-item-icon');
+    if (item.icon_url) {
+        iconEl.src = item.icon_url;
+        iconEl.style.display = 'block';
+    } else {
+        iconEl.style.display = 'none';
+    }
+
+    document.getElementById('edit-item-id').textContent = `#${item.config_base_id}`;
+    document.getElementById('edit-item-current-name').textContent = item.name_en || 'Unknown';
+    document.getElementById('edit-item-name').value = item.name_en || '';
+    document.getElementById('item-edit-form').classList.remove('hidden');
+    document.getElementById('edit-item-name').focus();
+    document.getElementById('edit-item-name').select();
+}
+
+function cancelItemEdit() {
+    document.getElementById('item-edit-form').classList.add('hidden');
+    currentEditItemId = null;
+}
+
+async function saveItemName() {
+    if (!currentEditItemId) return;
+
+    const newName = document.getElementById('edit-item-name').value.trim();
+    if (!newName) {
+        alert('Please enter a name');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/items/${currentEditItemId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name_en: newName })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Update the display
+        document.getElementById('edit-item-current-name').textContent = result.name_en;
+
+        // Show success and refresh data
+        alert(`Item updated: #${currentEditItemId} → "${newName}"\n\nPlease report this correction:\nID: ${currentEditItemId}\nName: ${newName}`);
+
+        // Refresh the dashboard to show updated names
+        await refreshAll(true);
+
+    } catch (error) {
+        console.error('Error saving item name:', error);
+        alert('Failed to save item name. Please try again.');
+    }
+}
 
 // --- Data Refresh ---
 
@@ -419,6 +582,34 @@ function stopAutoRefresh() {
     if (refreshTimer) {
         clearInterval(refreshTimer);
         refreshTimer = null;
+    }
+}
+
+// --- Reset Stats ---
+
+async function resetStats() {
+    if (!confirm('Reset all run tracking data? This will clear all runs and loot history.\n\nYour inventory, prices, and settings will be preserved.')) {
+        return;
+    }
+
+    const btn = document.getElementById('reset-stats-btn');
+    btn.disabled = true;
+    btn.textContent = 'Resetting...';
+
+    const result = await postResetStats();
+
+    btn.disabled = false;
+    btn.textContent = 'Reset Stats';
+
+    if (result && result.success) {
+        // Clear chart data hashes to force re-render
+        lastRunsHash = null;
+        lastStatsHash = null;
+
+        // Refresh all data
+        await refreshAll(true);
+    } else {
+        alert('Failed to reset stats. Please try again.');
     }
 }
 

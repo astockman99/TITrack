@@ -1,8 +1,10 @@
 """Prices API routes."""
 
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 from titrack.api.schemas import PriceListResponse, PriceResponse, PriceUpdateRequest
 from titrack.core.models import Price
@@ -42,6 +44,47 @@ def list_prices(
     return PriceListResponse(
         prices=prices,
         total=len(prices),
+    )
+
+
+@router.get("/export")
+def export_prices(
+    repo: Repository = Depends(get_repository),
+) -> JSONResponse:
+    """Export all prices as a seed-compatible JSON file."""
+    all_prices = repo.get_all_prices()
+
+    prices_data = []
+    for price in all_prices:
+        item = repo.get_item(price.config_base_id)
+        prices_data.append({
+            "id": str(price.config_base_id),
+            "name_en": item.name_en if item else None,
+            "price_fe": price.price_fe,
+            "source": price.source,
+        })
+
+    # Sort by name for readability
+    prices_data.sort(key=lambda x: x.get("name_en") or "")
+
+    export_data: dict[str, Any] = {
+        "meta": {
+            "exported_at_utc": datetime.utcnow().isoformat() + "Z",
+            "count": len(prices_data),
+            "notes": [
+                "Price seed file for TITrack.",
+                "Prices are in FE (Flame Elementium).",
+                "These values will be overwritten when users search the AH.",
+            ],
+        },
+        "prices": prices_data,
+    }
+
+    return JSONResponse(
+        content=export_data,
+        headers={
+            "Content-Disposition": "attachment; filename=titrack_prices_seed.json"
+        },
     )
 
 

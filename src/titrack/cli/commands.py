@@ -12,7 +12,7 @@ from typing import Optional
 
 from titrack.collector.collector import Collector
 from titrack.config.settings import Settings, find_log_file
-from titrack.core.models import Item, ItemDelta, Run
+from titrack.core.models import Item, ItemDelta, Price, Run
 from titrack.data.zones import get_zone_display_name
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
@@ -60,7 +60,7 @@ def print_run_end(run: Run, repo: Repository) -> None:
 
 
 def cmd_init(args: argparse.Namespace) -> int:
-    """Initialize database and optionally seed items."""
+    """Initialize database and optionally seed items and prices."""
     settings = Settings.from_args(
         db_path=args.db,
         portable=args.portable,
@@ -82,6 +82,20 @@ def cmd_init(args: argparse.Namespace) -> int:
     else:
         existing = repo.get_item_count()
         print(f"  {existing} items in database")
+
+    # Seed prices if provided
+    prices_seed = getattr(args, 'prices_seed', None)
+    if prices_seed:
+        prices_path = Path(prices_seed)
+        if prices_path.exists():
+            print(f"Seeding prices from: {prices_path}")
+            count = seed_prices(repo, prices_path)
+            print(f"  Loaded {count} prices")
+        else:
+            print(f"  Warning: Price seed file not found: {prices_path}")
+    else:
+        existing = repo.get_price_count()
+        print(f"  {existing} prices in database")
 
     db.close()
     print("Done.")
@@ -110,6 +124,27 @@ def seed_items(repo: Repository, seed_file: Path) -> int:
 
     repo.upsert_items_batch(items)
     return len(items)
+
+
+def seed_prices(repo: Repository, seed_file: Path) -> int:
+    """Load prices from seed file into database."""
+    with open(seed_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    prices_data = data.get("prices", [])
+    prices = []
+
+    for price_data in prices_data:
+        price = Price(
+            config_base_id=int(price_data["id"]),
+            price_fe=float(price_data["price_fe"]),
+            source=price_data.get("source", "seed"),
+            updated_at=datetime.now(),
+        )
+        prices.append(price)
+
+    repo.upsert_prices_batch(prices)
+    return len(prices)
 
 
 def cmd_parse_file(args: argparse.Namespace) -> int:
@@ -361,6 +396,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         db=api_db,
         log_path=settings.log_path,
         collector_running=collector is not None,
+        collector=collector,
     )
 
     # Set up graceful shutdown
@@ -422,6 +458,11 @@ def create_parser() -> argparse.ArgumentParser:
         "--seed",
         type=str,
         help="Path to item seed JSON file",
+    )
+    init_parser.add_argument(
+        "--prices-seed",
+        type=str,
+        help="Path to price seed JSON file",
     )
 
     # parse-file command

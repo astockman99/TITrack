@@ -92,6 +92,12 @@ class ItemListResponse(BaseModel):
     total: int
 
 
+class ItemUpdateRequest(BaseModel):
+    """Request to update an item's name."""
+
+    name_en: Optional[str] = None
+
+
 class PriceResponse(BaseModel):
     """Price entry response."""
 

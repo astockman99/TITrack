@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query
 
 from pydantic import BaseModel
 
+from titrack.data.zones import get_zone_display_name
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
 
@@ -121,4 +122,49 @@ def get_stats_history(
         cumulative_value=filtered_cumulative_value,
         value_per_hour=filtered_value_rate,
         cumulative_fe=filtered_cumulative_fe,
+    )
+
+
+class ZoneInfo(BaseModel):
+    """Zone information."""
+
+    zone_signature: str
+    display_name: str
+    needs_translation: bool
+
+
+class ZonesResponse(BaseModel):
+    """List of zones."""
+
+    zones: list[ZoneInfo]
+    total: int
+    untranslated: int
+
+
+@router.get("/zones", response_model=ZonesResponse)
+def get_zones(
+    repo: Repository = Depends(get_repository),
+) -> ZonesResponse:
+    """Get all unique zones encountered with their display names."""
+    zone_signatures = repo.get_unique_zones()
+
+    zones = []
+    untranslated = 0
+
+    for sig in zone_signatures:
+        display = get_zone_display_name(sig)
+        # Check if it's untranslated (contains underscore or Chinese chars)
+        needs_trans = "_" in display or any('\u4e00' <= c <= '\u9fff' for c in display)
+        if needs_trans:
+            untranslated += 1
+        zones.append(ZoneInfo(
+            zone_signature=sig,
+            display_name=display,
+            needs_translation=needs_trans,
+        ))
+
+    return ZonesResponse(
+        zones=zones,
+        total=len(zones),
+        untranslated=untranslated,
     )

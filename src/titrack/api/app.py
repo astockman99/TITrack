@@ -17,6 +17,7 @@ def create_app(
     db: Database,
     log_path: Optional[Path] = None,
     collector_running: bool = False,
+    collector: Optional[object] = None,
 ) -> FastAPI:
     """
     Create and configure the FastAPI application.
@@ -65,10 +66,11 @@ def create_app(
     app.include_router(prices.router)
     app.include_router(stats.router)
 
-    # Store state for status endpoint
+    # Store state for status endpoint and reset functionality
     app.state.db = db
     app.state.log_path = log_path
     app.state.collector_running = collector_running
+    app.state.collector = collector
     app.state.repo = repo
 
     @app.get("/api/status", response_model=StatusResponse, tags=["status"])
