@@ -197,7 +197,7 @@ class Collector:
             self._current_proto_name = None
 
     def _handle_bag_event(self, event: ParsedBagEvent, timestamp: datetime) -> None:
-        """Handle BagMgr modification events."""
+        """Handle BagMgr modification and init events."""
         current_run = self.run_segmenter.get_current_run()
         run_id = current_run.id if current_run and not current_run.is_hub else None
 
@@ -211,6 +211,11 @@ class Collector:
 
         # Persist slot state
         self.repository.upsert_slot_state(new_state)
+
+        # For init events (inventory snapshot), only update slot state, don't create deltas
+        # This prevents pollution of loot tracking when user sorts inventory
+        if event.is_init:
+            return
 
         # Persist and notify delta
         if delta:

@@ -107,13 +107,14 @@ class Price:
 
 @dataclass
 class ParsedBagEvent:
-    """Parsed BagMgr modification event."""
+    """Parsed BagMgr modification or init event."""
 
     page_id: int
     slot_id: int
     config_base_id: int
     num: int  # Absolute stack count
     raw_line: str
+    is_init: bool = False  # True for InitBagData (snapshot), False for Modfy (change)
 
 
 @dataclass

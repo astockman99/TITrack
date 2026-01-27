@@ -171,7 +171,7 @@ function renderInventory(data, forceRender = false) {
 
     tbody.innerHTML = data.items.slice(0, 20).map(item => {
         const isFE = item.config_base_id === 100300;
-        const iconHtml = getIconHtml(item.icon_url, 'item-icon');
+        const iconHtml = getIconHtml(item.config_base_id, 'item-icon');
 
         return `
             <tr>
@@ -366,7 +366,7 @@ async function showRunDetails(runId) {
         body.innerHTML = `
             <ul class="loot-list">
                 ${run.loot.map(item => {
-                    const iconHtml = getIconHtml(item.icon_url, 'loot-item-icon');
+                    const iconHtml = getIconHtml(item.config_base_id, 'loot-item-icon');
                     const qtyStr = (item.quantity > 0 ? '+' : '') + formatNumber(item.quantity);
                     const valueStr = item.total_value_fe !== null
                         ? `= ${formatNumber(Math.round(item.total_value_fe))} FE`
@@ -662,18 +662,20 @@ function simpleHash(obj) {
 
 function handleIconError(img) {
     // Track failed icon and hide it
-    if (img.dataset.iconUrl) {
-        failedIcons.add(img.dataset.iconUrl);
+    if (img.dataset.configId) {
+        failedIcons.add(img.dataset.configId);
     }
     img.style.display = 'none';
 }
 
-function getIconHtml(iconUrl, cssClass) {
+function getIconHtml(configBaseId, cssClass) {
     // Don't render icons that have previously failed
-    if (!iconUrl || failedIcons.has(iconUrl)) {
+    if (!configBaseId || failedIcons.has(String(configBaseId))) {
         return '';
     }
-    return `<img src="${iconUrl}" alt="" class="${cssClass}" data-icon-url="${iconUrl}" onerror="handleIconError(this)">`;
+    // Use proxy endpoint to fetch icons (handles CDN headers server-side)
+    const proxyUrl = `/api/icons/${configBaseId}`;
+    return `<img src="${proxyUrl}" alt="" class="${cssClass}" data-config-id="${configBaseId}" onerror="handleIconError(this)">`;
 }
 
 // --- Initialization ---

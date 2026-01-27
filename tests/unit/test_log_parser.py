@@ -13,7 +13,7 @@ from titrack.parser.log_parser import parse_line, parse_lines
 class TestParseLine:
     """Tests for single line parsing."""
 
-    def test_parses_bag_event(self):
+    def test_parses_bag_modify_event(self):
         line = "GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 671"
         event = parse_line(line)
         assert isinstance(event, ParsedBagEvent)
@@ -22,6 +22,29 @@ class TestParseLine:
         assert event.config_base_id == 100300
         assert event.num == 671
         assert event.raw_line == line
+        assert event.is_init is False
+
+    def test_parses_bag_init_event(self):
+        line = "GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609"
+        event = parse_line(line)
+        assert isinstance(event, ParsedBagEvent)
+        assert event.page_id == 102
+        assert event.slot_id == 0
+        assert event.config_base_id == 100300
+        assert event.num == 609
+        assert event.raw_line == line
+        assert event.is_init is True
+
+    def test_parses_bag_init_event_different_page(self):
+        """Test init events for different bag pages (equipment, skills, misc)."""
+        line = "GameLog: Display: [Game] BagMgr@:InitBagData PageId = 103 SlotId = 57 ConfigBaseId = 6153 Num = 14"
+        event = parse_line(line)
+        assert isinstance(event, ParsedBagEvent)
+        assert event.page_id == 103
+        assert event.slot_id == 57
+        assert event.config_base_id == 6153
+        assert event.num == 14
+        assert event.is_init is True
 
     def test_parses_context_start(self):
         line = "GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start"

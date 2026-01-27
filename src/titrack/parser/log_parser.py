@@ -9,6 +9,7 @@ from titrack.core.models import (
 )
 from titrack.parser.patterns import (
     BAG_MODIFY_PATTERN,
+    BAG_INIT_PATTERN,
     ITEM_CHANGE_PATTERN,
     LEVEL_EVENT_PATTERN,
     LEVEL_ID_PATTERN,
@@ -39,6 +40,19 @@ def parse_line(line: str) -> ParsedEvent:
             config_base_id=int(match.group("config_base_id")),
             num=int(match.group("num")),
             raw_line=line,
+            is_init=False,
+        )
+
+    # Try BagMgr init/snapshot (triggered by sorting inventory)
+    match = BAG_INIT_PATTERN.search(line)
+    if match:
+        return ParsedBagEvent(
+            page_id=int(match.group("page_id")),
+            slot_id=int(match.group("slot_id")),
+            config_base_id=int(match.group("config_base_id")),
+            num=int(match.group("num")),
+            raw_line=line,
+            is_init=True,
         )
 
     # Try ItemChange context marker

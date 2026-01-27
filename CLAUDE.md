@@ -65,6 +65,9 @@ GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
 GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 671
 GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
 
+# Inventory snapshot (triggered by sorting inventory in-game)
+GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609
+
 # Map boundaries
 LevelMgr@ EnterLevel ...
 LevelMgr@ OpenLevel ...
@@ -75,6 +78,7 @@ LevelMgr@ OpenLevel ...
 - Delta = current `Num` - previous `Num` for same slot/item
 - Tag changes inside PickItems block as "pickup-related"
 - Handle unknown ConfigBaseIds gracefully (show as "Unknown <id>")
+- `InitBagData` events update slot state but don't create deltas (used for inventory sync)
 
 ## Database Schema (Core Tables)
 
@@ -141,6 +145,9 @@ Seeds the `items` table on first run.
 - `GET /api/stats/history` - Time-series data for charts
 - `GET /api/stats/zones` - List all zones encountered (for translation)
 
+### Icons
+- `GET /api/icons/{id}` - Proxy icon from CDN (handles headers server-side, caches results)
+
 ### Other
 - `GET /api/inventory` - Current inventory state
 - `GET /api/status` - Server status
@@ -175,6 +182,19 @@ These are differentiated using `LevelId` from the game logs:
 To add a new ambiguous zone:
 1. Run the zone and check the console for `(LevelId=XXXX)`
 2. Add the mapping to `LEVEL_ID_ZONES` in `zones.py`
+
+## Inventory Sync
+
+To sync your full inventory with the tracker, use the **Sort** button in-game:
+1. Open your inventory (bag)
+2. Click the Sort/Arrange button (auto-organizes items)
+3. The game logs `BagMgr@:InitBagData` lines for every slot
+4. TITrack captures these and updates slot state without creating deltas
+
+This is useful when:
+- Starting the tracker for the first time (existing inventory not tracked)
+- Inventory state gets out of sync
+- You want to ensure accurate net worth calculation
 
 ## Known Limitations / TODO
 

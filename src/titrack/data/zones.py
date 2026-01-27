@@ -24,6 +24,7 @@ ZONE_NAMES = {
     "SD_ShouGuLinDi": "Blistering Lava Sea - Twisted Valley",
     "DD_DiDuTingYuan200": "Blistering Lava Sea - Court of Darkness",
     "KD_RongHuoHeXin": "Blistering Lava Sea - Smelting Plant",
+    "YanYuZhiGu": "Blistering Lava Sea - Hellfire Chasm",
     # Glacial Abyss
     "DD_TingYuanMiGong": "Glacial Abyss - High Court Maze",
     "YJ_XieDuYuZuo": "Glacial Abyss - Defiled Side Chamber",
@@ -37,6 +38,7 @@ ZONE_NAMES = {
     # YL_BeiFengLinDi (Grimwind Woods) differentiated by level_id in LEVEL_ID_ZONES
     "SD_ZhongXiGaoQiang": "Glacial Abyss - Wall of the Last Breath",
     "SD_GeBuLinYingDi": "Glacial Abyss - Blustery Canyon",
+    "YongShuangBingPo": "Glacial Abyss - Throne of Winter",
 
     # Vorax
     "DiXiaZhenSuo": "Vorax - Shelly's Operating Theater",
@@ -54,6 +56,7 @@ ZONE_NAMES = {
     "YJ_RiXiShenMiao": "Steel Forge - Sun Temple",
     "YJ_YingLingShenDian": "Steel Forge - Corona Shrine",
     "SQ_ZheFengBiZhang": "Steel Forge - Windbreath Cliff",
+    "ChiGuiWuShi": "Steel Forge - Imaginary Monument",
 
     # Thunder Wastes
     "DD_TanXiZhiQiang": "Thunder Wastes - Wall of Sorrows",
@@ -67,6 +70,7 @@ ZONE_NAMES = {
     "JH_JiaoTangDaTing": "Thunder Wastes - Prayer Sanctuary",
     "DD_DiDuTingYuan000": "Thunder Wastes - Sacred Courtyard",
     "YJ_LiuJinJieQu": "Thunder Wastes - Gallery of Moon",
+    "LeiYingJiDian": "Thunder Wastes - Summit of Thunder",
 
     # Voidlands (remaining zones without conflicts)
     "DD_QunLangJieXiang": "Voidlands - Grim Alleys",
@@ -78,6 +82,7 @@ ZONE_NAMES = {
     "YL_XiDiChongGu": "Voidlands - Jungle of the Brood",
     "YJ_YongZhouHuiLang": "Voidlands - Gallery of Stars",
     "JH_YinNiShengTang": "Voidlands - Yesterday Chamber",
+    "DiaoLingWangYu": "Voidlands - Dreamless Abyss",
 }
 
 # LevelId-based zone mappings for zones that share the same path across different areas
@@ -89,6 +94,12 @@ LEVEL_ID_ZONES = {
     # Elemental Mine - same path (KD_YuanSuKuangDong000) in different areas
     4612: "Blistering Lava Sea - Elemental Mine",
     4655: "Voidlands - Elemental Mine",
+    # Boss zones (Timemark bosses)
+    3016: "Blistering Lava Sea - Hellfire Chasm",
+    3006: "Glacial Abyss - Throne of Winter",
+    3036: "Thunder Wastes - Summit of Thunder",
+    3026: "Steel Forge - Imaginary Monument",
+    3046: "Voidlands - Dreamless Abyss",
 }
 
 

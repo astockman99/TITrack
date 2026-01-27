@@ -85,6 +85,16 @@ The dashboard shows:
 4. Console shows: `[Price] Item Name: 0.021000 FE`
 5. All values update to reflect the new price
 
+### Sync Full Inventory
+
+The tracker only sees items when they change in the game log. To sync your full current inventory:
+
+1. Open your bag in game
+2. Click the **Sort** button (auto-organizes items)
+3. The tracker captures a full inventory snapshot
+
+This is useful when starting the tracker for the first time or if inventory state gets out of sync.
+
 ### CLI Commands
 
 ```bash

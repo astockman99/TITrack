@@ -12,6 +12,16 @@ BAG_MODIFY_PATTERN = re.compile(
     r"Num\s*=\s*(?P<num>\d+)"
 )
 
+# BagMgr init/snapshot line (triggered by sorting inventory or opening bag)
+# Example: GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609
+BAG_INIT_PATTERN = re.compile(
+    r"GameLog:\s*Display:\s*\[Game\]\s*BagMgr@:InitBagData\s+"
+    r"PageId\s*=\s*(?P<page_id>\d+)\s+"
+    r"SlotId\s*=\s*(?P<slot_id>\d+)\s+"
+    r"ConfigBaseId\s*=\s*(?P<config_base_id>\d+)\s+"
+    r"Num\s*=\s*(?P<num>\d+)"
+)
+
 # ItemChange context markers
 # Example: GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
 # Example: GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end

@@ -30,6 +30,18 @@ SAMPLE_LOG = """\
 [2026.01.26-10.05.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200
 """
 
+# Sample log with InitBagData (inventory snapshot from sorting)
+SAMPLE_LOG_WITH_INIT = """\
+[2026.01.27-12.36.57:771][ 65]GameLog: Display: [Game] ItemChange@ ProtoName=ResetItemsLayout start
+[2026.01.27-12.36.57:771][ 65]GameLog: Display: [Game] ItemChange@ Reset PageId=102
+[2026.01.27-12.36.57:774][ 65]GameLog: Display: [Game] ItemChange@ ProtoName=ResetItemsLayout end
+[2026.01.27-12.36.57:774][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609
+[2026.01.27-12.36.57:776][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 1 ConfigBaseId = 100200 Num = 999
+[2026.01.27-12.36.57:776][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 2 ConfigBaseId = 100200 Num = 442
+[2026.01.27-12.36.57:776][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 103 SlotId = 0 ConfigBaseId = 440004 Num = 2
+[2026.01.27-12.36.57:776][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 103 SlotId = 1 ConfigBaseId = 430000 Num = 20
+"""
+
 
 @pytest.fixture
 def test_env():
@@ -208,3 +220,82 @@ class TestCollectorIntegration:
 
         # Most deltas should be from PickItems
         assert len(pick_deltas) > 0
+
+    def test_init_bag_updates_state_without_delta(self, test_env):
+        """Test that InitBagData events update slot state but don't create deltas."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+
+        # Create log file with init data
+        log_path = tmpdir / "init_test.log"
+        log_path.write_text(SAMPLE_LOG_WITH_INIT)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Should have no deltas (init events don't create deltas)
+        assert len(deltas_received) == 0
+
+        # But slot state should be updated
+        states = repo.get_all_slot_states()
+        assert len(states) == 5  # 3 slots in page 102, 2 in page 103
+
+        # Verify FE slot (102, 0)
+        fe_state = repo.get_slot_state(102, 0)
+        assert fe_state is not None
+        assert fe_state.config_base_id == FE_CONFIG_BASE_ID
+        assert fe_state.num == 609
+
+        # Verify other slot (102, 1)
+        other_state = repo.get_slot_state(102, 1)
+        assert other_state is not None
+        assert other_state.config_base_id == 100200
+        assert other_state.num == 999
+
+        # Verify page 103 slot
+        misc_state = repo.get_slot_state(103, 0)
+        assert misc_state is not None
+        assert misc_state.config_base_id == 440004
+        assert misc_state.num == 2
+
+    def test_init_bag_followed_by_pickup(self, test_env):
+        """Test that init events set baseline for subsequent pickup deltas."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+
+        # Create log file: init snapshot, then a pickup
+        log_content = """\
+[2026.01.27-12.36.57:774][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
+[2026.01.27-12.37.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
+[2026.01.27-12.37.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 550
+[2026.01.27-12.37.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
+"""
+        log_path = tmpdir / "init_then_pickup.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Should have exactly 1 delta (from the pickup, not from init)
+        assert len(deltas_received) == 1
+        assert deltas_received[0].delta == 50  # 550 - 500
+        assert deltas_received[0].config_base_id == FE_CONFIG_BASE_ID
+        assert deltas_received[0].proto_name == "PickItems"
+
+        # Final state should be 550
+        fe_state = repo.get_slot_state(102, 0)
+        assert fe_state.num == 550

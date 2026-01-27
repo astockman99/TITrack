@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from titrack.api.routes import inventory, items, prices, runs, stats
+from titrack.api.routes import icons, inventory, items, prices, runs, stats
 from titrack.api.schemas import StatusResponse
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
@@ -58,6 +58,7 @@ def create_app(
     app.dependency_overrides[items.get_repository] = get_repository
     app.dependency_overrides[prices.get_repository] = get_repository
     app.dependency_overrides[stats.get_repository] = get_repository
+    app.dependency_overrides[icons.get_repository] = get_repository
 
     # Include routers
     app.include_router(runs.router)
@@ -65,6 +66,7 @@ def create_app(
     app.include_router(items.router)
     app.include_router(prices.router)
     app.include_router(stats.router)
+    app.include_router(icons.router)
 
     # Store state for status endpoint and reset functionality
     app.state.db = db

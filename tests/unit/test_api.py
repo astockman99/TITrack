@@ -288,3 +288,32 @@ class TestPricesEndpoints:
         data = response.json()
         assert data["price_fe"] == 1.0
         assert data["name"] == "Flame Elementium"
+
+
+class TestIconsEndpoint:
+    def test_get_icon_no_item(self, client):
+        """Test getting icon for non-existent item returns 404."""
+        response = client.get("/api/icons/999999")
+        assert response.status_code == 404
+
+    def test_get_icon_no_url(self, seeded_db):
+        """Test getting icon for item with no icon_url returns 404."""
+        app = create_app(seeded_db)
+        repo = Repository(seeded_db)
+
+        # Add item without icon_url
+        item = Item(
+            config_base_id=999888,
+            name_en="Test Item No Icon",
+            name_cn=None,
+            type_cn=None,
+            icon_url=None,
+            url_en=None,
+            url_cn=None,
+        )
+        repo.upsert_item(item)
+
+        client = TestClient(app)
+        response = client.get("/api/icons/999888")
+        assert response.status_code == 404
+        assert "No icon available" in response.json()["detail"]

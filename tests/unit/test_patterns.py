@@ -4,6 +4,7 @@ import pytest
 
 from titrack.parser.patterns import (
     BAG_MODIFY_PATTERN,
+    BAG_INIT_PATTERN,
     ITEM_CHANGE_PATTERN,
     LEVEL_EVENT_PATTERN,
     LEVEL_ID_PATTERN,
@@ -42,6 +43,40 @@ class TestBagModifyPattern:
         match = BAG_MODIFY_PATTERN.search(line)
         assert match is not None
         assert match.group("num") == "500"
+
+
+class TestBagInitPattern:
+    """Tests for BagMgr init/snapshot pattern."""
+
+    def test_matches_standard_line(self):
+        line = "GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609"
+        match = BAG_INIT_PATTERN.search(line)
+        assert match is not None
+        assert match.group("page_id") == "102"
+        assert match.group("slot_id") == "0"
+        assert match.group("config_base_id") == "100300"
+        assert match.group("num") == "609"
+
+    def test_matches_different_page_ids(self):
+        # PageId 100 = equipment, 101 = skills, 102 = consumables, 103 = misc
+        line = "GameLog: Display: [Game] BagMgr@:InitBagData PageId = 103 SlotId = 57 ConfigBaseId = 6153 Num = 14"
+        match = BAG_INIT_PATTERN.search(line)
+        assert match is not None
+        assert match.group("page_id") == "103"
+        assert match.group("slot_id") == "57"
+        assert match.group("config_base_id") == "6153"
+        assert match.group("num") == "14"
+
+    def test_no_match_on_modify_line(self):
+        line = "GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 671"
+        match = BAG_INIT_PATTERN.search(line)
+        assert match is None
+
+    def test_matches_with_timestamp_prefix(self):
+        line = "[2026.01.27-12.36.57:776][ 65]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609"
+        match = BAG_INIT_PATTERN.search(line)
+        assert match is not None
+        assert match.group("num") == "609"
 
 
 class TestItemChangePattern:
