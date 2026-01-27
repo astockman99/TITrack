@@ -49,11 +49,23 @@ class Database:
         for statement in ALL_CREATE_STATEMENTS:
             cursor.execute(statement)
 
+        # Run migrations for existing databases
+        self._run_migrations(cursor)
+
         # Store schema version
         cursor.execute(
             "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
             ("schema_version", str(SCHEMA_VERSION)),
         )
+
+    def _run_migrations(self, cursor: sqlite3.Cursor) -> None:
+        """Run database migrations for schema changes."""
+        # Check if level_id column exists in runs table
+        cursor.execute("PRAGMA table_info(runs)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if "level_id" not in columns:
+            cursor.execute("ALTER TABLE runs ADD COLUMN level_id INTEGER")
+            print("Migration: Added level_id column to runs table")
 
     def close(self) -> None:
         """Close database connection."""

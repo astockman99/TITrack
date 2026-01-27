@@ -53,6 +53,15 @@ class LogTailer:
             # File shrunk - rotation detected
             self._position = 0
             self._file_size = current_size
+        elif position < 0 or position > 10_000_000_000:
+            # Invalid position (corruption or overflow) - reset
+            print(f"WARNING: Invalid log position {position}, resetting to 0")
+            self._position = 0
+            self._file_size = current_size
+        elif position > current_size:
+            # Position beyond current file - file may have been truncated/rotated
+            self._position = 0
+            self._file_size = current_size
         else:
             self._position = position
             self._file_size = file_size
@@ -90,7 +99,14 @@ class LogTailer:
             with open(self.file_path, "r", encoding="utf-8", errors="replace") as f:
                 f.seek(self._position)
                 content = f.read(current_size - self._position)
-                self._position = f.tell()
+                new_position = f.tell()
+                # Sanity check: position should be non-negative and reasonable
+                # (file may have grown since we checked size, so position > current_size is OK)
+                MAX_REASONABLE_POS = 10_000_000_000  # 10GB sanity limit
+                if new_position < 0 or new_position > MAX_REASONABLE_POS:
+                    print(f"WARNING: f.tell() returned invalid position {new_position}, resetting")
+                    new_position = current_size
+                self._position = new_position
                 self._file_size = current_size
         except (OSError, IOError):
             return

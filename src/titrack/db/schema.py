@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS runs (
     zone_signature TEXT NOT NULL,
     start_ts TEXT NOT NULL,
     end_ts TEXT,
-    is_hub INTEGER NOT NULL DEFAULT 0
+    is_hub INTEGER NOT NULL DEFAULT 0,
+    level_id INTEGER
 )
 """
 

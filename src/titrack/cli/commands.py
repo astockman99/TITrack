@@ -30,7 +30,7 @@ def print_delta(delta: ItemDelta, repo: Repository) -> None:
 def print_run_start(run: Run) -> None:
     """Print run start to console."""
     hub_str = " (hub)" if run.is_hub else ""
-    zone_name = get_zone_display_name(run.zone_signature)
+    zone_name = get_zone_display_name(run.zone_signature, run.level_id)
     print(f"\n=== Entered: {zone_name}{hub_str} ===")
 
 
@@ -314,7 +314,7 @@ def cmd_show_runs(args: argparse.Namespace) -> int:
         fe_gained = summary.get(FE_CONFIG_BASE_ID, 0)
 
         hub_str = "[hub] " if run.is_hub else ""
-        zone_name = get_zone_display_name(run.zone_signature)
+        zone_name = get_zone_display_name(run.zone_signature, run.level_id)
         print(
             f"  #{run.id:3} {hub_str}{zone_name[:30]:<30} "
             f"{duration_str:>10} FE: {fe_gained:+d}"

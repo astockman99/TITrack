@@ -5,11 +5,13 @@ from titrack.core.models import (
     ParsedContextMarker,
     ParsedEvent,
     ParsedLevelEvent,
+    ParsedLevelIdEvent,
 )
 from titrack.parser.patterns import (
     BAG_MODIFY_PATTERN,
     ITEM_CHANGE_PATTERN,
     LEVEL_EVENT_PATTERN,
+    LEVEL_ID_PATTERN,
 )
 
 
@@ -54,6 +56,16 @@ def parse_line(line: str) -> ParsedEvent:
         return ParsedLevelEvent(
             event_type=match.group("event_type"),
             level_info=match.group("level_info").strip(),
+            raw_line=line,
+        )
+
+    # Try LevelId event (for zone differentiation)
+    match = LEVEL_ID_PATTERN.search(line)
+    if match:
+        return ParsedLevelIdEvent(
+            level_uid=int(match.group("level_uid")),
+            level_type=int(match.group("level_type")),
+            level_id=int(match.group("level_id")),
             raw_line=line,
         )
 

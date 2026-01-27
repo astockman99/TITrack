@@ -29,6 +29,13 @@ LEVEL_EVENT_PATTERN = re.compile(
     r"InMainLevelPath\s*=\s*(?P<level_info>.+)"
 )
 
+# LevelId extraction (for differentiating zones with same path but different areas)
+# Example: GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 1061006 3 4606
+LEVEL_ID_PATTERN = re.compile(
+    r"GameLog:\s*Display:\s*\[Game\]\s*LevelMgr@\s+LevelUid,\s*LevelType,\s*LevelId\s*=\s*"
+    r"(?P<level_uid>\d+)\s+(?P<level_type>\d+)\s+(?P<level_id>\d+)"
+)
+
 # Known hub/town zone patterns (for run segmentation)
 # These patterns identify non-mapping zones
 # Map paths look like: /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/...
@@ -39,11 +46,13 @@ HUB_ZONE_PATTERNS = [
     re.compile(r"hub", re.IGNORECASE),
     re.compile(r"lobby", re.IGNORECASE),
     re.compile(r"social", re.IGNORECASE),
-    re.compile(r"/01SD/", re.IGNORECASE),  # Ember's Rest hideout
-    re.compile(r"/04DD/", re.IGNORECASE),  # Another hideout variant
+    # Note: /01SD/ and /04DD/ removed - zone codes are shared by hideouts AND maps
+    # Hideouts are detected by their specific Chinese names instead
     re.compile(r"YuJinZhiXiBiNanSuo", re.IGNORECASE),  # Ember's Rest (Chinese name)
     re.compile(r"ShengTingZhuangYuan", re.IGNORECASE),  # Sacred Court Manor (hideout)
     re.compile(r"ZhuCheng", re.IGNORECASE),  # Main city
+    re.compile(r"/UI/", re.IGNORECASE),  # UI screens (login, etc.)
+    re.compile(r"LoginScene", re.IGNORECASE),  # Login screen
 ]
 
 # Flame Elementium ConfigBaseId (primary currency)

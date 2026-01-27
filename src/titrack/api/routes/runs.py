@@ -80,7 +80,7 @@ def list_runs(
         run_responses.append(
             RunResponse(
                 id=run.id,
-                zone_name=get_zone_display_name(run.zone_signature),
+                zone_name=get_zone_display_name(run.zone_signature, run.level_id),
                 zone_signature=run.zone_signature,
                 start_ts=run.start_ts,
                 end_ts=run.end_ts,
@@ -197,7 +197,7 @@ def get_run(
 
     return RunResponse(
         id=run.id,
-        zone_name=get_zone_display_name(run.zone_signature),
+        zone_name=get_zone_display_name(run.zone_signature, run.level_id),
         zone_signature=run.zone_signature,
         start_ts=run.start_ts,
         end_ts=run.end_ts,

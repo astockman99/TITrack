@@ -162,3 +162,20 @@ Zone names are mapped in `src/titrack/data/zones.py`. The `ZONE_NAMES` dictionar
 Prices can be seeded on init: `titrack init --seed items.json --prices-seed prices.json`
 
 Export current prices via the UI "Export Prices" button or `GET /api/prices/export`.
+
+## Zone Differentiation
+
+Some zones share the same internal path across different areas (e.g., "Grimwind Woods" appears in both Glacial Abyss and Voidlands with the same path `YL_BeiFengLinDi201`).
+
+These are differentiated using `LevelId` from the game logs:
+- The `LevelMgr@ LevelUid, LevelType, LevelId` line is parsed before zone transitions
+- `LEVEL_ID_ZONES` in `src/titrack/data/zones.py` maps specific LevelIds to zone names
+- LevelId lookup takes priority over path-based lookup
+
+To add a new ambiguous zone:
+1. Run the zone and check the console for `(LevelId=XXXX)`
+2. Add the mapping to `LEVEL_ID_ZONES` in `zones.py`
+
+## Known Limitations / TODO
+
+- **Timemark level not tracked**: The game log zone paths are identical regardless of Timemark level (e.g., 7-0 vs 8-0). Runs of the same zone are grouped together. To support per-Timemark tracking, would need to find another log line that indicates the Timemark level (possibly when selecting beacon or starting map) or add manual run tagging in the UI.

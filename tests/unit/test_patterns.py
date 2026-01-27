@@ -6,6 +6,7 @@ from titrack.parser.patterns import (
     BAG_MODIFY_PATTERN,
     ITEM_CHANGE_PATTERN,
     LEVEL_EVENT_PATTERN,
+    LEVEL_ID_PATTERN,
     HUB_ZONE_PATTERNS,
 )
 
@@ -95,6 +96,30 @@ class TestLevelEventPattern:
         assert match is None
 
 
+class TestLevelIdPattern:
+    """Tests for LevelId extraction pattern."""
+
+    def test_matches_level_id_line(self):
+        line = "GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 1061006 3 4606"
+        match = LEVEL_ID_PATTERN.search(line)
+        assert match is not None
+        assert match.group("level_uid") == "1061006"
+        assert match.group("level_type") == "3"
+        assert match.group("level_id") == "4606"
+
+    def test_matches_different_values(self):
+        line = "GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 1061406 3 4654"
+        match = LEVEL_ID_PATTERN.search(line)
+        assert match is not None
+        assert match.group("level_uid") == "1061406"
+        assert match.group("level_id") == "4654"
+
+    def test_no_match_on_other_level_mgr_line(self):
+        line = "GameLog: Display: [Game] LevelMgr@:LevelPath, Model = Content/Art/Maps/03YL/YL_BeiFengLinDi201"
+        match = LEVEL_ID_PATTERN.search(line)
+        assert match is None
+
+
 class TestHubZonePatterns:
     """Tests for hub/town zone detection patterns."""
 
@@ -108,8 +133,12 @@ class TestHubZonePatterns:
         assert any(p.search("Player_Hideout_01") for p in HUB_ZONE_PATTERNS)
 
     def test_detects_embers_rest_by_path(self):
-        # Ember's Rest hideout path
+        # Ember's Rest hideout detected by name, not zone code
         assert any(p.search("/Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200") for p in HUB_ZONE_PATTERNS)
+
+    def test_does_not_match_dragonrest_cavern(self):
+        # Dragonrest Cavern uses 01SD code but should NOT be detected as hub
+        assert not any(p.search("/Game/Art/Maps/01SD/SD_ShouGuSiDi000") for p in HUB_ZONE_PATTERNS)
 
     def test_detects_embers_rest_by_name(self):
         assert any(p.search("YuJinZhiXiBiNanSuo") for p in HUB_ZONE_PATTERNS)
@@ -120,3 +149,11 @@ class TestHubZonePatterns:
     def test_does_not_match_map_zone_path(self):
         # Map zones like 02KD should not be detected as hub
         assert not any(p.search("/Game/Art/Maps/02KD/KD_YuanSuKuangDong000") for p in HUB_ZONE_PATTERNS)
+
+    def test_does_not_match_timemark_7_zone(self):
+        # Timemark 7 maps use 04DD code but should NOT be detected as hub
+        assert not any(p.search("/Game/Art/Maps/04DD/DD_ChaoBaiZhiLu200") for p in HUB_ZONE_PATTERNS)
+
+    def test_detects_sacred_court_manor_hideout(self):
+        # Sacred Court Manor hideout (also uses 04DD) should still be detected
+        assert any(p.search("/Game/Art/Maps/04DD/DD_ShengTingZhuangYuan000") for p in HUB_ZONE_PATTERNS)

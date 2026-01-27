@@ -40,12 +40,13 @@ class Repository:
     def insert_run(self, run: Run) -> int:
         """Insert a new run and return its ID."""
         cursor = self.db.execute(
-            "INSERT INTO runs (zone_signature, start_ts, end_ts, is_hub) VALUES (?, ?, ?, ?)",
+            "INSERT INTO runs (zone_signature, start_ts, end_ts, is_hub, level_id) VALUES (?, ?, ?, ?, ?)",
             (
                 run.zone_signature,
                 run.start_ts.isoformat(),
                 run.end_ts.isoformat() if run.end_ts else None,
                 1 if run.is_hub else 0,
+                run.level_id,
             ),
         )
         return cursor.lastrowid
@@ -93,12 +94,15 @@ class Repository:
         return [row["zone_signature"] for row in rows]
 
     def _row_to_run(self, row) -> Run:
+        # Handle level_id which may not exist in older databases
+        level_id = row["level_id"] if "level_id" in row.keys() else None
         return Run(
             id=row["id"],
             zone_signature=row["zone_signature"],
             start_ts=datetime.fromisoformat(row["start_ts"]),
             end_ts=datetime.fromisoformat(row["end_ts"]) if row["end_ts"] else None,
             is_hub=bool(row["is_hub"]),
+            level_id=level_id,
         )
 
     # --- Item Deltas ---
@@ -406,6 +410,14 @@ class Repository:
 
     def save_log_position(self, file_path: Path, position: int, file_size: int) -> None:
         """Save current log file position for resume."""
+        # Guard against oversized integers (SQLite max is 2^63-1)
+        MAX_SQLITE_INT = 9223372036854775807
+        if position > MAX_SQLITE_INT or file_size > MAX_SQLITE_INT:
+            print(f"WARNING: Log position overflow - position={position}, file_size={file_size}")
+            # Clamp to max value to avoid crash
+            position = min(position, MAX_SQLITE_INT)
+            file_size = min(file_size, MAX_SQLITE_INT)
+
         conn = self.db.connection
         conn.execute("BEGIN IMMEDIATE")
         try:

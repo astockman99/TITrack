@@ -47,6 +47,7 @@ class RunSegmenter:
         self,
         event: ParsedLevelEvent,
         timestamp: Optional[datetime] = None,
+        level_id: Optional[int] = None,
     ) -> tuple[Optional[Run], Optional[Run]]:
         """
         Process a level event and update run state.
@@ -54,6 +55,7 @@ class RunSegmenter:
         Args:
             event: Parsed level event
             timestamp: Event timestamp (defaults to now)
+            level_id: Optional LevelId for zone differentiation
 
         Returns:
             Tuple of (ended_run or None, new_run or None)
@@ -82,6 +84,7 @@ class RunSegmenter:
             start_ts=timestamp,
             end_ts=None,
             is_hub=is_hub,
+            level_id=level_id,
         )
         self._next_run_id += 1
         self._current_run = new_run

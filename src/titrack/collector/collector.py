@@ -12,6 +12,7 @@ from titrack.core.models import (
     ParsedBagEvent,
     ParsedContextMarker,
     ParsedLevelEvent,
+    ParsedLevelIdEvent,
     Price,
     Run,
 )
@@ -71,6 +72,9 @@ class Collector:
         # Context tracking
         self._current_context = EventContext.OTHER
         self._current_proto_name: Optional[str] = None
+
+        # LevelId tracking (for zone differentiation)
+        self._pending_level_id: Optional[int] = None
 
         # Exchange price tracking: SynId -> ConfigBaseId
         self._pending_price_searches: dict[int, int] = {}
@@ -176,6 +180,9 @@ class Collector:
             self._handle_context_marker(event)
         elif isinstance(event, ParsedBagEvent):
             self._handle_bag_event(event, timestamp)
+        elif isinstance(event, ParsedLevelIdEvent):
+            # Store LevelId for the upcoming level event
+            self._pending_level_id = event.level_id
         elif isinstance(event, ParsedLevelEvent):
             self._handle_level_event(event, timestamp)
 
@@ -213,7 +220,17 @@ class Collector:
 
     def _handle_level_event(self, event: ParsedLevelEvent, timestamp: datetime) -> None:
         """Handle level transition events."""
-        ended_run, new_run = self.run_segmenter.process_event(event, timestamp)
+        # Use pending level_id if available
+        level_id = self._pending_level_id
+        self._pending_level_id = None  # Clear after use
+
+        ended_run, new_run = self.run_segmenter.process_event(event, timestamp, level_id)
+
+        # DEBUG: Print zone transitions to console
+        if new_run:
+            hub_status = "[HUB]" if new_run.is_hub else "[MAP]"
+            level_info = f" (LevelId={new_run.level_id})" if new_run.level_id else ""
+            print(f"ZONE: {hub_status} {new_run.zone_signature}{level_info}")
 
         if ended_run:
             self.repository.update_run_end(ended_run.id, ended_run.end_ts)

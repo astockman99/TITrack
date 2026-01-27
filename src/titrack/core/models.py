@@ -66,6 +66,7 @@ class Run:
     start_ts: datetime
     end_ts: Optional[datetime] = None
     is_hub: bool = False  # True if this is a hub/town zone
+    level_id: Optional[int] = None  # For zone differentiation (same path, different areas)
 
     @property
     def is_active(self) -> bool:
@@ -133,5 +134,15 @@ class ParsedLevelEvent:
     raw_line: str
 
 
+@dataclass
+class ParsedLevelIdEvent:
+    """Parsed LevelId event (for zone differentiation)."""
+
+    level_uid: int
+    level_type: int
+    level_id: int
+    raw_line: str
+
+
 # Type alias for any parsed event
-ParsedEvent = ParsedBagEvent | ParsedContextMarker | ParsedLevelEvent | None
+ParsedEvent = ParsedBagEvent | ParsedContextMarker | ParsedLevelEvent | ParsedLevelIdEvent | None
