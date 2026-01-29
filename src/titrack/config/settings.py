@@ -19,20 +19,51 @@ STEAM_PATHS = [
 LOG_RELATIVE_PATH = Path("UE_Game/Torchlight/Saved/Logs/UE_game.log")
 
 
-def find_log_file() -> Optional[Path]:
+def find_log_file(custom_game_dir: Optional[str] = None) -> Optional[Path]:
     """
     Auto-detect the game log file location.
 
-    Checks common Steam library locations.
+    Checks custom directory first (if provided), then common Steam library locations.
+
+    Args:
+        custom_game_dir: Custom game installation directory to check first
 
     Returns:
         Path to log file if found, None otherwise
     """
+    # Check custom directory first if provided
+    if custom_game_dir:
+        custom_path = Path(custom_game_dir) / LOG_RELATIVE_PATH
+        if custom_path.exists():
+            return custom_path
+
+    # Fall back to common Steam paths
     for steam_path in STEAM_PATHS:
         log_path = steam_path / LOG_RELATIVE_PATH
         if log_path.exists():
             return log_path
     return None
+
+
+def validate_game_directory(game_dir: str) -> tuple[bool, Optional[Path]]:
+    """
+    Validate that a directory contains the game log file.
+
+    Args:
+        game_dir: Path to the game installation directory
+
+    Returns:
+        Tuple of (is_valid, log_path) where log_path is the full path if valid
+    """
+    game_path = Path(game_dir)
+    if not game_path.exists():
+        return False, None
+
+    log_path = game_path / LOG_RELATIVE_PATH
+    if log_path.exists():
+        return True, log_path
+
+    return False, None
 
 
 def get_default_db_path() -> Path:

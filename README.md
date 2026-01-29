@@ -81,6 +81,8 @@ python -m titrack serve --no-browser       # Don't open browser
 
 **Important**: After starting the tracker, you must **log in (or relog) your character** in-game for tracking to begin. The dashboard will show "Waiting for character login..." until a character is detected.
 
+**Custom Install Location**: If Torchlight Infinite is installed in a non-standard location, TITrack will prompt you to enter the game directory. The setting is saved and persists across restarts.
+
 The dashboard shows:
 - **Header Stats**: Total FE, Net Worth, Value/Hour, Runs, Learned Prices
 - **Charts**: Cumulative value and value/hour over time

@@ -240,6 +240,41 @@
         </div>
     </div>
 
+    <div id="log-path-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Game Log File Not Found</h3>
+                <button class="close-btn" onclick="closeLogPathModal()">&times;</button>
+            </div>
+            <div class="help-body">
+                <section class="help-section">
+                    <p>TITrack could not find the Torchlight Infinite log file. This usually means the game is installed in a non-standard location.</p>
+                </section>
+                <section class="help-section">
+                    <h4>Configure Game Directory</h4>
+                    <p>Enter the path to your Torchlight Infinite installation folder:</p>
+                    <div class="log-path-input-group">
+                        <input type="text" id="log-directory-input" placeholder="C:\Program Files (x86)\Steam\steamapps\common\Torchlight Infinite" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
+                        <button onclick="validateLogDirectory()" class="validate-btn">Validate</button>
+                    </div>
+                    <p id="log-path-status" class="log-path-status"></p>
+                    <p class="help-note">The log file should be at: [game folder]\UE_Game\Torchlight\Saved\Logs\UE_game.log</p>
+                </section>
+                <section class="help-section">
+                    <h4>Common Locations</h4>
+                    <ul>
+                        <li><code>C:\Program Files (x86)\Steam\steamapps\common\Torchlight Infinite</code></li>
+                        <li><code>D:\SteamLibrary\steamapps\common\Torchlight Infinite</code></li>
+                    </ul>
+                </section>
+                <div class="modal-actions">
+                    <button onclick="saveLogDirectory()" id="save-log-dir-btn" class="save-btn" disabled>Save & Restart</button>
+                    <button onclick="closeLogPathModal()" class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="price-history-modal" class="modal hidden">
         <div class="modal-content modal-wide">
             <div class="modal-header">

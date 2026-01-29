@@ -96,6 +96,7 @@ def create_app(
             collector_running=app.state.collector_running,
             db_path=str(db.db_path),
             log_path=str(log_path) if log_path else None,
+            log_path_missing=log_path is None,
             item_count=repo.get_item_count(),
             run_count=len(repo.get_recent_runs(limit=10000)),
             awaiting_player=app.state.player_info is None,

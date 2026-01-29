@@ -768,3 +768,108 @@ tr.nightmare .zone-name {
     transform: translateY(-100%);
     margin-top: -5px;
 }
+
+/* Log Path Configuration Modal */
+.log-path-input-group {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.log-path-input-group input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: monospace;
+}
+
+.log-path-input-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.validate-btn {
+    padding: 10px 20px;
+    background: var(--accent);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.validate-btn:hover {
+    opacity: 0.9;
+}
+
+.validate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.log-path-status {
+    font-size: 0.9rem;
+    min-height: 1.5em;
+}
+
+.log-path-status.success {
+    color: var(--positive);
+}
+
+.log-path-status.error {
+    color: var(--negative);
+}
+
+.log-path-status.validating {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.modal-actions .save-btn {
+    background: var(--positive);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.modal-actions .save-btn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.modal-actions .save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-actions .cancel-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.modal-actions .cancel-btn:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.help-section code {
+    background: var(--bg-card);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}

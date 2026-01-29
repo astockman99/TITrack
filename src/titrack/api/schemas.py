@@ -131,6 +131,7 @@ class StatusResponse(BaseModel):
     collector_running: bool
     db_path: str
     log_path: Optional[str] = None
+    log_path_missing: bool = False
     item_count: int
     run_count: int
     awaiting_player: bool = False

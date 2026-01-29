@@ -335,11 +335,16 @@ function renderStatus(status) {
     // Show/hide awaiting player message
     const awaitingMessage = document.getElementById('awaiting-player-message');
     if (awaitingMessage) {
-        if (status?.awaiting_player) {
+        if (status?.awaiting_player && !status?.log_path_missing) {
             awaitingMessage.classList.remove('hidden');
         } else {
             awaitingMessage.classList.add('hidden');
         }
+    }
+
+    // Show log path configuration modal if log file not found
+    if (status?.log_path_missing) {
+        showLogPathModal();
     }
 }
 
@@ -466,6 +471,115 @@ document.addEventListener('click', (e) => {
         closeNoCharacterModal();
     }
 });
+
+// --- Log Path Configuration Modal ---
+
+let logPathModalShown = false;
+let validatedLogPath = null;
+
+function showLogPathModal() {
+    // Only show once per session
+    if (logPathModalShown) return;
+    logPathModalShown = true;
+    document.getElementById('log-path-modal').classList.remove('hidden');
+}
+
+function closeLogPathModal() {
+    document.getElementById('log-path-modal').classList.add('hidden');
+}
+
+// Close log-path modal on outside click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'log-path-modal') {
+        closeLogPathModal();
+    }
+});
+
+async function validateLogDirectory() {
+    const input = document.getElementById('log-directory-input');
+    const status = document.getElementById('log-path-status');
+    const saveBtn = document.getElementById('save-log-dir-btn');
+    const path = input.value.trim();
+
+    if (!path) {
+        status.textContent = 'Please enter a path';
+        status.className = 'log-path-status error';
+        saveBtn.disabled = true;
+        return;
+    }
+
+    status.textContent = 'Validating...';
+    status.className = 'log-path-status validating';
+    saveBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE}/settings/log-directory/validate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.valid) {
+            status.textContent = `Found: ${result.log_path}`;
+            status.className = 'log-path-status success';
+            validatedLogPath = path;
+            saveBtn.disabled = false;
+        } else {
+            status.textContent = result.error || 'Log file not found at this location';
+            status.className = 'log-path-status error';
+            validatedLogPath = null;
+            saveBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Error validating log directory:', error);
+        status.textContent = 'Error validating path. Please try again.';
+        status.className = 'log-path-status error';
+        validatedLogPath = null;
+        saveBtn.disabled = true;
+    }
+}
+
+async function saveLogDirectory() {
+    if (!validatedLogPath) return;
+
+    const saveBtn = document.getElementById('save-log-dir-btn');
+    const status = document.getElementById('log-path-status');
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    try {
+        const response = await fetch(`${API_BASE}/settings/log_directory`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: validatedLogPath })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        status.textContent = 'Saved! Please restart TITrack for changes to take effect.';
+        status.className = 'log-path-status success';
+        saveBtn.textContent = 'Saved - Restart Required';
+
+        // Show a more prominent message
+        alert('Log directory saved! Please restart TITrack for the changes to take effect.');
+
+    } catch (error) {
+        console.error('Error saving log directory:', error);
+        status.textContent = 'Error saving. Please try again.';
+        status.className = 'log-path-status error';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save & Restart';
+    }
+}
 
 // Chart configuration
 const chartOptions = {
@@ -674,6 +788,7 @@ document.addEventListener('keydown', (e) => {
         closeModal();
         closeHelpModal();
         closePriceHistoryModal();
+        closeLogPathModal();
     }
 });
 

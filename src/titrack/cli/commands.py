@@ -364,6 +364,23 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     print(f"Database: {settings.db_path}")
 
+    # If log file not found via auto-detect, check for saved log_directory setting
+    if not settings.log_path or not settings.log_path.exists():
+        # Connect to DB to check for saved setting
+        temp_db = Database(settings.db_path)
+        temp_db.connect()
+        temp_repo = Repository(temp_db)
+        saved_log_dir = temp_repo.get_setting("log_directory")
+        temp_db.close()
+
+        if saved_log_dir:
+            # Try using saved directory
+            from titrack.config.settings import find_log_file
+            found_path = find_log_file(custom_game_dir=saved_log_dir)
+            if found_path and found_path.exists():
+                settings.log_path = found_path
+                print(f"Using saved log directory: {saved_log_dir}")
+
     collector = None
     collector_thread = None
     collector_db = None
