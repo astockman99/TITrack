@@ -37,8 +37,37 @@ class TestExchangeMessageParser:
         assert result.syn_id == 23444
         assert result.config_base_id == 5028
 
-    def test_parse_search_response(self):
-        """Test parsing a price search response."""
+    def test_parse_search_response_new_format(self):
+        """Test parsing a price search response with new format (currency after prices)."""
+        parser = ExchangeMessageParser()
+
+        lines = [
+            "[2026.01.28-09.58.21:887][818]GameLog: Display: [Game] ----Socket RecvMessage STT----XchgSearchPrice----SynId = 13366",
+            "[2026.01.28-09.58.21:887][818]GameLog: Display: [Game] ",
+            "+errCode",
+            "+prices+1+unitPrices+1 [15.0]",
+            "|      | |          +2 [15.5]",
+            "|      | |          +3 [15.6]",
+            "|      | +currency [100300]",
+            "[2026.01.28-09.58.21:887][818]GameLog: Display: [Game] ----Socket RecvMessage End----",
+        ]
+
+        result = None
+        for line in lines:
+            result = parser.parse_line(line)
+            if result is not None:
+                break
+
+        assert result is not None
+        assert isinstance(result, ExchangePriceResponse)
+        assert result.syn_id == 13366
+        assert len(result.prices_fe) == 3
+        assert result.prices_fe[0] == 15.0
+        assert result.prices_fe[1] == 15.5
+        assert result.prices_fe[2] == 15.6
+
+    def test_parse_search_response_old_format(self):
+        """Test parsing a price search response with old format (currency before prices)."""
         parser = ExchangeMessageParser()
 
         lines = [
@@ -72,11 +101,12 @@ class TestExchangeMessageParser:
         """Test that only FE (100300) prices are captured."""
         parser = ExchangeMessageParser()
 
+        # New format: prices first, then currency
         lines = [
             "----Socket RecvMessage STT----XchgSearchPrice----SynId = 100",
             "+errCode",
-            "+prices+1+currency [100200]",  # Not FE
-            "|      | +unitPrices+1 [100.0]",
+            "+prices+1+unitPrices+1 [100.0]",
+            "|      | +currency [100200]",  # Not FE
             "----Socket RecvMessage End----",
         ]
 

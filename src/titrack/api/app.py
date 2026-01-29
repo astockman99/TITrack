@@ -8,9 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from titrack.api.routes import icons, inventory, items, prices, runs, stats
-from titrack.api.schemas import StatusResponse
+from titrack.api.schemas import PlayerResponse, StatusResponse
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
+from titrack.parser.player_parser import get_enter_log_path, get_effective_player_id, parse_enter_log, PlayerInfo
 
 
 def create_app(
@@ -18,6 +19,7 @@ def create_app(
     log_path: Optional[Path] = None,
     collector_running: bool = False,
     collector: Optional[object] = None,
+    player_info: Optional[PlayerInfo] = None,
 ) -> FastAPI:
     """
     Create and configure the FastAPI application.
@@ -26,6 +28,7 @@ def create_app(
         db: Database connection
         log_path: Path to log file being monitored
         collector_running: Whether the collector is actively running
+        player_info: Current player info for data isolation
 
     Returns:
         Configured FastAPI application
@@ -33,7 +36,7 @@ def create_app(
     app = FastAPI(
         title="TITrack API",
         description="Torchlight Infinite Local Loot Tracker API",
-        version="0.2.0",
+        version="0.3.0",  # Bumped for multi-season support
     )
 
     # CORS middleware for local development
@@ -45,8 +48,11 @@ def create_app(
         allow_headers=["*"],
     )
 
-    # Create repository
+    # Create repository with player context for filtering
     repo = Repository(db)
+    if player_info:
+        effective_id = get_effective_player_id(player_info)
+        repo.set_player_context(player_info.season_id, effective_id)
 
     # Dependency override for repository injection
     def get_repository() -> Repository:
@@ -74,6 +80,7 @@ def create_app(
     app.state.collector_running = collector_running
     app.state.collector = collector
     app.state.repo = repo
+    app.state.player_info = player_info
 
     @app.get("/api/status", response_model=StatusResponse, tags=["status"])
     def get_status() -> StatusResponse:
@@ -85,6 +92,42 @@ def create_app(
             log_path=str(log_path) if log_path else None,
             item_count=repo.get_item_count(),
             run_count=len(repo.get_recent_runs(limit=10000)),
+        )
+
+    @app.get("/api/player", response_model=Optional[PlayerResponse], tags=["player"])
+    def get_player() -> Optional[PlayerResponse]:
+        """Get current player/character information."""
+        # Use cached player_info if available (from startup)
+        pi = app.state.player_info
+        if pi:
+            return PlayerResponse(
+                name=pi.name,
+                level=pi.level,
+                season_id=pi.season_id,
+                season_name=pi.season_name,
+                hero_id=pi.hero_id,
+                hero_name=pi.hero_name,
+                player_id=pi.player_id,
+            )
+
+        # Fall back to parsing enter log
+        if not log_path:
+            return None
+
+        enter_log = get_enter_log_path(log_path)
+        parsed_info = parse_enter_log(enter_log)
+
+        if not parsed_info:
+            return None
+
+        return PlayerResponse(
+            name=parsed_info.name,
+            level=parsed_info.level,
+            season_id=parsed_info.season_id,
+            season_name=parsed_info.season_name,
+            hero_id=parsed_info.hero_id,
+            hero_name=parsed_info.hero_name,
+            player_id=parsed_info.player_id,
         )
 
     # Mount static files (must be last to not override API routes)

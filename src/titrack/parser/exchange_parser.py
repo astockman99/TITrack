@@ -44,10 +44,16 @@ MESSAGE_END_PATTERN = re.compile(r"----Socket (?:Send|Recv)Message End----")
 # Pattern to extract refer (ConfigBaseId) from request
 REFER_PATTERN = re.compile(r"\+refer \[(\d+)\]")
 
-# Pattern to extract currency and unit prices from response
-CURRENCY_PATTERN = re.compile(r"\+prices\+\d+\+currency \[(\d+)\]")
+# Pattern to extract currency from response (can appear before or after prices)
+# Old format: +prices+1+currency [100300]
+# New format: |      | +currency [100300]  (at end of price list)
+CURRENCY_PATTERN = re.compile(r"\+currency \[(\d+)\]")
+
 # Match both "+unitPrices+N [price]" and continuation lines "+N [price]"
 UNIT_PRICE_PATTERN = re.compile(r"\+(?:unitPrices\+)?\d+ \[([0-9.]+)\]")
+
+# Pattern to detect start of a new price section (prices+N+unitPrices)
+PRICES_SECTION_START = re.compile(r"\+prices\+\d+\+unitPrices")
 
 # FE currency ConfigBaseId
 FE_CURRENCY_ID = 100300
@@ -144,30 +150,56 @@ class ExchangeMessageParser:
         )
 
     def _parse_response(self, content: str) -> Optional[ExchangePriceResponse]:
-        """Parse a price search response, extracting FE prices."""
-        prices_fe = []
+        """Parse a price search response, extracting FE prices.
 
-        # Find the FE currency section and extract prices
+        Handles two formats:
+        - Old: currency comes before prices (+prices+1+currency [100300] then +unitPrices)
+        - New: currency comes after prices (+prices+1+unitPrices... then +currency [100300])
+        """
+        prices_fe = []
         lines = content.split("\n")
-        in_fe_section = False
+
+        # Track current section state
+        current_section_prices: list[float] = []
+        current_section_is_fe: Optional[bool] = None  # None = unknown yet
 
         for line in lines:
-            # Check if we're entering FE currency section
+            # Check for start of new price section (new format: +prices+N+unitPrices)
+            if PRICES_SECTION_START.search(line):
+                # Finalize previous section if we had prices and knew the currency
+                if current_section_prices and current_section_is_fe:
+                    prices_fe.extend(current_section_prices)
+                # Start new section
+                current_section_prices = []
+                current_section_is_fe = None
+
+            # Check for currency marker
             currency_match = CURRENCY_PATTERN.search(line)
             if currency_match:
                 currency_id = int(currency_match.group(1))
-                in_fe_section = (currency_id == FE_CURRENCY_ID)
+                is_fe = (currency_id == FE_CURRENCY_ID)
+
+                if current_section_prices:
+                    # New format: prices came first, now we know the currency
+                    if is_fe:
+                        prices_fe.extend(current_section_prices)
+                    current_section_prices = []
+                    current_section_is_fe = None
+                else:
+                    # Old format: currency comes first, prices will follow
+                    current_section_is_fe = is_fe
                 continue
 
-            # Extract unit prices if in FE section
-            if in_fe_section:
-                price_match = UNIT_PRICE_PATTERN.search(line)
-                if price_match:
-                    price = float(price_match.group(1))
+            # Extract unit prices
+            price_match = UNIT_PRICE_PATTERN.search(line)
+            if price_match:
+                price = float(price_match.group(1))
+                if current_section_is_fe is True:
+                    # Old format: we already know this is FE section
                     prices_fe.append(price)
-                # Check if we've left the section (new currency or end of prices)
-                elif "+currency" in line or (line.strip() and not line.strip().startswith("|")):
-                    in_fe_section = False
+                else:
+                    # New format or unknown: collect prices, determine currency later
+                    current_section_prices.append(price)
 
         if not prices_fe:
             return None

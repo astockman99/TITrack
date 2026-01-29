@@ -17,6 +17,7 @@ from titrack.data.zones import get_zone_display_name
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
+from titrack.parser.player_parser import get_enter_log_path, get_effective_player_id, parse_enter_log, PlayerInfo
 
 
 def print_delta(delta: ItemDelta, repo: Repository) -> None:
@@ -166,6 +167,13 @@ def cmd_parse_file(args: argparse.Namespace) -> int:
     print(f"Parsing: {settings.log_path}")
     print(f"Database: {settings.db_path}")
 
+    # Parse player info from enter log
+    player_info = parse_enter_log(get_enter_log_path(settings.log_path))
+    if player_info:
+        print(f"Player: {player_info.name} ({player_info.season_name})")
+    else:
+        print("Warning: Could not detect player info")
+
     db = Database(settings.db_path)
     db.connect()
 
@@ -176,6 +184,7 @@ def cmd_parse_file(args: argparse.Namespace) -> int:
         on_delta=lambda d: print_delta(d, repo),
         on_run_start=print_run_start,
         on_run_end=lambda r: print_run_end(r, repo),
+        player_info=player_info,
     )
     collector.initialize()
 
@@ -209,6 +218,14 @@ def cmd_tail(args: argparse.Namespace) -> int:
 
     print(f"Tailing: {settings.log_path}")
     print(f"Database: {settings.db_path}")
+
+    # Parse player info from enter log
+    player_info = parse_enter_log(get_enter_log_path(settings.log_path))
+    if player_info:
+        print(f"Player: {player_info.name} ({player_info.season_name})")
+    else:
+        print("Warning: Could not detect player info")
+
     print("Press Ctrl+C to stop\n")
 
     db = Database(settings.db_path)
@@ -221,6 +238,7 @@ def cmd_tail(args: argparse.Namespace) -> int:
         on_delta=lambda d: print_delta(d, repo),
         on_run_start=print_run_start,
         on_run_end=lambda r: print_run_end(r, repo),
+        player_info=player_info,
     )
     collector.initialize()
 
@@ -348,10 +366,18 @@ def cmd_serve(args: argparse.Namespace) -> int:
     collector = None
     collector_thread = None
     collector_db = None
+    player_info = None
 
     # Start collector in background if log file is available
     if settings.log_path and settings.log_path.exists():
         print(f"Log file: {settings.log_path}")
+
+        # Parse player info from enter log
+        player_info = parse_enter_log(get_enter_log_path(settings.log_path))
+        if player_info:
+            print(f"Player: {player_info.name} ({player_info.season_name})")
+        else:
+            print("Warning: Could not detect player info")
 
         # Collector gets its own database connection
         collector_db = Database(settings.db_path)
@@ -363,6 +389,15 @@ def cmd_serve(args: argparse.Namespace) -> int:
             item_name = collector_repo.get_item_name(price.config_base_id)
             print(f"  [Price] {item_name}: {price.price_fe:.6f} FE")
 
+        # Placeholder for player change callback (set after app is created)
+        player_change_callback = [None]  # Use list to allow closure modification
+
+        def on_player_change(new_player_info):
+            print(f"  [Player] Switched to: {new_player_info.name} ({new_player_info.season_name})")
+            # Update app state if callback is set
+            if player_change_callback[0]:
+                player_change_callback[0](new_player_info)
+
         collector = Collector(
             db=collector_db,
             log_path=settings.log_path,
@@ -370,6 +405,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
             on_run_start=lambda r: None,
             on_run_end=lambda r: None,
             on_price_update=on_price_update,
+            on_player_change=on_player_change,
+            player_info=player_info,
         )
         collector.initialize()
 
@@ -397,7 +434,21 @@ def cmd_serve(args: argparse.Namespace) -> int:
         log_path=settings.log_path,
         collector_running=collector is not None,
         collector=collector,
+        player_info=player_info,
     )
+
+    # Set up player change callback to update app state
+    if collector is not None:
+        def update_app_player(new_player_info):
+            app.state.player_info = new_player_info
+            # Also update the API repository context with effective player_id
+            if hasattr(app.state, 'repo'):
+                effective_id = get_effective_player_id(new_player_info)
+                app.state.repo.set_player_context(
+                    new_player_info.season_id,
+                    effective_id
+                )
+        player_change_callback[0] = update_app_player
 
     # Set up graceful shutdown
     def signal_handler(sig, frame):

@@ -52,6 +52,32 @@ header h1 {
     letter-spacing: 2px;
 }
 
+.header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.player-info.hidden {
+    display: none;
+}
+
+.player-name {
+    color: var(--positive);
+    font-weight: 600;
+}
+
+.player-details {
+    color: var(--text-secondary);
+}
+
 .header-stats {
     display: flex;
     gap: 15px;
@@ -293,7 +319,8 @@ tbody tr:last-child td {
 
 .reset-btn,
 .edit-items-btn,
-.export-btn {
+.export-btn,
+.help-btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--text-secondary);
@@ -319,9 +346,15 @@ tbody tr:last-child td {
     color: var(--positive);
 }
 
+.help-btn:hover {
+    border-color: #64b5f6;
+    color: #64b5f6;
+}
+
 .reset-btn:disabled,
 .edit-items-btn:disabled,
-.export-btn:disabled {
+.export-btn:disabled,
+.help-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -697,4 +730,92 @@ footer {
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-style: italic;
+}
+
+/* Nightmare runs (Twinightmare mechanic) */
+tr.nightmare {
+    background-color: rgba(138, 43, 226, 0.15);
+}
+
+tr.nightmare:hover {
+    background-color: rgba(138, 43, 226, 0.25);
+}
+
+tr.nightmare .zone-name {
+    color: #b388ff;
+}
+
+/* Help Modal */
+.help-body {
+    padding: 20px;
+}
+
+.help-section {
+    margin-bottom: 25px;
+}
+
+.help-section:last-child {
+    margin-bottom: 0;
+}
+
+.help-section h4 {
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.help-section p {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.help-section ol,
+.help-section ul {
+    margin-left: 20px;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.help-section li {
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.help-section strong {
+    color: var(--positive);
+}
+
+.help-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding-left: 10px;
+    border-left: 2px solid var(--border);
+}
+
+/* Modal actions (buttons at bottom) */
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.dismiss-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.dismiss-btn:hover {
+    background: var(--accent-secondary);
 }

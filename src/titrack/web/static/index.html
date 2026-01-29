@@ -11,7 +11,13 @@
 <body>
     <div class="container">
         <header>
-            <h1>TITrack</h1>
+            <div class="header-title">
+                <h1>TITrack</h1>
+                <div id="player-info" class="player-info hidden">
+                    <span id="player-name" class="player-name"></span>
+                    <span id="player-details" class="player-details"></span>
+                </div>
+            </div>
             <div class="header-stats">
                 <div class="stat-card primary">
                     <span class="stat-label">Net Worth</span>
@@ -33,12 +39,9 @@
                     <span class="stat-label">Avg Run Time</span>
                     <span id="avg-run-time" class="stat-value">--</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-label">Prices</span>
-                    <span id="prices-count" class="stat-value">0</span>
-                </div>
             </div>
             <div class="header-controls">
+                <button class="help-btn" onclick="openHelpModal()">Instructions</button>
                 <button class="export-btn" onclick="exportPrices()">Export Prices</button>
                 <button class="edit-items-btn" onclick="openEditItemModal()">Edit Items</button>
                 <button id="reset-stats-btn" class="reset-btn" onclick="resetStats()">Reset Stats</button>
@@ -145,6 +148,90 @@
                         <button onclick="cancelItemEdit()" class="cancel-btn">Cancel</button>
                     </div>
                     <p class="edit-item-note">Note: Please report corrections so the seed file can be updated for future versions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>How to Use TITrack</h3>
+                <button class="close-btn" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-body">
+                <section class="help-section">
+                    <h4>1. Enable Game Logging</h4>
+                    <p>TITrack reads the game's log file to track your loot. To enable logging:</p>
+                    <ol>
+                        <li>Open Torchlight Infinite</li>
+                        <li>Go to <strong>Settings</strong></li>
+                        <li>Find and click the <strong>"Enable Log"</strong> button</li>
+                    </ol>
+                    <p class="help-note">Without this enabled, TITrack cannot capture any data.</p>
+                </section>
+
+                <section class="help-section">
+                    <h4>2. Sync Your Inventory</h4>
+                    <p>To populate the inventory display with your current items:</p>
+                    <ol>
+                        <li>Open your inventory in-game</li>
+                        <li>Click the <strong>Sort</strong> button (auto-arranges items)</li>
+                        <li>Repeat for each tab you want to track (Skill, Commodity, Others)</li>
+                    </ol>
+                    <p class="help-note">The Gear tab is not tracked because gear prices depend heavily on specific affixes.</p>
+                </section>
+
+                <section class="help-section">
+                    <h4>3. Automatic Price Learning</h4>
+                    <p>TITrack learns item prices automatically when you use the in-game Exchange:</p>
+                    <ol>
+                        <li>Open the Exchange in-game</li>
+                        <li>Search for any item you want to price</li>
+                        <li>TITrack captures the listed prices and calculates a reference price (10th percentile)</li>
+                    </ol>
+                    <p class="help-note">Prices are saved locally and used to calculate your loot value and net worth.</p>
+                </section>
+
+                <section class="help-section">
+                    <h4>4. Tracking Runs</h4>
+                    <p>Once logging is enabled, TITrack automatically:</p>
+                    <ul>
+                        <li>Detects when you enter and leave maps</li>
+                        <li>Tracks all items picked up during each run</li>
+                        <li>Calculates value based on learned prices</li>
+                        <li>Shows your Value/Hour based on active run time only</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="no-character-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Character Not Detected</h3>
+                <button class="close-btn" onclick="closeNoCharacterModal()">&times;</button>
+            </div>
+            <div class="help-body">
+                <section class="help-section">
+                    <p>TITrack could not detect your character information. This usually means game logging is not enabled or you haven't logged in with a character yet.</p>
+                </section>
+                <section class="help-section">
+                    <h4>To fix this:</h4>
+                    <ol>
+                        <li>Open Torchlight Infinite</li>
+                        <li>Go to <strong>Settings</strong></li>
+                        <li>Click <strong>"Enable Log"</strong></li>
+                        <li>Log out and log back in with your character</li>
+                        <li>Refresh this page</li>
+                    </ol>
+                </section>
+                <section class="help-section">
+                    <p class="help-note">TITrack tracks data separately for each character and league. Without character detection, data may not be properly isolated.</p>
+                </section>
+                <div class="modal-actions">
+                    <button onclick="closeNoCharacterModal()" class="dismiss-btn">Dismiss</button>
                 </div>
             </div>
         </div>

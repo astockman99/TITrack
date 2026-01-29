@@ -49,6 +49,8 @@ class DeltaCalculator:
         proto_name: Optional[str],
         run_id: Optional[int],
         timestamp: Optional[datetime] = None,
+        season_id: Optional[int] = None,
+        player_id: Optional[str] = None,
     ) -> tuple[Optional[ItemDelta], SlotState]:
         """
         Process a bag event and compute the delta.
@@ -59,6 +61,8 @@ class DeltaCalculator:
             proto_name: Protocol name if in a context block
             run_id: Current run ID if in a run
             timestamp: Event timestamp (defaults to now)
+            season_id: Current season/league ID
+            player_id: Current player ID
 
         Returns:
             Tuple of (delta or None if no change, new slot state)
@@ -74,6 +78,7 @@ class DeltaCalculator:
             config_base_id=event.config_base_id,
             num=event.num,
             updated_at=timestamp,
+            player_id=player_id,
         )
 
         # Update state
@@ -94,6 +99,8 @@ class DeltaCalculator:
                 proto_name=proto_name,
                 run_id=run_id,
                 timestamp=timestamp,
+                season_id=season_id,
+                player_id=player_id,
             )
             return delta, new_state
 
@@ -111,6 +118,8 @@ class DeltaCalculator:
                 proto_name=proto_name,
                 run_id=run_id,
                 timestamp=timestamp,
+                season_id=season_id,
+                player_id=player_id,
             )
             return delta, new_state
 
@@ -130,6 +139,8 @@ class DeltaCalculator:
             proto_name=proto_name,
             run_id=run_id,
             timestamp=timestamp,
+            season_id=season_id,
+            player_id=player_id,
         )
         return delta, new_state
 

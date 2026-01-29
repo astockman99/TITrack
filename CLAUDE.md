@@ -83,7 +83,7 @@ LevelMgr@ OpenLevel ...
 ## Database Schema (Core Tables)
 
 - `settings` - key/value config
-- `runs` - map instances (start_ts, end_ts, zone_sig)
+- `runs` - map instances (start_ts, end_ts, zone_sig, level_id, level_type, level_uid)
 - `item_deltas` - per-item changes with run_id, context, proto_name
 - `slot_state` - current inventory state per (page_id, slot_id)
 - `items` - item metadata (name, icon_url, category)
@@ -136,8 +136,9 @@ Seeds the `items` table on first run.
 - `PATCH /api/items/{id}` - Update item name
 
 ### Prices
-- `GET /api/prices` - List all prices
+- `GET /api/prices` - List all prices (filtered by current season)
 - `GET /api/prices/export` - Export prices as seed-compatible JSON
+- `POST /api/prices/migrate-legacy` - Migrate legacy prices (season_id=0) to current season
 - `GET /api/prices/{id}` - Get price for item
 - `PUT /api/prices/{id}` - Update price
 
@@ -147,6 +148,9 @@ Seeds the `items` table on first run.
 
 ### Icons
 - `GET /api/icons/{id}` - Proxy icon from CDN (handles headers server-side, caches results)
+
+### Player
+- `GET /api/player` - Current player/character info (name, season)
 
 ### Other
 - `GET /api/inventory` - Current inventory state
@@ -195,6 +199,58 @@ This is useful when:
 - Starting the tracker for the first time (existing inventory not tracked)
 - Inventory state gets out of sync
 - You want to ensure accurate net worth calculation
+
+## Player Info & Multi-Character Support
+
+Player/character information is parsed from the main game log (`UE_game.log`). The parser looks for lines containing `+player+Name`, `+player+SeasonId`, etc.
+
+- **Name**: Player's character name
+- **SeasonId**: League/season identifier (mapped to display name in `player_parser.py`)
+
+The dashboard displays the character name and season name in the header.
+
+### Automatic Character Detection
+
+When you switch characters in-game, TITrack automatically detects the change by monitoring player data lines in the log stream:
+
+1. Player data lines (`+player+Name`, `+player+SeasonId`, etc.) are parsed as they appear
+2. When a different character is detected, the collector switches context
+3. Inventories, runs, and prices are isolated per character/season
+
+### Data Isolation
+
+Each character has isolated data using an **effective player ID**:
+- If the log contains a `PlayerId`, that is used
+- Otherwise, `{season_id}_{name}` is used as the identifier (e.g., `1301_MyChar`)
+
+This ensures:
+- **Inventory**: Each character has separate slot states
+- **Runs/Deltas**: Tagged with season_id and player_id
+- **Prices**: Isolated per season (seasonal vs permanent economies are separate)
+
+### Migrating Legacy Prices
+
+If you have prices from before multi-season support was added, they may be stored with `season_id=0`. To migrate them to your current season:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/prices/migrate-legacy
+```
+
+Run this while logged in as the character whose economy should receive the prices.
+
+## Inventory Tab Filtering
+
+The game inventory has 4 tabs identified by PageId:
+- **PageId 100**: Gear (equipment) - **EXCLUDED from tracking**
+- **PageId 101**: Skill
+- **PageId 102**: Commodity (currency, crafting materials)
+- **PageId 103**: Misc
+
+The Gear tab is excluded because gear prices are too dependent on specific affixes to be reliably tracked. This filtering is defined in `src/titrack/data/inventory.py` and applied at:
+- Collector level (bag events from excluded pages are skipped)
+- Repository queries (slot states and deltas filtered by default)
+
+To modify which tabs are tracked, edit `EXCLUDED_PAGES` in `src/titrack/data/inventory.py`.
 
 ## Known Limitations / TODO
 

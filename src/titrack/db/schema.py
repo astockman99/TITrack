@@ -1,6 +1,6 @@
 """Database schema - DDL statements for SQLite."""
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # Bumped for season_id/player_id support
 
 # Settings table - key/value configuration
 CREATE_SETTINGS = """
@@ -19,7 +19,11 @@ CREATE TABLE IF NOT EXISTS runs (
     start_ts TEXT NOT NULL,
     end_ts TEXT,
     is_hub INTEGER NOT NULL DEFAULT 0,
-    level_id INTEGER
+    level_id INTEGER,
+    level_type INTEGER,
+    level_uid INTEGER,
+    season_id INTEGER,
+    player_id TEXT
 )
 """
 
@@ -39,6 +43,8 @@ CREATE TABLE IF NOT EXISTS item_deltas (
     proto_name TEXT,
     run_id INTEGER,
     timestamp TEXT NOT NULL,
+    season_id INTEGER,
+    player_id TEXT,
     FOREIGN KEY (run_id) REFERENCES runs(id)
 )
 """
@@ -51,15 +57,16 @@ CREATE_ITEM_DELTAS_CONFIG_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_item_deltas_config ON item_deltas(config_base_id)
 """
 
-# Slot state - current inventory state
+# Slot state - current inventory state (PK includes player_id for per-character isolation)
 CREATE_SLOT_STATE = """
 CREATE TABLE IF NOT EXISTS slot_state (
+    player_id TEXT NOT NULL DEFAULT '',
     page_id INTEGER NOT NULL,
     slot_id INTEGER NOT NULL,
     config_base_id INTEGER NOT NULL,
     num INTEGER NOT NULL,
     updated_at TEXT NOT NULL,
-    PRIMARY KEY (page_id, slot_id)
+    PRIMARY KEY (player_id, page_id, slot_id)
 )
 """
 
@@ -76,13 +83,15 @@ CREATE TABLE IF NOT EXISTS items (
 )
 """
 
-# Prices table - item valuation
+# Prices table - item valuation (compound key: config_base_id + season_id)
 CREATE_PRICES = """
 CREATE TABLE IF NOT EXISTS prices (
-    config_base_id INTEGER PRIMARY KEY,
+    config_base_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL DEFAULT 0,
     price_fe REAL NOT NULL DEFAULT 0,
     source TEXT NOT NULL DEFAULT 'manual',
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (config_base_id, season_id)
 )
 """
 

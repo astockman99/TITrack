@@ -60,12 +60,93 @@ class Database:
 
     def _run_migrations(self, cursor: sqlite3.Cursor) -> None:
         """Run database migrations for schema changes."""
-        # Check if level_id column exists in runs table
+        # Check existing columns in runs table
         cursor.execute("PRAGMA table_info(runs)")
-        columns = [row[1] for row in cursor.fetchall()]
-        if "level_id" not in columns:
+        runs_columns = [row[1] for row in cursor.fetchall()]
+
+        if "level_id" not in runs_columns:
             cursor.execute("ALTER TABLE runs ADD COLUMN level_id INTEGER")
             print("Migration: Added level_id column to runs table")
+
+        if "level_type" not in runs_columns:
+            cursor.execute("ALTER TABLE runs ADD COLUMN level_type INTEGER")
+            print("Migration: Added level_type column to runs table")
+
+        if "level_uid" not in runs_columns:
+            cursor.execute("ALTER TABLE runs ADD COLUMN level_uid INTEGER")
+            print("Migration: Added level_uid column to runs table")
+
+        # V2 migrations: season_id and player_id support
+        if "season_id" not in runs_columns:
+            cursor.execute("ALTER TABLE runs ADD COLUMN season_id INTEGER")
+            print("Migration: Added season_id column to runs table")
+
+        if "player_id" not in runs_columns:
+            cursor.execute("ALTER TABLE runs ADD COLUMN player_id TEXT")
+            print("Migration: Added player_id column to runs table")
+
+        # Check item_deltas columns
+        cursor.execute("PRAGMA table_info(item_deltas)")
+        deltas_columns = [row[1] for row in cursor.fetchall()]
+
+        if "season_id" not in deltas_columns:
+            cursor.execute("ALTER TABLE item_deltas ADD COLUMN season_id INTEGER")
+            print("Migration: Added season_id column to item_deltas table")
+
+        if "player_id" not in deltas_columns:
+            cursor.execute("ALTER TABLE item_deltas ADD COLUMN player_id TEXT")
+            print("Migration: Added player_id column to item_deltas table")
+
+        # Migrate prices table (PK change from config_base_id to config_base_id+season_id)
+        cursor.execute("PRAGMA table_info(prices)")
+        prices_columns = [row[1] for row in cursor.fetchall()]
+
+        if "season_id" not in prices_columns:
+            # Need to recreate table with new PK
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS prices_new (
+                    config_base_id INTEGER NOT NULL,
+                    season_id INTEGER NOT NULL DEFAULT 0,
+                    price_fe REAL NOT NULL DEFAULT 0,
+                    source TEXT NOT NULL DEFAULT 'manual',
+                    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    PRIMARY KEY (config_base_id, season_id)
+                )
+            """)
+            # Migrate existing data (season_id=0 means legacy/unknown)
+            cursor.execute("""
+                INSERT OR IGNORE INTO prices_new (config_base_id, season_id, price_fe, source, updated_at)
+                SELECT config_base_id, 0, price_fe, source, updated_at FROM prices
+            """)
+            cursor.execute("DROP TABLE prices")
+            cursor.execute("ALTER TABLE prices_new RENAME TO prices")
+            print("Migration: Recreated prices table with season_id")
+
+        # Migrate slot_state table (PK change to include player_id)
+        cursor.execute("PRAGMA table_info(slot_state)")
+        slot_columns = [row[1] for row in cursor.fetchall()]
+
+        if "player_id" not in slot_columns:
+            # Need to recreate table with new PK
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS slot_state_new (
+                    player_id TEXT NOT NULL DEFAULT '',
+                    page_id INTEGER NOT NULL,
+                    slot_id INTEGER NOT NULL,
+                    config_base_id INTEGER NOT NULL,
+                    num INTEGER NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY (player_id, page_id, slot_id)
+                )
+            """)
+            # Migrate existing data (player_id='' means legacy/unknown)
+            cursor.execute("""
+                INSERT OR IGNORE INTO slot_state_new (player_id, page_id, slot_id, config_base_id, num, updated_at)
+                SELECT '', page_id, slot_id, config_base_id, num, updated_at FROM slot_state
+            """)
+            cursor.execute("DROP TABLE slot_state")
+            cursor.execute("ALTER TABLE slot_state_new RENAME TO slot_state")
+            print("Migration: Recreated slot_state table with player_id")
 
     def close(self) -> None:
         """Close database connection."""

@@ -27,9 +27,11 @@ class RunResponse(BaseModel):
     end_ts: Optional[datetime] = None
     duration_seconds: Optional[float] = None
     is_hub: bool
+    is_nightmare: bool = False  # True if this is a nightmare run (Twinightmare)
     fe_gained: int  # Raw FE currency gained
     total_value: float  # Total value including priced items
     loot: list[LootItem]
+    consolidated_run_ids: Optional[list[int]] = None  # IDs of runs merged into this one
 
 
 class RunListResponse(BaseModel):
@@ -131,3 +133,15 @@ class StatusResponse(BaseModel):
     log_path: Optional[str] = None
     item_count: int
     run_count: int
+
+
+class PlayerResponse(BaseModel):
+    """Player/character information."""
+
+    name: str
+    level: int
+    season_id: int
+    season_name: str
+    hero_id: int
+    hero_name: str
+    player_id: Optional[str] = None

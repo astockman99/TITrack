@@ -6,6 +6,7 @@ from titrack.core.models import (
     ParsedEvent,
     ParsedLevelEvent,
     ParsedLevelIdEvent,
+    ParsedPlayerDataEvent,
 )
 from titrack.parser.patterns import (
     BAG_MODIFY_PATTERN,
@@ -14,6 +15,7 @@ from titrack.parser.patterns import (
     LEVEL_EVENT_PATTERN,
     LEVEL_ID_PATTERN,
 )
+from titrack.parser.player_parser import parse_player_line
 
 
 def parse_line(line: str) -> ParsedEvent:
@@ -80,6 +82,18 @@ def parse_line(line: str) -> ParsedEvent:
             level_uid=int(match.group("level_uid")),
             level_type=int(match.group("level_type")),
             level_id=int(match.group("level_id")),
+            raw_line=line,
+        )
+
+    # Try player data (for character detection)
+    player_data = parse_player_line(line)
+    if player_data:
+        return ParsedPlayerDataEvent(
+            name=player_data.get("name"),
+            level=player_data.get("level"),
+            season_id=player_data.get("season_id"),
+            hero_id=player_data.get("hero_id"),
+            player_id=player_data.get("player_id"),
             raw_line=line,
         )
 

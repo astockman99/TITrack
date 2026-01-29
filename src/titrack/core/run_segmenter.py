@@ -48,6 +48,10 @@ class RunSegmenter:
         event: ParsedLevelEvent,
         timestamp: Optional[datetime] = None,
         level_id: Optional[int] = None,
+        level_type: Optional[int] = None,
+        level_uid: Optional[int] = None,
+        season_id: Optional[int] = None,
+        player_id: Optional[str] = None,
     ) -> tuple[Optional[Run], Optional[Run]]:
         """
         Process a level event and update run state.
@@ -56,6 +60,10 @@ class RunSegmenter:
             event: Parsed level event
             timestamp: Event timestamp (defaults to now)
             level_id: Optional LevelId for zone differentiation
+            level_type: Optional LevelType (3=normal, 11=nightmare)
+            level_uid: Optional LevelUid (unique map instance ID)
+            season_id: Optional season/league ID
+            player_id: Optional player ID
 
         Returns:
             Tuple of (ended_run or None, new_run or None)
@@ -85,6 +93,10 @@ class RunSegmenter:
             end_ts=None,
             is_hub=is_hub,
             level_id=level_id,
+            level_type=level_type,
+            level_uid=level_uid,
+            season_id=season_id,
+            player_id=player_id,
         )
         self._next_run_id += 1
         self._current_run = new_run

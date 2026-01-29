@@ -9,6 +9,7 @@ let lastInventoryData = null;
 let lastRunsHash = null;
 let lastInventoryHash = null;
 let lastStatsHash = null;
+let lastPlayerHash = null;
 const failedIcons = new Set(); // Track icons that failed to load
 
 // Chart instances
@@ -54,6 +55,10 @@ async function fetchStatsHistory(hours = 24) {
     return fetchJson(`/stats/history?hours=${hours}`);
 }
 
+async function fetchPlayer() {
+    return fetchJson('/player');
+}
+
 async function fetchPrices() {
     return fetchJson('/prices');
 }
@@ -92,6 +97,12 @@ function formatNumber(num) {
     return num.toLocaleString();
 }
 
+function formatFEValue(value) {
+    // Format FE values with 2 decimal places
+    if (value === null || value === undefined) return '--';
+    return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function formatFE(value) {
     if (value === null || value === undefined) return '--';
     if (value > 0) {
@@ -104,21 +115,20 @@ function formatFE(value) {
 
 function formatValue(value) {
     if (value === null || value === undefined) return '--';
-    const rounded = Math.round(value);
-    if (rounded > 0) {
-        return `<span class="positive">+${formatNumber(rounded)}</span>`;
-    } else if (rounded < 0) {
-        return `<span class="negative">${formatNumber(rounded)}</span>`;
+    const formatted = value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (value > 0) {
+        return `<span class="positive">+${formatted}</span>`;
+    } else if (value < 0) {
+        return `<span class="negative">${formatted}</span>`;
     }
-    return formatNumber(rounded);
+    return formatted;
 }
 
-function renderStats(stats, inventory, prices) {
+function renderStats(stats, inventory) {
     document.getElementById('net-worth').textContent = formatNumber(Math.round(inventory?.net_worth_fe || 0));
     document.getElementById('value-per-hour').textContent = formatNumber(Math.round(stats?.value_per_hour || 0));
     document.getElementById('value-per-map').textContent = formatNumber(Math.round(stats?.avg_value_per_run || 0));
     document.getElementById('total-runs').textContent = formatNumber(stats?.total_runs || 0);
-    document.getElementById('prices-count').textContent = formatNumber(prices?.total || 0);
 
     // Calculate and display average run time
     const avgRunTime = (stats?.total_runs > 0 && stats?.total_duration_seconds > 0)
@@ -141,18 +151,22 @@ function renderRuns(data, forceRender = false) {
         return;
     }
 
-    tbody.innerHTML = data.runs.map(run => `
-        <tr>
-            <td class="zone-name" title="${run.zone_signature}">${escapeHtml(run.zone_name)}</td>
-            <td class="duration">${formatDuration(run.duration_seconds)}</td>
-            <td>${formatValue(run.total_value)}</td>
-            <td>
-                <button class="expand-btn" onclick="showRunDetails(${run.id})">
-                    Details
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = data.runs.map(run => {
+        const nightmareClass = run.is_nightmare ? ' nightmare' : '';
+        const consolidatedInfo = run.consolidated_run_ids ? ` (${run.consolidated_run_ids.length} segments)` : '';
+        return `
+            <tr class="${nightmareClass}">
+                <td class="zone-name" title="${run.zone_signature}${consolidatedInfo}">${escapeHtml(run.zone_name)}</td>
+                <td class="duration">${formatDuration(run.duration_seconds)}</td>
+                <td>${formatValue(run.total_value)}</td>
+                <td>
+                    <button class="expand-btn" onclick="showRunDetails(${run.id})">
+                        Details
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function renderInventory(data, forceRender = false) {
@@ -182,7 +196,7 @@ function renderInventory(data, forceRender = false) {
                     </div>
                 </td>
                 <td>${formatNumber(item.quantity)}</td>
-                <td>${item.total_value_fe ? formatNumber(Math.round(item.total_value_fe)) : '--'}</td>
+                <td>${item.total_value_fe ? formatFEValue(item.total_value_fe) : '--'}</td>
             </tr>
         `;
     }).join('');
@@ -200,6 +214,42 @@ function renderStatus(status) {
         collectorStatus.textContent = 'Collector: Stopped';
     }
 }
+
+function renderPlayer(player) {
+    const playerInfo = document.getElementById('player-info');
+    const playerName = document.getElementById('player-name');
+    const playerDetails = document.getElementById('player-details');
+
+    if (player) {
+        playerName.textContent = player.name;
+        playerDetails.textContent = player.season_name;
+        playerInfo.classList.remove('hidden');
+    } else {
+        playerInfo.classList.add('hidden');
+    }
+}
+
+// --- No Character Modal ---
+
+let noCharacterModalShown = false;
+
+function showNoCharacterModal() {
+    // Only show once per session
+    if (noCharacterModalShown) return;
+    noCharacterModalShown = true;
+    document.getElementById('no-character-modal').classList.remove('hidden');
+}
+
+function closeNoCharacterModal() {
+    document.getElementById('no-character-modal').classList.add('hidden');
+}
+
+// Close no-character modal on outside click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'no-character-modal') {
+        closeNoCharacterModal();
+    }
+});
 
 // Chart configuration
 const chartOptions = {
@@ -369,7 +419,7 @@ async function showRunDetails(runId) {
                     const iconHtml = getIconHtml(item.config_base_id, 'loot-item-icon');
                     const qtyStr = (item.quantity > 0 ? '+' : '') + formatNumber(item.quantity);
                     const valueStr = item.total_value_fe !== null
-                        ? `= ${formatNumber(Math.round(item.total_value_fe))} FE`
+                        ? `= ${item.total_value_fe.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} FE`
                         : '<span class="no-price">no price</span>';
                     return `
                         <li class="loot-item">
@@ -407,6 +457,24 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeModal();
         closeEditItemModal();
+        closeHelpModal();
+    }
+});
+
+// --- Help Modal ---
+
+function openHelpModal() {
+    document.getElementById('help-modal').classList.remove('hidden');
+}
+
+function closeHelpModal() {
+    document.getElementById('help-modal').classList.add('hidden');
+}
+
+// Close help modal on outside click
+document.getElementById('help-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'help-modal') {
+        closeHelpModal();
     }
 });
 
@@ -550,23 +618,31 @@ async function saveItemName() {
 
 async function refreshAll(forceRender = false) {
     try {
-        const [status, stats, runs, inventory, statsHistory, prices] = await Promise.all([
+        const [status, stats, runs, inventory, statsHistory, player] = await Promise.all([
             fetchStatus(),
             fetchStats(),
             fetchRuns(),
             fetchInventory(),
             fetchStatsHistory(24),
-            fetchPrices()
+            fetchPlayer()
         ]);
 
         lastRunsData = runs;
         lastInventoryData = inventory;
 
         renderStatus(status);
-        renderStats(stats, inventory, prices);
+        renderStats(stats, inventory);
         renderRuns(runs, forceRender);
         renderInventory(inventory, forceRender);
         renderCharts(statsHistory, forceRender);
+
+        // Check if player changed and update display
+        const playerHash = simpleHash(player);
+        if (forceRender || playerHash !== lastPlayerHash) {
+            renderPlayer(player);
+            lastPlayerHash = playerHash;
+        }
+
         updateLastRefresh();
     } catch (error) {
         console.error('Error refreshing data:', error);
@@ -680,9 +756,19 @@ function getIconHtml(configBaseId, cssClass) {
 
 // --- Initialization ---
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Set initial sort indicators
     updateSortIndicators();
+
+    // Fetch player info initially
+    const player = await fetchPlayer();
+    renderPlayer(player);
+    lastPlayerHash = simpleHash(player);
+
+    // Show warning modal if no character detected
+    if (!player) {
+        showNoCharacterModal();
+    }
 
     // Initial load (force render on first load)
     refreshAll(true);

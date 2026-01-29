@@ -33,6 +33,7 @@ class SlotState:
     config_base_id: int
     num: int
     updated_at: datetime = field(default_factory=datetime.now)
+    player_id: Optional[str] = None  # Inventory is per-character
 
     @property
     def key(self) -> SlotKey:
@@ -51,6 +52,8 @@ class ItemDelta:
     proto_name: Optional[str]  # e.g., "PickItems"
     run_id: Optional[int]
     timestamp: datetime = field(default_factory=datetime.now)
+    season_id: Optional[int] = None  # Season/league for data isolation
+    player_id: Optional[str] = None  # Player for data isolation
 
     @property
     def key(self) -> SlotKey:
@@ -67,6 +70,10 @@ class Run:
     end_ts: Optional[datetime] = None
     is_hub: bool = False  # True if this is a hub/town zone
     level_id: Optional[int] = None  # For zone differentiation (same path, different areas)
+    level_type: Optional[int] = None  # 3=normal, 11=nightmare (Twinightmare mechanic)
+    level_uid: Optional[int] = None  # Unique instance ID (for consolidating split runs)
+    season_id: Optional[int] = None  # Season/league for data isolation
+    player_id: Optional[str] = None  # Player for data isolation
 
     @property
     def is_active(self) -> bool:
@@ -100,6 +107,7 @@ class Price:
     price_fe: float  # Value in Flame Elementium
     source: str  # "manual", "import", etc.
     updated_at: datetime = field(default_factory=datetime.now)
+    season_id: Optional[int] = None  # Season/league for price isolation
 
 
 # Parsed event types
@@ -145,5 +153,17 @@ class ParsedLevelIdEvent:
     raw_line: str
 
 
+@dataclass
+class ParsedPlayerDataEvent:
+    """Parsed player data from log (for character detection)."""
+
+    name: Optional[str] = None
+    level: Optional[int] = None
+    season_id: Optional[int] = None
+    hero_id: Optional[int] = None
+    player_id: Optional[str] = None
+    raw_line: str = ""
+
+
 # Type alias for any parsed event
-ParsedEvent = ParsedBagEvent | ParsedContextMarker | ParsedLevelEvent | ParsedLevelIdEvent | None
+ParsedEvent = ParsedBagEvent | ParsedContextMarker | ParsedLevelEvent | ParsedLevelIdEvent | ParsedPlayerDataEvent | None

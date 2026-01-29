@@ -88,6 +88,52 @@ def export_prices(
     )
 
 
+class MigratePricesResponse(PriceListResponse):
+    """Response for migrate prices endpoint."""
+    migrated: int
+
+
+@router.post("/migrate-legacy", response_model=MigratePricesResponse)
+def migrate_legacy_prices(
+    repo: Repository = Depends(get_repository),
+) -> MigratePricesResponse:
+    """
+    Migrate legacy prices (season_id=0) to the current season.
+
+    Use this to recover prices that were saved before multi-season support.
+    """
+    if repo._current_season_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="No season context set. Please ensure a character is detected."
+        )
+
+    # Migrate legacy prices
+    migrated = repo.migrate_legacy_prices(repo._current_season_id)
+
+    # Return updated price list
+    all_prices = repo.get_all_prices()
+    prices = []
+    for price in all_prices:
+        item = repo.get_item(price.config_base_id)
+        prices.append(
+            PriceResponse(
+                config_base_id=price.config_base_id,
+                name=item.name_en if item else f"Unknown {price.config_base_id}",
+                price_fe=price.price_fe,
+                source=price.source,
+                updated_at=price.updated_at,
+            )
+        )
+    prices.sort(key=lambda x: x.name)
+
+    return MigratePricesResponse(
+        prices=prices,
+        total=len(prices),
+        migrated=migrated,
+    )
+
+
 @router.get("/{config_base_id}", response_model=PriceResponse)
 def get_price(
     config_base_id: int,
@@ -124,6 +170,7 @@ def update_price(
         price_fe=request.price_fe,
         source=request.source,
         updated_at=datetime.now(),
+        season_id=repo._current_season_id,  # Tag with current season
     )
     repo.upsert_price(price)
 

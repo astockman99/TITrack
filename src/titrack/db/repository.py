@@ -13,6 +13,7 @@ from titrack.core.models import (
     SlotState,
 )
 from titrack.db.connection import Database
+from titrack.data.inventory import EXCLUDED_PAGES
 
 
 class Repository:
@@ -20,6 +21,14 @@ class Repository:
 
     def __init__(self, db: Database) -> None:
         self.db = db
+        # Current player context for filtering (set externally)
+        self._current_season_id: Optional[int] = None
+        self._current_player_id: Optional[str] = None
+
+    def set_player_context(self, season_id: Optional[int], player_id: Optional[str]) -> None:
+        """Set the current player context for filtering queries."""
+        self._current_season_id = season_id
+        self._current_player_id = player_id
 
     # --- Settings ---
 
@@ -40,13 +49,18 @@ class Repository:
     def insert_run(self, run: Run) -> int:
         """Insert a new run and return its ID."""
         cursor = self.db.execute(
-            "INSERT INTO runs (zone_signature, start_ts, end_ts, is_hub, level_id) VALUES (?, ?, ?, ?, ?)",
+            """INSERT INTO runs (zone_signature, start_ts, end_ts, is_hub, level_id, level_type, level_uid, season_id, player_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 run.zone_signature,
                 run.start_ts.isoformat(),
                 run.end_ts.isoformat() if run.end_ts else None,
                 1 if run.is_hub else 0,
                 run.level_id,
+                run.level_type,
+                run.level_uid,
+                run.season_id,
+                run.player_id,
             ),
         )
         return cursor.lastrowid
@@ -65,20 +79,50 @@ class Repository:
             return None
         return self._row_to_run(row)
 
-    def get_active_run(self) -> Optional[Run]:
-        """Get the currently active (non-ended) run."""
-        row = self.db.fetchone(
-            "SELECT * FROM runs WHERE end_ts IS NULL ORDER BY start_ts DESC LIMIT 1"
-        )
+    def get_active_run(self, season_id: Optional[int] = None, player_id: Optional[str] = None) -> Optional[Run]:
+        """Get the currently active (non-ended) run, optionally filtered by season/player."""
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        if season_id is not None:
+            # Filter: show data where season/player matches OR is NULL (legacy/untagged)
+            # This excludes data explicitly tagged for a DIFFERENT season/player
+            row = self.db.fetchone(
+                """SELECT * FROM runs WHERE end_ts IS NULL
+                   AND (season_id IS NULL OR season_id = ?)
+                   AND (player_id IS NULL OR player_id = ?)
+                   ORDER BY start_ts DESC LIMIT 1""",
+                (season_id, player_id or ''),
+            )
+        else:
+            row = self.db.fetchone(
+                "SELECT * FROM runs WHERE end_ts IS NULL ORDER BY start_ts DESC LIMIT 1"
+            )
         if not row:
             return None
         return self._row_to_run(row)
 
-    def get_recent_runs(self, limit: int = 20) -> list[Run]:
-        """Get recent runs ordered by start time descending."""
-        rows = self.db.fetchall(
-            "SELECT * FROM runs ORDER BY start_ts DESC LIMIT ?", (limit,)
-        )
+    def get_recent_runs(self, limit: int = 20, season_id: Optional[int] = None, player_id: Optional[str] = None) -> list[Run]:
+        """Get recent runs ordered by start time descending, optionally filtered by season/player."""
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        if season_id is not None:
+            # Filter: show data where season/player matches OR is NULL (legacy/untagged)
+            # This excludes data explicitly tagged for a DIFFERENT season/player
+            rows = self.db.fetchall(
+                """SELECT * FROM runs
+                   WHERE (season_id IS NULL OR season_id = ?)
+                   AND (player_id IS NULL OR player_id = ?)
+                   ORDER BY start_ts DESC LIMIT ?""",
+                (season_id, player_id or '', limit),
+            )
+        else:
+            rows = self.db.fetchall(
+                "SELECT * FROM runs ORDER BY start_ts DESC LIMIT ?", (limit,)
+            )
         return [self._row_to_run(row) for row in rows]
 
     def get_max_run_id(self) -> int:
@@ -86,16 +130,35 @@ class Repository:
         row = self.db.fetchone("SELECT MAX(id) as max_id FROM runs")
         return row["max_id"] or 0
 
-    def get_unique_zones(self) -> list[str]:
-        """Get all unique zone signatures from runs."""
-        rows = self.db.fetchall(
-            "SELECT DISTINCT zone_signature FROM runs ORDER BY zone_signature"
-        )
+    def get_unique_zones(self, season_id: Optional[int] = None, player_id: Optional[str] = None) -> list[str]:
+        """Get all unique zone signatures from runs, optionally filtered by season/player."""
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        if season_id is not None:
+            # Filter: show data where season/player matches OR is NULL (legacy/untagged)
+            rows = self.db.fetchall(
+                """SELECT DISTINCT zone_signature FROM runs
+                   WHERE (season_id IS NULL OR season_id = ?)
+                   AND (player_id IS NULL OR player_id = ?)
+                   ORDER BY zone_signature""",
+                (season_id, player_id or ''),
+            )
+        else:
+            rows = self.db.fetchall(
+                "SELECT DISTINCT zone_signature FROM runs ORDER BY zone_signature"
+            )
         return [row["zone_signature"] for row in rows]
 
     def _row_to_run(self, row) -> Run:
-        # Handle level_id which may not exist in older databases
-        level_id = row["level_id"] if "level_id" in row.keys() else None
+        # Handle columns which may not exist in older databases
+        keys = row.keys()
+        level_id = row["level_id"] if "level_id" in keys else None
+        level_type = row["level_type"] if "level_type" in keys else None
+        level_uid = row["level_uid"] if "level_uid" in keys else None
+        season_id = row["season_id"] if "season_id" in keys else None
+        player_id = row["player_id"] if "player_id" in keys else None
         return Run(
             id=row["id"],
             zone_signature=row["zone_signature"],
@@ -103,6 +166,10 @@ class Repository:
             end_ts=datetime.fromisoformat(row["end_ts"]) if row["end_ts"] else None,
             is_hub=bool(row["is_hub"]),
             level_id=level_id,
+            level_type=level_type,
+            level_uid=level_uid,
+            season_id=season_id,
+            player_id=player_id,
         )
 
     # --- Item Deltas ---
@@ -111,8 +178,8 @@ class Repository:
         """Insert an item delta and return its ID."""
         cursor = self.db.execute(
             """INSERT INTO item_deltas
-               (page_id, slot_id, config_base_id, delta, context, proto_name, run_id, timestamp)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+               (page_id, slot_id, config_base_id, delta, context, proto_name, run_id, timestamp, season_id, player_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 delta.page_id,
                 delta.slot_id,
@@ -122,34 +189,67 @@ class Repository:
                 delta.proto_name,
                 delta.run_id,
                 delta.timestamp.isoformat(),
+                delta.season_id,
+                delta.player_id,
             ),
         )
         return cursor.lastrowid
 
-    def get_deltas_for_run(self, run_id: int) -> list[ItemDelta]:
-        """Get all deltas for a run."""
-        rows = self.db.fetchall(
-            "SELECT * FROM item_deltas WHERE run_id = ? ORDER BY timestamp",
-            (run_id,),
-        )
+    def get_deltas_for_run(self, run_id: int, include_excluded: bool = False) -> list[ItemDelta]:
+        """
+        Get all deltas for a run.
+
+        Args:
+            run_id: The run ID to get deltas for.
+            include_excluded: If True, include excluded pages (e.g., Gear).
+                              Default False filters out excluded pages.
+        """
+        if include_excluded or not EXCLUDED_PAGES:
+            rows = self.db.fetchall(
+                "SELECT * FROM item_deltas WHERE run_id = ? ORDER BY timestamp",
+                (run_id,),
+            )
+        else:
+            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            rows = self.db.fetchall(
+                f"SELECT * FROM item_deltas WHERE run_id = ? AND page_id NOT IN ({placeholders}) ORDER BY timestamp",
+                (run_id, *EXCLUDED_PAGES),
+            )
         return [self._row_to_delta(row) for row in rows]
 
-    def get_run_summary(self, run_id: int) -> dict[int, int]:
+    def get_run_summary(self, run_id: int, include_excluded: bool = False) -> dict[int, int]:
         """
         Get aggregated delta per item for a run.
+
+        Args:
+            run_id: The run ID to get summary for.
+            include_excluded: If True, include excluded pages (e.g., Gear).
+                              Default False filters out excluded pages.
 
         Returns:
             Dict mapping config_base_id -> total delta
         """
-        rows = self.db.fetchall(
-            """SELECT config_base_id, SUM(delta) as total_delta
-               FROM item_deltas WHERE run_id = ?
-               GROUP BY config_base_id""",
-            (run_id,),
-        )
+        if include_excluded or not EXCLUDED_PAGES:
+            rows = self.db.fetchall(
+                """SELECT config_base_id, SUM(delta) as total_delta
+                   FROM item_deltas WHERE run_id = ?
+                   GROUP BY config_base_id""",
+                (run_id,),
+            )
+        else:
+            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            rows = self.db.fetchall(
+                f"""SELECT config_base_id, SUM(delta) as total_delta
+                   FROM item_deltas WHERE run_id = ? AND page_id NOT IN ({placeholders})
+                   GROUP BY config_base_id""",
+                (run_id, *EXCLUDED_PAGES),
+            )
         return {row["config_base_id"]: row["total_delta"] for row in rows}
 
     def _row_to_delta(self, row) -> ItemDelta:
+        keys = row.keys()
+        season_id = row["season_id"] if "season_id" in keys else None
+        player_id = row["player_id"] if "player_id" in keys else None
         return ItemDelta(
             page_id=row["page_id"],
             slot_id=row["slot_id"],
@@ -159,17 +259,22 @@ class Repository:
             proto_name=row["proto_name"],
             run_id=row["run_id"],
             timestamp=datetime.fromisoformat(row["timestamp"]),
+            season_id=season_id,
+            player_id=player_id,
         )
 
     # --- Slot State ---
 
     def upsert_slot_state(self, state: SlotState) -> None:
         """Insert or update slot state."""
+        # Use empty string for NULL player_id to match PK constraint
+        player_id = state.player_id if state.player_id else ""
         self.db.execute(
             """INSERT OR REPLACE INTO slot_state
-               (page_id, slot_id, config_base_id, num, updated_at)
-               VALUES (?, ?, ?, ?, ?)""",
+               (player_id, page_id, slot_id, config_base_id, num, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
             (
+                player_id,
                 state.page_id,
                 state.slot_id,
                 state.config_base_id,
@@ -178,28 +283,87 @@ class Repository:
             ),
         )
 
-    def get_all_slot_states(self) -> list[SlotState]:
-        """Get all slot states."""
-        rows = self.db.fetchall("SELECT * FROM slot_state")
+    def get_all_slot_states(self, include_excluded: bool = False, player_id: Optional[str] = None) -> list[SlotState]:
+        """
+        Get all slot states.
+
+        Args:
+            include_excluded: If True, include excluded pages (e.g., Gear).
+                              Default False filters out excluded pages.
+            player_id: Filter by player_id. If None, uses current context or returns all.
+        """
+        # Use provided value or fall back to context
+        player_id = player_id if player_id is not None else self._current_player_id
+        player_id_filter = player_id if player_id else ""
+
+        if include_excluded or not EXCLUDED_PAGES:
+            if player_id is not None:
+                rows = self.db.fetchall(
+                    "SELECT * FROM slot_state WHERE player_id = ?",
+                    (player_id_filter,),
+                )
+            else:
+                rows = self.db.fetchall("SELECT * FROM slot_state")
+        else:
+            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            if player_id is not None:
+                rows = self.db.fetchall(
+                    f"SELECT * FROM slot_state WHERE player_id = ? AND page_id NOT IN ({placeholders})",
+                    (player_id_filter, *EXCLUDED_PAGES),
+                )
+            else:
+                rows = self.db.fetchall(
+                    f"SELECT * FROM slot_state WHERE page_id NOT IN ({placeholders})",
+                    tuple(EXCLUDED_PAGES),
+                )
         return [self._row_to_slot_state(row) for row in rows]
 
-    def get_slot_state(self, page_id: int, slot_id: int) -> Optional[SlotState]:
+    def get_slot_state(self, page_id: int, slot_id: int, player_id: Optional[str] = None) -> Optional[SlotState]:
         """Get state for a specific slot."""
+        # Use provided value or fall back to context
+        player_id = player_id if player_id is not None else self._current_player_id
+        player_id_filter = player_id if player_id else ""
+
         row = self.db.fetchone(
-            "SELECT * FROM slot_state WHERE page_id = ? AND slot_id = ?",
-            (page_id, slot_id),
+            "SELECT * FROM slot_state WHERE player_id = ? AND page_id = ? AND slot_id = ?",
+            (player_id_filter, page_id, slot_id),
         )
         if not row:
             return None
         return self._row_to_slot_state(row)
 
+    def clear_page_slot_states(self, page_id: int, player_id: Optional[str] = None) -> int:
+        """
+        Clear all slot states for a specific inventory page and player.
+
+        Used when receiving InitBagData events to ensure stale slots are removed.
+
+        Returns:
+            Number of slots cleared.
+        """
+        # Use provided value or fall back to context
+        player_id = player_id if player_id is not None else self._current_player_id
+        player_id_filter = player_id if player_id else ""
+
+        cursor = self.db.execute(
+            "DELETE FROM slot_state WHERE player_id = ? AND page_id = ?",
+            (player_id_filter, page_id),
+        )
+        return cursor.rowcount
+
     def _row_to_slot_state(self, row) -> SlotState:
+        keys = row.keys()
+        player_id = row["player_id"] if "player_id" in keys else None
+        # Convert empty string back to None
+        if player_id == "":
+            player_id = None
         return SlotState(
             page_id=row["page_id"],
             slot_id=row["slot_id"],
             config_base_id=row["config_base_id"],
             num=row["num"],
             updated_at=datetime.fromisoformat(row["updated_at"]),
+            player_id=player_id,
         )
 
     # --- Items ---
@@ -289,46 +453,69 @@ class Repository:
 
     def upsert_price(self, price: Price) -> None:
         """Insert or update a price entry."""
+        # Use 0 for NULL season_id to match PK constraint
+        season_id = price.season_id if price.season_id is not None else 0
         self.db.execute(
             """INSERT OR REPLACE INTO prices
-               (config_base_id, price_fe, source, updated_at)
-               VALUES (?, ?, ?, ?)""",
+               (config_base_id, season_id, price_fe, source, updated_at)
+               VALUES (?, ?, ?, ?, ?)""",
             (
                 price.config_base_id,
+                season_id,
                 price.price_fe,
                 price.source,
                 price.updated_at.isoformat(),
             ),
         )
 
-    def get_price(self, config_base_id: int) -> Optional[Price]:
-        """Get price for an item."""
+    def get_price(self, config_base_id: int, season_id: Optional[int] = None) -> Optional[Price]:
+        """Get price for an item, filtered by season (no cross-season fallback)."""
+        # Use provided value or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        season_id_filter = season_id if season_id is not None else 0
+
         row = self.db.fetchone(
-            "SELECT * FROM prices WHERE config_base_id = ?", (config_base_id,)
+            "SELECT * FROM prices WHERE config_base_id = ? AND season_id = ?",
+            (config_base_id, season_id_filter),
         )
         if not row:
             return None
         return self._row_to_price(row)
 
-    def get_all_prices(self) -> list[Price]:
-        """Get all prices."""
-        rows = self.db.fetchall("SELECT * FROM prices")
+    def get_all_prices(self, season_id: Optional[int] = None) -> list[Price]:
+        """Get all prices, filtered by season (no cross-season mixing)."""
+        # Use provided value or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        season_id_filter = season_id if season_id is not None else 0
+
+        rows = self.db.fetchall(
+            "SELECT * FROM prices WHERE season_id = ?",
+            (season_id_filter,),
+        )
         return [self._row_to_price(row) for row in rows]
 
-    def get_price_count(self) -> int:
-        """Get total number of prices in database."""
-        row = self.db.fetchone("SELECT COUNT(*) as cnt FROM prices")
+    def get_price_count(self, season_id: Optional[int] = None) -> int:
+        """Get total number of prices in database, filtered by season."""
+        # Use provided value or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        season_id_filter = season_id if season_id is not None else 0
+
+        row = self.db.fetchone(
+            "SELECT COUNT(*) as cnt FROM prices WHERE season_id = ?",
+            (season_id_filter,),
+        )
         return row["cnt"] if row else 0
 
     def upsert_prices_batch(self, prices: list[Price]) -> None:
         """Insert or update multiple prices."""
         self.db.executemany(
             """INSERT OR REPLACE INTO prices
-               (config_base_id, price_fe, source, updated_at)
-               VALUES (?, ?, ?, ?)""",
+               (config_base_id, season_id, price_fe, source, updated_at)
+               VALUES (?, ?, ?, ?, ?)""",
             [
                 (
                     price.config_base_id,
+                    price.season_id if price.season_id is not None else 0,
                     price.price_fe,
                     price.source,
                     price.updated_at.isoformat(),
@@ -337,12 +524,41 @@ class Repository:
             ],
         )
 
+    def migrate_legacy_prices(self, target_season_id: int) -> int:
+        """
+        Migrate legacy prices (season_id=0) to a specific season.
+
+        Args:
+            target_season_id: The season to assign legacy prices to.
+
+        Returns:
+            Number of prices migrated.
+        """
+        # Count legacy prices first
+        row = self.db.fetchone("SELECT COUNT(*) as cnt FROM prices WHERE season_id = 0")
+        count = row["cnt"] if row else 0
+
+        if count > 0:
+            # Update legacy prices to target season
+            self.db.execute(
+                "UPDATE prices SET season_id = ? WHERE season_id = 0",
+                (target_season_id,),
+            )
+
+        return count
+
     def _row_to_price(self, row) -> Price:
+        keys = row.keys()
+        season_id = row["season_id"] if "season_id" in keys else None
+        # Convert 0 back to None (legacy/unknown)
+        if season_id == 0:
+            season_id = None
         return Price(
             config_base_id=row["config_base_id"],
             price_fe=row["price_fe"],
             source=row["source"],
             updated_at=datetime.fromisoformat(row["updated_at"]),
+            season_id=season_id,
         )
 
     def get_run_value(self, run_id: int) -> tuple[int, float]:
