@@ -30,6 +30,10 @@ dependencies = [
     "uvicorn[standard]>=0.27.0",
 ]
 
+[project.optional-dependencies.cloud]
+# Cloud sync support (optional - install with: pip install titrack[cloud])
+supabase = ["supabase>=2.0.0"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",

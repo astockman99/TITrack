@@ -18,6 +18,7 @@ from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
 from titrack.parser.player_parser import get_enter_log_path, get_effective_player_id, parse_enter_log, PlayerInfo
+from titrack.sync.manager import SyncManager
 
 
 def print_delta(delta: ItemDelta, repo: Repository) -> None:
@@ -367,6 +368,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     collector_thread = None
     collector_db = None
     player_info = None
+    sync_manager = None
 
     # Start collector in background if log file is available
     if settings.log_path and settings.log_path.exists():
@@ -384,6 +386,12 @@ def cmd_serve(args: argparse.Namespace) -> int:
         collector_db.connect()
 
         collector_repo = Repository(collector_db)
+
+        # Initialize sync manager (uses collector's DB connection)
+        sync_manager = SyncManager(collector_db)
+        if player_info:
+            sync_manager.set_season_context(player_info.season_id)
+        sync_manager.initialize()
 
         def on_price_update(price):
             item_name = collector_repo.get_item_name(price.config_base_id)
@@ -407,6 +415,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
             on_price_update=on_price_update,
             on_player_change=on_player_change,
             player_info=player_info,
+            sync_manager=sync_manager,
         )
         collector.initialize()
 
@@ -435,6 +444,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         collector_running=collector is not None,
         collector=collector,
         player_info=player_info,
+        sync_manager=sync_manager,
     )
 
     # Set up player change callback to update app state
@@ -448,6 +458,9 @@ def cmd_serve(args: argparse.Namespace) -> int:
                     new_player_info.season_id,
                     effective_id
                 )
+            # Update sync manager season context
+            if hasattr(app.state, 'sync_manager') and app.state.sync_manager:
+                app.state.sync_manager.set_season_context(new_player_info.season_id)
         player_change_callback[0] = update_app_player
 
     # Set up graceful shutdown
@@ -476,6 +489,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
         log_level="warning",
     )
 
+    if sync_manager:
+        sync_manager.stop_background_sync()
     if collector:
         collector.stop()
     if collector_db:

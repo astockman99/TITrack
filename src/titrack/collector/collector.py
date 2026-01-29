@@ -50,6 +50,7 @@ class Collector:
         on_price_update: Optional[Callable[[Price], None]] = None,
         on_player_change: Optional[Callable[[PlayerInfo], None]] = None,
         player_info: Optional[PlayerInfo] = None,
+        sync_manager: Optional[object] = None,
     ) -> None:
         """
         Initialize collector.
@@ -76,6 +77,7 @@ class Collector:
         self._on_run_end = on_run_end
         self._on_price_update = on_price_update
         self._on_player_change = on_player_change
+        self._sync_manager = sync_manager
 
         # Player context for data isolation
         self._player_info = player_info
@@ -111,6 +113,15 @@ class Collector:
         self._init_batch_threshold_seconds = 2.0  # New batch if > 2 seconds gap
 
         self._running = False
+
+    def set_sync_manager(self, sync_manager: Optional[object]) -> None:
+        """
+        Set the sync manager for cloud price submissions.
+
+        Args:
+            sync_manager: SyncManager instance or None to disable
+        """
+        self._sync_manager = sync_manager
 
     def initialize(self) -> None:
         """
@@ -456,6 +467,18 @@ class Collector:
             # Notify callback
             if self._on_price_update:
                 self._on_price_update(price)
+
+            # Queue for cloud sync (only exchange-sourced prices)
+            if self._sync_manager is not None:
+                try:
+                    self._sync_manager.queue_price_submission(
+                        config_base_id=config_base_id,
+                        season_id=self._season_id or 0,
+                        price_fe=ref_price,
+                        prices_array=event.prices_fe,
+                    )
+                except Exception as e:
+                    print(f"Cloud sync: Failed to queue price: {e}")
 
     def process_file(self, from_beginning: bool = False) -> int:
         """

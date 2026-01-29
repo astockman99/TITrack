@@ -819,3 +819,151 @@ tr.nightmare .zone-name {
 .dismiss-btn:hover {
     background: var(--accent-secondary);
 }
+
+/* Cloud Sync Styles */
+.cloud-sync-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 15px;
+    border-right: 1px solid var(--border);
+    margin-right: 5px;
+}
+
+.cloud-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cloud-status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: background 0.3s;
+}
+
+.cloud-status-indicator.connected {
+    background: var(--positive);
+}
+
+.cloud-status-indicator.syncing {
+    background: #ffb74d;
+    animation: pulse 1s infinite;
+}
+
+.cloud-status-indicator.error {
+    background: var(--negative);
+}
+
+.cloud-status-indicator.offline {
+    background: #9e9e9e;
+}
+
+/* Sparkline in inventory table */
+.sparkline-header.hidden {
+    display: none;
+}
+
+.sparkline-cell {
+    width: 60px;
+    height: 24px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.sparkline-cell:hover {
+    opacity: 0.8;
+}
+
+.sparkline {
+    width: 100%;
+    height: 100%;
+}
+
+.sparkline-placeholder {
+    width: 60px;
+    height: 24px;
+    background: var(--bg-card);
+    border-radius: 4px;
+}
+
+/* Wide modal for price history */
+.modal-wide {
+    max-width: 800px;
+}
+
+#price-history-body {
+    padding: 20px;
+}
+
+.price-history-chart-container {
+    height: 300px;
+    margin-bottom: 20px;
+}
+
+.price-history-chart-container canvas {
+    max-height: 300px;
+}
+
+.price-history-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--bg-card);
+    border-radius: 8px;
+}
+
+.price-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.price-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.price-stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.price-history-note {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Cloud price indicator in inventory */
+.cloud-price-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64b5f6;
+    margin-left: 6px;
+    vertical-align: middle;
+    cursor: help;
+}
+
+.cloud-price-indicator:hover::after {
+    content: "Community price";
+    position: absolute;
+    background: var(--bg-card);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    transform: translateY(-100%);
+    margin-top: -5px;
+}

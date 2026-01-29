@@ -15,6 +15,11 @@ const failedIcons = new Set(); // Track icons that failed to load
 // Chart instances
 let cumulativeValueChart = null;
 let valueRateChart = null;
+let priceHistoryChart = null;
+
+// Cloud sync state
+let cloudSyncEnabled = false;
+let cloudPricesCache = {};
 
 // Inventory sorting state
 let inventorySortBy = 'value';
@@ -61,6 +66,52 @@ async function fetchPlayer() {
 
 async function fetchPrices() {
     return fetchJson('/prices');
+}
+
+// --- Cloud Sync API Calls ---
+
+async function fetchCloudStatus() {
+    return fetchJson('/cloud/status');
+}
+
+async function toggleCloudSync(enabled) {
+    try {
+        const response = await fetch(`${API_BASE}/cloud/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled })
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error toggling cloud sync:', error);
+        return null;
+    }
+}
+
+async function triggerCloudSync() {
+    try {
+        const response = await fetch(`${API_BASE}/cloud/sync`, {
+            method: 'POST'
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error triggering cloud sync:', error);
+        return null;
+    }
+}
+
+async function fetchCloudPrices() {
+    return fetchJson('/cloud/prices');
+}
+
+async function fetchCloudPriceHistory(configBaseId) {
+    return fetchJson(`/cloud/prices/${configBaseId}/history`);
 }
 
 function exportPrices() {
@@ -177,9 +228,19 @@ function renderInventory(data, forceRender = false) {
     lastInventoryHash = newHash;
 
     const tbody = document.getElementById('inventory-body');
+    const sparklineHeader = document.getElementById('sparkline-header');
+
+    // Show/hide sparkline column based on cloud sync status
+    if (cloudSyncEnabled && Object.keys(cloudPricesCache).length > 0) {
+        sparklineHeader.classList.remove('hidden');
+    } else {
+        sparklineHeader.classList.add('hidden');
+    }
+
+    const colSpan = cloudSyncEnabled ? 4 : 3;
 
     if (!data || !data.items || data.items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="loading">No items in inventory</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="loading">No items in inventory</td></tr>`;
         return;
     }
 
@@ -187,19 +248,81 @@ function renderInventory(data, forceRender = false) {
         const isFE = item.config_base_id === 100300;
         const iconHtml = getIconHtml(item.config_base_id, 'item-icon');
 
+        // Check if we have cloud price for this item
+        const cloudPrice = cloudPricesCache[item.config_base_id];
+        const hasCloudPrice = cloudPrice && cloudPrice.unique_devices >= 3;
+
+        // Cloud price indicator
+        const cloudIndicator = hasCloudPrice
+            ? `<span class="cloud-price-indicator" title="Community price (${cloudPrice.unique_devices} contributors)"></span>`
+            : '';
+
+        // Sparkline cell (only if cloud sync enabled)
+        const sparklineCell = cloudSyncEnabled
+            ? `<td class="sparkline-cell" onclick="showPriceHistory(${item.config_base_id}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
+                ${hasCloudPrice ? '<canvas class="sparkline" data-config-id="' + item.config_base_id + '"></canvas>' : '<div class="sparkline-placeholder"></div>'}
+               </td>`
+            : '';
+
         return `
             <tr>
                 <td>
                     <div class="item-row">
                         ${iconHtml}
-                        <span class="item-name ${isFE ? 'fe' : ''}">${escapeHtml(item.name)}</span>
+                        <span class="item-name ${isFE ? 'fe' : ''}">${escapeHtml(item.name)}${cloudIndicator}</span>
                     </div>
                 </td>
                 <td>${formatNumber(item.quantity)}</td>
                 <td>${item.total_value_fe ? formatFEValue(item.total_value_fe) : '--'}</td>
+                ${sparklineCell}
             </tr>
         `;
     }).join('');
+
+    // Render sparklines after DOM update
+    if (cloudSyncEnabled) {
+        requestAnimationFrame(() => renderSparklines());
+    }
+}
+
+function renderSparklines() {
+    const sparklines = document.querySelectorAll('.sparkline[data-config-id]');
+    sparklines.forEach(canvas => {
+        const configId = parseInt(canvas.dataset.configId);
+        const cloudPrice = cloudPricesCache[configId];
+        if (!cloudPrice) return;
+
+        // For now, just show a simple indicator based on recent trend
+        // Full sparkline would need history data per item
+        renderSimpleSparkline(canvas, cloudPrice);
+    });
+}
+
+function renderSimpleSparkline(canvas, cloudPrice) {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.offsetWidth || 60;
+    const height = canvas.offsetHeight || 24;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // Simple placeholder visualization
+    // In a full implementation, this would fetch per-item history
+    ctx.strokeStyle = '#4ecca3';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+
+    // Draw a simple line representing the price
+    const midY = height / 2;
+    ctx.moveTo(0, midY);
+    ctx.lineTo(width, midY);
+    ctx.stroke();
+
+    // Draw dot for current price
+    ctx.fillStyle = '#4ecca3';
+    ctx.beginPath();
+    ctx.arc(width - 4, midY, 3, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 function renderStatus(status) {
@@ -226,6 +349,94 @@ function renderPlayer(player) {
         playerInfo.classList.remove('hidden');
     } else {
         playerInfo.classList.add('hidden');
+    }
+}
+
+// --- Cloud Sync UI ---
+
+function renderCloudStatus(status) {
+    const toggle = document.getElementById('cloud-sync-toggle');
+    const indicator = document.getElementById('cloud-sync-status');
+
+    if (!status) {
+        toggle.checked = false;
+        toggle.disabled = true;
+        indicator.className = 'cloud-status-indicator';
+        indicator.title = 'Cloud sync not available';
+        return;
+    }
+
+    // Enable toggle if cloud is available
+    toggle.disabled = !status.cloud_available;
+    toggle.checked = status.enabled;
+    cloudSyncEnabled = status.enabled;
+
+    // Update indicator
+    indicator.className = 'cloud-status-indicator';
+    if (status.status === 'connected') {
+        indicator.classList.add('connected');
+        indicator.title = 'Cloud sync connected';
+    } else if (status.status === 'syncing') {
+        indicator.classList.add('syncing');
+        indicator.title = 'Syncing...';
+    } else if (status.status === 'error') {
+        indicator.classList.add('error');
+        indicator.title = status.last_error || 'Cloud sync error';
+    } else if (status.status === 'offline') {
+        indicator.classList.add('offline');
+        indicator.title = 'Cloud sync offline';
+    } else {
+        indicator.title = 'Cloud sync disabled';
+    }
+
+    // Add queue info to title
+    if (status.queue_pending > 0) {
+        indicator.title += ` (${status.queue_pending} pending)`;
+    }
+}
+
+async function handleCloudSyncToggle(event) {
+    const enabled = event.target.checked;
+    const toggle = event.target;
+
+    // Disable toggle while processing
+    toggle.disabled = true;
+
+    const result = await toggleCloudSync(enabled);
+
+    if (result) {
+        cloudSyncEnabled = result.enabled;
+        toggle.checked = result.enabled;
+
+        if (!result.success && result.error) {
+            alert(`Cloud sync error: ${result.error}`);
+        }
+
+        // Refresh cloud status
+        const status = await fetchCloudStatus();
+        renderCloudStatus(status);
+
+        // Load cloud prices if newly enabled
+        if (result.enabled) {
+            await loadCloudPrices();
+        }
+    } else {
+        // Revert on error
+        toggle.checked = !enabled;
+    }
+
+    toggle.disabled = false;
+}
+
+async function loadCloudPrices() {
+    if (!cloudSyncEnabled) return;
+
+    const data = await fetchCloudPrices();
+    if (data && data.prices) {
+        cloudPricesCache = {};
+        for (const price of data.prices) {
+            cloudPricesCache[price.config_base_id] = price;
+        }
     }
 }
 
@@ -458,6 +669,141 @@ document.addEventListener('keydown', (e) => {
         closeModal();
         closeEditItemModal();
         closeHelpModal();
+        closePriceHistoryModal();
+    }
+});
+
+// --- Price History Modal ---
+
+async function showPriceHistory(configBaseId, itemName) {
+    const modal = document.getElementById('price-history-modal');
+    const title = document.getElementById('price-history-title');
+    const chartCanvas = document.getElementById('price-history-chart');
+
+    title.textContent = `Price History: ${itemName}`;
+
+    // Show loading state
+    document.getElementById('price-stat-median').textContent = '...';
+    document.getElementById('price-stat-p10').textContent = '...';
+    document.getElementById('price-stat-p90').textContent = '...';
+    document.getElementById('price-stat-contributors').textContent = '...';
+
+    modal.classList.remove('hidden');
+
+    // Fetch history data
+    const data = await fetchCloudPriceHistory(configBaseId);
+
+    if (!data || !data.history || data.history.length === 0) {
+        // No history available
+        if (priceHistoryChart) {
+            priceHistoryChart.destroy();
+            priceHistoryChart = null;
+        }
+        document.getElementById('price-stat-median').textContent = 'No data';
+        document.getElementById('price-stat-p10').textContent = '--';
+        document.getElementById('price-stat-p90').textContent = '--';
+        document.getElementById('price-stat-contributors').textContent = '--';
+        return;
+    }
+
+    // Prepare chart data
+    const chartData = data.history.map(h => ({
+        x: new Date(h.hour_bucket),
+        y: h.price_fe_median
+    }));
+
+    const p10Data = data.history.map(h => ({
+        x: new Date(h.hour_bucket),
+        y: h.price_fe_p10 || h.price_fe_median
+    }));
+
+    const p90Data = data.history.map(h => ({
+        x: new Date(h.hour_bucket),
+        y: h.price_fe_p90 || h.price_fe_median
+    }));
+
+    // Update stats from latest point
+    const latest = data.history[data.history.length - 1];
+    document.getElementById('price-stat-median').textContent = formatFEValue(latest.price_fe_median);
+    document.getElementById('price-stat-p10').textContent = latest.price_fe_p10 ? formatFEValue(latest.price_fe_p10) : '--';
+    document.getElementById('price-stat-p90').textContent = latest.price_fe_p90 ? formatFEValue(latest.price_fe_p90) : '--';
+
+    // Get contributors from cloud cache
+    const cloudPrice = cloudPricesCache[configBaseId];
+    document.getElementById('price-stat-contributors').textContent = cloudPrice?.unique_devices || '--';
+
+    // Create or update chart
+    if (priceHistoryChart) {
+        priceHistoryChart.destroy();
+    }
+
+    priceHistoryChart = new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Median',
+                    data: chartData,
+                    borderColor: '#e94560',
+                    backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    pointHoverRadius: 5,
+                },
+                {
+                    label: 'P10 (Low)',
+                    data: p10Data,
+                    borderColor: 'rgba(78, 204, 163, 0.5)',
+                    backgroundColor: 'rgba(78, 204, 163, 0.1)',
+                    fill: '+1',
+                    tension: 0.3,
+                    pointRadius: 0,
+                    borderDash: [5, 5],
+                },
+                {
+                    label: 'P90 (High)',
+                    data: p90Data,
+                    borderColor: 'rgba(255, 107, 107, 0.5)',
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    borderDash: [5, 5],
+                }
+            ],
+        },
+        options: {
+            ...chartOptions,
+            plugins: {
+                ...chartOptions.plugins,
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#a0a0a0',
+                        usePointStyle: true,
+                    }
+                },
+                tooltip: {
+                    ...chartOptions.plugins.tooltip,
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: ${formatFEValue(ctx.parsed.y)} FE`,
+                    },
+                },
+            },
+        },
+    });
+}
+
+function closePriceHistoryModal() {
+    document.getElementById('price-history-modal').classList.add('hidden');
+}
+
+// Close price history modal on outside click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'price-history-modal') {
+        closePriceHistoryModal();
     }
 });
 
@@ -618,13 +964,14 @@ async function saveItemName() {
 
 async function refreshAll(forceRender = false) {
     try {
-        const [status, stats, runs, inventory, statsHistory, player] = await Promise.all([
+        const [status, stats, runs, inventory, statsHistory, player, cloudStatus] = await Promise.all([
             fetchStatus(),
             fetchStats(),
             fetchRuns(),
             fetchInventory(),
             fetchStatsHistory(24),
-            fetchPlayer()
+            fetchPlayer(),
+            fetchCloudStatus()
         ]);
 
         lastRunsData = runs;
@@ -632,7 +979,14 @@ async function refreshAll(forceRender = false) {
 
         renderStatus(status);
         renderStats(stats, inventory);
+        renderCloudStatus(cloudStatus);
         renderRuns(runs, forceRender);
+
+        // Load cloud prices if sync is enabled
+        if (cloudStatus && cloudStatus.enabled && Object.keys(cloudPricesCache).length === 0) {
+            await loadCloudPrices();
+        }
+
         renderInventory(inventory, forceRender);
         renderCharts(statsHistory, forceRender);
 
@@ -768,6 +1122,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show warning modal if no character detected
     if (!player) {
         showNoCharacterModal();
+    }
+
+    // Set up cloud sync toggle
+    const cloudSyncToggle = document.getElementById('cloud-sync-toggle');
+    cloudSyncToggle.addEventListener('change', handleCloudSyncToggle);
+
+    // Initial cloud status check
+    const cloudStatus = await fetchCloudStatus();
+    renderCloudStatus(cloudStatus);
+
+    // Load cloud prices if already enabled
+    if (cloudStatus && cloudStatus.enabled) {
+        await loadCloudPrices();
     }
 
     // Initial load (force render on first load)

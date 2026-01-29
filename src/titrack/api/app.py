@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from titrack.api.routes import icons, inventory, items, prices, runs, stats
+from titrack.api.routes import cloud, icons, inventory, items, prices, runs, settings, stats
 from titrack.api.schemas import PlayerResponse, StatusResponse
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
@@ -20,6 +20,7 @@ def create_app(
     collector_running: bool = False,
     collector: Optional[object] = None,
     player_info: Optional[PlayerInfo] = None,
+    sync_manager: Optional[object] = None,
 ) -> FastAPI:
     """
     Create and configure the FastAPI application.
@@ -65,6 +66,8 @@ def create_app(
     app.dependency_overrides[prices.get_repository] = get_repository
     app.dependency_overrides[stats.get_repository] = get_repository
     app.dependency_overrides[icons.get_repository] = get_repository
+    app.dependency_overrides[settings.get_repository] = get_repository
+    app.dependency_overrides[cloud.get_repository] = get_repository
 
     # Include routers
     app.include_router(runs.router)
@@ -73,6 +76,8 @@ def create_app(
     app.include_router(prices.router)
     app.include_router(stats.router)
     app.include_router(icons.router)
+    app.include_router(settings.router)
+    app.include_router(cloud.router)
 
     # Store state for status endpoint and reset functionality
     app.state.db = db
@@ -81,6 +86,7 @@ def create_app(
     app.state.collector = collector
     app.state.repo = repo
     app.state.player_info = player_info
+    app.state.sync_manager = sync_manager
 
     @app.get("/api/status", response_model=StatusResponse, tags=["status"])
     def get_status() -> StatusResponse:

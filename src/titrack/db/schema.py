@@ -1,6 +1,6 @@
 """Database schema - DDL statements for SQLite."""
 
-SCHEMA_VERSION = 2  # Bumped for season_id/player_id support
+SCHEMA_VERSION = 3  # Bumped for cloud sync support
 
 # Settings table - key/value configuration
 CREATE_SETTINGS = """
@@ -106,6 +106,51 @@ CREATE TABLE IF NOT EXISTS log_position (
 )
 """
 
+# Cloud sync queue - prices waiting to upload
+CREATE_CLOUD_SYNC_QUEUE = """
+CREATE TABLE IF NOT EXISTS cloud_sync_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    config_base_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    price_fe REAL NOT NULL,
+    prices_array TEXT NOT NULL,
+    queued_at TEXT NOT NULL DEFAULT (datetime('now')),
+    attempts INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'pending'
+)
+"""
+
+# Cloud price cache - downloaded aggregated prices
+CREATE_CLOUD_PRICE_CACHE = """
+CREATE TABLE IF NOT EXISTS cloud_price_cache (
+    config_base_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    price_fe_median REAL NOT NULL,
+    price_fe_p10 REAL,
+    price_fe_p90 REAL,
+    submission_count INTEGER,
+    unique_devices INTEGER,
+    cloud_updated_at TEXT,
+    cached_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (config_base_id, season_id)
+)
+"""
+
+# Cloud price history - for sparklines (72h cached locally)
+CREATE_CLOUD_PRICE_HISTORY = """
+CREATE TABLE IF NOT EXISTS cloud_price_history (
+    config_base_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    hour_bucket TEXT NOT NULL,
+    price_fe_median REAL NOT NULL,
+    price_fe_p10 REAL,
+    price_fe_p90 REAL,
+    submission_count INTEGER,
+    cached_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (config_base_id, season_id, hour_bucket)
+)
+"""
+
 ALL_CREATE_STATEMENTS = [
     CREATE_SETTINGS,
     CREATE_RUNS,
@@ -117,4 +162,7 @@ ALL_CREATE_STATEMENTS = [
     CREATE_ITEMS,
     CREATE_PRICES,
     CREATE_LOG_POSITION,
+    CREATE_CLOUD_SYNC_QUEUE,
+    CREATE_CLOUD_PRICE_CACHE,
+    CREATE_CLOUD_PRICE_HISTORY,
 ]

@@ -41,6 +41,13 @@
                 </div>
             </div>
             <div class="header-controls">
+                <div class="cloud-sync-control">
+                    <label class="toggle cloud-toggle">
+                        <input type="checkbox" id="cloud-sync-toggle">
+                        <span>Cloud Sync</span>
+                    </label>
+                    <span id="cloud-sync-status" class="cloud-status-indicator" title="Cloud sync status"></span>
+                </div>
                 <button class="help-btn" onclick="openHelpModal()">Instructions</button>
                 <button class="export-btn" onclick="exportPrices()">Export Prices</button>
                 <button class="edit-items-btn" onclick="openEditItemModal()">Edit Items</button>
@@ -94,10 +101,11 @@
                             <th class="sortable active" data-sort="value" onclick="sortInventory('value')">
                                 Value <span class="sort-indicator" id="sort-value"></span>
                             </th>
+                            <th id="sparkline-header" class="sparkline-header hidden" title="Price trend (72h)">Trend</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
-                        <tr><td colspan="3" class="loading">Loading...</td></tr>
+                        <tr><td colspan="4" class="loading">Loading...</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -233,6 +241,39 @@
                 <div class="modal-actions">
                     <button onclick="closeNoCharacterModal()" class="dismiss-btn">Dismiss</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="price-history-modal" class="modal hidden">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3 id="price-history-title">Price History</h3>
+                <button class="close-btn" onclick="closePriceHistoryModal()">&times;</button>
+            </div>
+            <div id="price-history-body">
+                <div class="price-history-chart-container">
+                    <canvas id="price-history-chart"></canvas>
+                </div>
+                <div class="price-history-stats">
+                    <div class="price-stat">
+                        <span class="price-stat-label">Current (Median)</span>
+                        <span id="price-stat-median" class="price-stat-value">--</span>
+                    </div>
+                    <div class="price-stat">
+                        <span class="price-stat-label">Low (P10)</span>
+                        <span id="price-stat-p10" class="price-stat-value">--</span>
+                    </div>
+                    <div class="price-stat">
+                        <span class="price-stat-label">High (P90)</span>
+                        <span id="price-stat-p90" class="price-stat-value">--</span>
+                    </div>
+                    <div class="price-stat">
+                        <span class="price-stat-label">Contributors</span>
+                        <span id="price-stat-contributors" class="price-stat-value">--</span>
+                    </div>
+                </div>
+                <p class="price-history-note">Prices are aggregated from anonymous community submissions. Minimum 3 unique contributors required.</p>
             </div>
         </div>
     </div>

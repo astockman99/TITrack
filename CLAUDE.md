@@ -252,6 +252,66 @@ The Gear tab is excluded because gear prices are too dependent on specific affix
 
 To modify which tabs are tracked, edit `EXCLUDED_PAGES` in `src/titrack/data/inventory.py`.
 
+## Cloud Sync (Crowd-Sourced Pricing)
+
+TITrack supports opt-in cloud sync to share and receive community pricing data.
+
+### Features
+
+- **Anonymous**: Uses device-based UUIDs, no user accounts required
+- **Opt-in**: Disabled by default, toggle in the UI header
+- **Offline-capable**: Works fully offline, syncs when connected
+- **Anti-poisoning**: Uses median aggregation with minimum 3 unique contributors
+
+### How It Works
+
+1. When you search an item in the in-game Exchange, TITrack captures the prices
+2. If cloud sync is enabled, the price data is queued for upload
+3. Background threads upload your submissions and download community prices
+4. Community prices show as sparklines in the inventory table
+
+### API Endpoints
+
+- `GET /api/cloud/status` - Sync status, queue counts, last sync times
+- `POST /api/cloud/toggle` - Enable/disable cloud sync
+- `POST /api/cloud/sync` - Manual sync trigger
+- `GET /api/cloud/prices` - Cached community prices
+- `GET /api/cloud/prices/{id}/history` - Price history for sparklines
+
+### Settings API
+
+- `GET /api/settings/{key}` - Get setting (whitelisted keys only)
+- `PUT /api/settings/{key}` - Update setting
+
+### Database Tables (Cloud Sync)
+
+- `cloud_sync_queue` - Prices waiting to upload
+- `cloud_price_cache` - Downloaded community prices
+- `cloud_price_history` - Hourly price snapshots for sparklines
+
+### Settings Keys
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `cloud_sync_enabled` | `"false"` | Master toggle |
+| `cloud_device_id` | (generated) | Anonymous device UUID |
+| `cloud_upload_enabled` | `"true"` | Upload prices to cloud |
+| `cloud_download_enabled` | `"true"` | Download prices from cloud |
+
+### Supabase Backend (Not Configured)
+
+Cloud sync requires a Supabase backend. The backend is NOT configured by default. To enable:
+
+1. Create a Supabase project
+2. Run the SQL migrations to create tables and functions
+3. Set environment variables:
+   - `TITRACK_SUPABASE_URL` - Your project URL
+   - `TITRACK_SUPABASE_KEY` - Your anon key
+4. Or update the defaults in `src/titrack/sync/client.py`
+
+Install the Supabase SDK: `pip install titrack[cloud]`
+
 ## Known Limitations / TODO
 
 - **Timemark level not tracked**: The game log zone paths are identical regardless of Timemark level (e.g., 7-0 vs 8-0). Runs of the same zone are grouped together. To support per-Timemark tracking, would need to find another log line that indicates the Timemark level (possibly when selecting beacon or starting map) or add manual run tagging in the UI.
+- **Cloud sync backend not configured**: The Supabase backend URLs/keys need to be configured before cloud sync will work.
