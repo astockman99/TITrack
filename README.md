@@ -4,12 +4,13 @@ A privacy-focused, fully local Windows desktop application that tracks loot from
 
 Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
-## Current Status: Phase 2 Complete ✓
+## Current Status: Phase 2.5 Complete ✓
 
 | Phase | Status | Description |
 |-------|--------|-------------|
 | Phase 1 | ✓ Complete | Log parsing, delta tracking, run segmentation, CLI |
 | Phase 2 | ✓ Complete | Web UI, REST API, charts, exchange price learning |
+| Phase 2.5 | ✓ Complete | Cloud sync for crowd-sourced pricing (opt-in) |
 | Phase 3 | Planned | Manual price editing UI, import/export |
 | Phase 4 | Planned | PyInstaller portable EXE packaging |
 
@@ -28,6 +29,14 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
   - Parses `XchgSearchPrice` messages from game logs
   - Calculates reference price (10th percentile of listings)
   - Updates inventory valuations and run values automatically
+
+- **Cloud Sync** (Optional):
+  - Share and receive community pricing data anonymously
+  - Toggle on/off in the dashboard header
+  - Background sync: uploads every 60s, downloads every 5min
+  - Anti-poisoning: median aggregation requiring 3+ contributors
+  - Works offline with local caching
+  - Only Exchange prices are shared (never manual edits)
 
 - **Value Calculations**:
   - Run value = FE gained + (item quantity × item price) for all priced items
@@ -134,6 +143,11 @@ python -m titrack show-state
 | `GET /api/prices` | Learned prices |
 | `PUT /api/prices/{id}` | Update a price |
 | `GET /api/stats/history` | Time-series data for charts |
+| `GET /api/cloud/status` | Cloud sync status |
+| `POST /api/cloud/toggle` | Enable/disable cloud sync |
+| `POST /api/cloud/sync` | Trigger manual sync |
+| `GET /api/cloud/prices` | Cached community prices |
+| `GET /api/cloud/prices/{id}/history` | Price history for sparklines |
 
 ## Project Structure
 
@@ -153,10 +167,15 @@ TITrack/
 │   │   ├── log_parser.py
 │   │   ├── log_tailer.py
 │   │   └── exchange_parser.py  # Price message parsing
+│   ├── sync/                   # Cloud sync module
+│   │   ├── client.py           # Supabase client
+│   │   ├── device.py           # Device UUID management
+│   │   └── manager.py          # Sync orchestration
 │   ├── db/                     # SQLite layer
 │   ├── collector/              # Main collection loop
 │   ├── config/                 # Settings
 │   └── cli/                    # CLI commands
+├── supabase/migrations/        # Supabase schema
 ├── tests/                      # 118 tests
 ├── pyproject.toml
 ├── tlidb_items_seed_en.json    # 1,811 items
@@ -240,11 +259,12 @@ ruff check .
 
 ## Design Principles
 
-1. **Privacy First**: All data stored locally, no network calls
+1. **Privacy First**: All data stored locally by default
 2. **No Cheating**: Only reads log files, no memory hooks
 3. **Passive Price Learning**: Prices learned from your own exchange searches
 4. **Pure Core**: Domain logic has no I/O, easy to test
 5. **Incremental Processing**: Resume from last position, handle log rotation
+6. **Opt-in Cloud**: Cloud sync is optional, anonymous, and transparent
 
 ## License
 

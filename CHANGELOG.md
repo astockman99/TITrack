@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Cloud Sync (Opt-in Crowd-Sourced Pricing)
+- Anonymous device-based identification using UUIDs
+- Background sync threads for uploads (60s) and downloads (5min)
+- Local queue for offline operation with automatic retry
+- Anti-poisoning protection: median aggregation requiring 3+ unique contributors
+- Price history with 72-hour local caching for sparklines
+- Cloud sync toggle in dashboard header with status indicator
+- New `src/titrack/sync/` module:
+  - `device.py` - UUID generation and validation
+  - `client.py` - Supabase client wrapper
+  - `manager.py` - Sync orchestration with background threads
+
+#### New API Endpoints
+- `GET /api/cloud/status` - Sync status, queue counts, last sync times
+- `POST /api/cloud/toggle` - Enable/disable cloud sync
+- `POST /api/cloud/sync` - Trigger manual sync
+- `GET /api/cloud/prices` - Cached community prices
+- `GET /api/cloud/prices/{id}/history` - Price history for sparklines
+- `GET /api/settings/{key}` - Read whitelisted settings
+- `PUT /api/settings/{key}` - Update whitelisted settings
+
+#### New Database Tables
+- `cloud_sync_queue` - Prices waiting to upload
+- `cloud_price_cache` - Downloaded community prices
+- `cloud_price_history` - Hourly price snapshots for sparklines
+
+#### Dashboard Updates
+- Cloud Sync toggle with connection status indicator
+- Instructions modal updated with Cloud Sync documentation
+- Sparkline column in inventory (when cloud sync enabled)
+- Price history modal with charts
+
+#### Supabase Backend
+- `supabase/migrations/001_initial_schema.sql` with:
+  - Tables: `device_registry`, `price_submissions`, `aggregated_prices`, `price_history`
+  - RPC function: `submit_price()` with rate limiting (100/device/hour)
+  - Scheduled functions: `aggregate_prices()`, `snapshot_price_history()`, `cleanup_old_submissions()`
+  - Row-level security policies for public read access
+
+### Changed
+- Collector now accepts optional `sync_manager` parameter
+- Database schema version bumped to 3
+- Added `supabase` as optional dependency (`pip install titrack[cloud]`)
+
 ### Planned
 - Phase 3: Manual price editing UI, import/export
 - Phase 4: PyInstaller portable EXE packaging
