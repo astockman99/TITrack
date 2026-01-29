@@ -374,12 +374,10 @@ def cmd_serve(args: argparse.Namespace) -> int:
     if settings.log_path and settings.log_path.exists():
         print(f"Log file: {settings.log_path}")
 
-        # Parse player info from enter log
-        player_info = parse_enter_log(get_enter_log_path(settings.log_path))
-        if player_info:
-            print(f"Player: {player_info.name} ({player_info.season_name})")
-        else:
-            print("Warning: Could not detect player info")
+        # Don't parse player info on startup - wait for live log detection
+        # This prevents showing stale data from a previously logged-in character
+        player_info = None
+        print("Waiting for character login...")
 
         # Collector gets its own database connection
         collector_db = Database(settings.db_path)
@@ -388,9 +386,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
         collector_repo = Repository(collector_db)
 
         # Initialize sync manager (uses collector's DB connection)
+        # Don't set season context yet - wait for player detection from live log
         sync_manager = SyncManager(collector_db)
-        if player_info:
-            sync_manager.set_season_context(player_info.season_id)
         sync_manager.initialize()
 
         def on_price_update(price):

@@ -133,6 +133,7 @@ class StatusResponse(BaseModel):
     log_path: Optional[str] = None
     item_count: int
     run_count: int
+    awaiting_player: bool = False
 
 
 class PlayerResponse(BaseModel):

@@ -42,7 +42,7 @@ Five main components:
 
 1. **Collector (Log Tailer + Parser)** - Watches TI log file, parses events, computes item deltas
 2. **Local Database (SQLite)** - Stores runs, deltas, slot state, prices, settings
-3. **Price Engine** - Maps ConfigBaseId to price_fe, supports manual edits and import/export
+3. **Price Engine** - Maps ConfigBaseId to price_fe, learns prices from Exchange searches
 4. **Local Web UI** - FastAPI serves REST API + static files, opens in browser
 5. **Packaged App** - PyInstaller EXE that starts all services
 
@@ -118,7 +118,7 @@ Seeds the `items` table on first run.
 3. Compute deltas, store in DB
 4. Segment runs (EnterLevel-based boundaries)
 5. Display FE gained per run, profit/hr
-6. Editable price list with import/export
+6. Automatic price learning from Exchange searches
 7. Net worth from latest inventory
 8. Packaged portable EXE
 
@@ -162,7 +162,7 @@ Seeds the `items` table on first run.
 - **Charts**: Cumulative Value, Value/Hour (rolling)
 - **Recent Runs**: Zone, duration, value with details modal
 - **Current Inventory**: Sortable by quantity or value
-- **Controls**: Reset Stats, Edit Items, Export Prices, Auto-refresh toggle
+- **Controls**: Reset Stats, Cloud Sync toggle, Auto-refresh toggle
 
 ## Zone Translation
 
@@ -172,7 +172,7 @@ Zone names are mapped in `src/titrack/data/zones.py`. The `ZONE_NAMES` dictionar
 
 Prices can be seeded on init: `titrack init --seed items.json --prices-seed prices.json`
 
-Export current prices via the UI "Export Prices" button or `GET /api/prices/export`.
+Export current prices via `GET /api/prices/export`.
 
 ## Zone Differentiation
 
@@ -211,7 +211,11 @@ The dashboard displays the character name and season name in the header.
 
 ### Automatic Character Detection
 
-When you switch characters in-game, TITrack automatically detects the change by monitoring player data lines in the log stream:
+TITrack detects characters by monitoring player data lines in the **live** log stream. On startup, the app shows "Waiting for character login..." until a character is detected.
+
+**Important**: You must log in (or relog) your character **after** starting TITrack for it to detect your character. Historical player data from before TITrack started is not read.
+
+When you switch characters in-game, TITrack automatically detects the change:
 
 1. Player data lines (`+player+Name`, `+player+SeasonId`, etc.) are parsed as they appear
 2. When a different character is detected, the collector switches context

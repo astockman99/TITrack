@@ -30,6 +30,10 @@ class Repository:
         self._current_season_id = season_id
         self._current_player_id = player_id
 
+    def has_player_context(self) -> bool:
+        """Return True if a player context has been set."""
+        return self._current_player_id is not None
+
     # --- Settings ---
 
     def get_setting(self, key: str) -> Optional[str]:
@@ -85,6 +89,10 @@ class Repository:
         season_id = season_id if season_id is not None else self._current_season_id
         player_id = player_id if player_id is not None else self._current_player_id
 
+        # Return None if no player context is set (awaiting character login)
+        if self._current_player_id is None and player_id is None:
+            return None
+
         if season_id is not None:
             # Filter: show data where season/player matches OR is NULL (legacy/untagged)
             # This excludes data explicitly tagged for a DIFFERENT season/player
@@ -108,6 +116,10 @@ class Repository:
         # Use provided values or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
         player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return empty list if no player context is set (awaiting character login)
+        if self._current_player_id is None and player_id is None:
+            return []
 
         if season_id is not None:
             # Filter: show data where season/player matches OR is NULL (legacy/untagged)
@@ -135,6 +147,10 @@ class Repository:
         # Use provided values or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
         player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return empty list if no player context is set (awaiting character login)
+        if self._current_player_id is None and player_id is None:
+            return []
 
         if season_id is not None:
             # Filter: show data where season/player matches OR is NULL (legacy/untagged)
@@ -294,6 +310,11 @@ class Repository:
         """
         # Use provided value or fall back to context
         player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return empty list if no player context is set (awaiting character login)
+        if self._current_player_id is None and player_id is None:
+            return []
+
         player_id_filter = player_id if player_id else ""
 
         if include_excluded or not EXCLUDED_PAGES:

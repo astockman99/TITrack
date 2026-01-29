@@ -4,14 +4,13 @@ A privacy-focused, fully local Windows desktop application that tracks loot from
 
 Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
-## Current Status: Phase 2.5 Complete ✓
+## Current Status: Phase 3 Complete ✓
 
 | Phase | Status | Description |
 |-------|--------|-------------|
 | Phase 1 | ✓ Complete | Log parsing, delta tracking, run segmentation, CLI |
 | Phase 2 | ✓ Complete | Web UI, REST API, charts, exchange price learning |
-| Phase 2.5 | ✓ Complete | Cloud sync for crowd-sourced pricing (opt-in) |
-| Phase 3 | Planned | Manual price editing UI, import/export |
+| Phase 3 | ✓ Complete | Cloud sync for crowd-sourced pricing (opt-in) |
 | Phase 4 | Planned | PyInstaller portable EXE packaging |
 
 ### What Works Now
@@ -79,6 +78,8 @@ python -m titrack serve
 python -m titrack serve --port 8080        # Custom port
 python -m titrack serve --no-browser       # Don't open browser
 ```
+
+**Important**: After starting the tracker, you must **log in (or relog) your character** in-game for tracking to begin. The dashboard will show "Waiting for character login..." until a character is detected.
 
 The dashboard shows:
 - **Header Stats**: Total FE, Net Worth, Value/Hour, Runs, Learned Prices

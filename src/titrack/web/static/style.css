@@ -69,6 +69,16 @@ header h1 {
     display: none;
 }
 
+.awaiting-message {
+    color: #f0c674;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.awaiting-message.hidden {
+    display: none;
+}
+
 .player-name {
     color: var(--positive);
     font-weight: 600;
@@ -318,8 +328,6 @@ tbody tr:last-child td {
 }
 
 .reset-btn,
-.edit-items-btn,
-.export-btn,
 .help-btn {
     background: none;
     border: 1px solid var(--border);
@@ -336,24 +344,12 @@ tbody tr:last-child td {
     color: var(--negative);
 }
 
-.edit-items-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.export-btn:hover {
-    border-color: var(--positive);
-    color: var(--positive);
-}
-
 .help-btn:hover {
     border-color: #64b5f6;
     color: #64b5f6;
 }
 
 .reset-btn:disabled,
-.edit-items-btn:disabled,
-.export-btn:disabled,
 .help-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -535,201 +531,6 @@ footer {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
-}
-
-/* Edit Item Modal */
-#edit-item-body {
-    padding: 20px;
-}
-
-.edit-item-search {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.edit-item-search input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: 1rem;
-}
-
-.edit-item-search input:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-.edit-item-search button {
-    padding: 10px 20px;
-    background: var(--accent);
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: opacity 0.2s;
-}
-
-.edit-item-search button:hover {
-    opacity: 0.9;
-}
-
-#item-search-results {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 15px;
-}
-
-.item-search-result {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.item-search-result:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.item-search-result:last-child {
-    border-bottom: none;
-}
-
-.search-result-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    object-fit: contain;
-    background: var(--bg-card);
-}
-
-.search-result-name {
-    flex: 1;
-}
-
-.search-result-id {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.no-results {
-    color: var(--text-secondary);
-    text-align: center;
-    padding: 20px;
-}
-
-#item-edit-form.hidden {
-    display: none;
-}
-
-.edit-item-current {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    background: var(--bg-card);
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
-
-.edit-item-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 4px;
-    object-fit: contain;
-    background: var(--bg-primary);
-}
-
-.edit-item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.edit-item-id {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.edit-item-current-name {
-    font-size: 1.1rem;
-    color: var(--text-primary);
-}
-
-.edit-item-field {
-    margin-bottom: 15px;
-}
-
-.edit-item-field label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.edit-item-field input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: 1rem;
-}
-
-.edit-item-field input:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-.edit-item-actions {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.edit-item-actions .save-btn {
-    padding: 10px 20px;
-    background: var(--positive);
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: opacity 0.2s;
-}
-
-.edit-item-actions .save-btn:hover {
-    opacity: 0.9;
-}
-
-.edit-item-actions .cancel-btn {
-    padding: 10px 20px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-}
-
-.edit-item-actions .cancel-btn:hover {
-    border-color: var(--text-primary);
-    color: var(--text-primary);
-}
-
-.edit-item-note {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-style: italic;
 }
 
 /* Nightmare runs (Twinightmare mechanic) */

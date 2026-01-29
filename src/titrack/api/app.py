@@ -98,6 +98,7 @@ def create_app(
             log_path=str(log_path) if log_path else None,
             item_count=repo.get_item_count(),
             run_count=len(repo.get_recent_runs(limit=10000)),
+            awaiting_player=app.state.player_info is None,
         )
 
     @app.get("/api/player", response_model=Optional[PlayerResponse], tags=["player"])
