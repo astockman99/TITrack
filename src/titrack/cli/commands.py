@@ -533,12 +533,13 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
 
         logger.info(f"Starting server on port {args.port}")
 
-        # Run server
+        # Run server (log_config=None to avoid frozen mode logging issues)
         uvicorn.run(
             app,
             host=args.host,
             port=args.port,
             log_level="warning",
+            log_config=None,
         )
     finally:
         # Ensure proper cleanup of all resources
@@ -725,6 +726,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
             host=args.host,
             port=args.port,
             log_level="warning",
+            log_config=None,  # Disable uvicorn's logging config for frozen mode
         )
         server = Server(config)
 
