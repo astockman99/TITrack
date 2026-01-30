@@ -31,7 +31,9 @@ ZONE_NAMES = {
     "DD_ZaWuJieQu": "Glacial Abyss - Deserted District",
     "SQ_MingShaJuLuo": "Glacial Abyss - Singing Sand",
     "SD_GeBuLinShanZhai": "Glacial Abyss - Shadow Outpost",
-    "GeBuLinCunLuo": "Thunder Wastes - Grove of Calamity",
+    # GeBuLinCunLuo - differentiated by LevelId suffix in AMBIGUOUS_ZONES
+    # Fallback shows generic name when suffix is unknown
+    "GeBuLinCunLuo": "Demiman Village",
     "KD_AiRenKuangDong": "Glacial Abyss - Abandoned Mines",
     "YL_YinYiZhiDi": "Glacial Abyss - Rainforest of Divine Legacy",
     "KD_WeiJiKuangDong": "Glacial Abyss - Swirling Mines",
@@ -101,8 +103,8 @@ AMBIGUOUS_ZONES = {
         55: "Voidlands - Elemental Mine",
     },
     "GeBuLinCunLuo": {  # Demiman Village / Grove of Calamity
-        2: "Glacial Abyss - Demiman Village",
-        # Note: Thunder Wastes variant uses fallback in ZONE_NAMES
+        36: "Glacial Abyss - Demiman Village",
+        # TODO: Find suffix for Thunder Wastes - Grove of Calamity
     },
 }
 

@@ -228,7 +228,7 @@ These are differentiated using `LevelId` from the game logs:
 | Grimwind Woods | 54 | Voidlands |
 | Elemental Mine | 12 | Blistering Lava Sea |
 | Elemental Mine | 55 | Voidlands |
-| Demiman Village | 02 | Glacial Abyss |
+| Demiman Village | 36 | Glacial Abyss |
 
 To add a new ambiguous zone:
 1. Run the zone and check the log for `LevelMgr@ LevelUid, LevelType, LevelId = X Y ZZZZ`
