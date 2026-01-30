@@ -397,11 +397,19 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     # Check if we should use native window mode
     use_window = is_frozen() and not getattr(args, 'no_window', False)
+    browser_mode = False
 
     if use_window:
-        return _serve_with_window(args, settings, logger)
-    else:
-        return _serve_browser_mode(args, settings, logger)
+        # Test if pywebview actually works on this system
+        if _test_webview_available(logger):
+            return _serve_with_window(args, settings, logger)
+        else:
+            logger.warning("Native window mode unavailable, falling back to browser mode...")
+            logger.info("Tip: Install .NET Desktop Runtime or Visual C++ Redistributable if you want native window mode")
+            browser_mode = True
+
+    args.browser_mode = browser_mode
+    return _serve_browser_mode(args, settings, logger)
 
 
 def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) -> int:
@@ -489,6 +497,7 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
             collector=collector,
             player_info=player_info,
             sync_manager=sync_manager,
+            browser_mode=getattr(args, 'browser_mode', False),
         )
 
         # Set up player change callback to update app state
@@ -557,6 +566,21 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
     return 0
 
 
+def _test_webview_available(logger) -> bool:
+    """Test if pywebview can initialize on this system."""
+    try:
+        import webview
+        # Try a minimal initialization to catch pythonnet/CLR issues early
+        # This is where "Failed to resolve Python.Runtime.Loader.Initialize" happens
+        webview.create_window("_test", html="<html></html>", hidden=True)
+        # Destroy immediately - we just wanted to test
+        webview.destroy_window(webview.windows[0])
+        return True
+    except Exception as e:
+        logger.warning(f"pywebview not available: {e}")
+        return False
+
+
 def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> int:
     """Run server with native window using pywebview."""
     try:
@@ -565,6 +589,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
         logger.error("pywebview is required for window mode.")
         logger.error("Falling back to browser mode...")
         args.no_browser = False
+        args.browser_mode = True  # Flag for UI to show Exit button
         return _serve_browser_mode(args, settings, logger)
 
     import uvicorn
@@ -662,7 +687,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
         api_db = Database(settings.db_path)
         api_db.connect()
 
-        # Create FastAPI app
+        # Create FastAPI app (window mode, not browser fallback)
         app = create_app(
             db=api_db,
             log_path=settings.log_path,
@@ -670,6 +695,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
             collector=collector,
             player_info=player_info,
             sync_manager=sync_manager,
+            browser_mode=False,
         )
 
         # Set up player change callback

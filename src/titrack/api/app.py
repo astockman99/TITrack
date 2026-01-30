@@ -23,6 +23,7 @@ def create_app(
     collector: Optional[object] = None,
     player_info: Optional[PlayerInfo] = None,
     sync_manager: Optional[object] = None,
+    browser_mode: bool = False,
 ) -> FastAPI:
     """
     Create and configure the FastAPI application.
@@ -99,6 +100,7 @@ def create_app(
     app.state.repo = repo
     app.state.player_info = player_info
     app.state.sync_manager = sync_manager
+    app.state.browser_mode = browser_mode
 
     @app.get("/api/status", response_model=StatusResponse, tags=["status"])
     def get_status() -> StatusResponse:
@@ -113,6 +115,28 @@ def create_app(
             run_count=len(repo.get_recent_runs(limit=10000)),
             awaiting_player=app.state.player_info is None,
         )
+
+    @app.get("/api/browser-mode", tags=["status"])
+    def get_browser_mode() -> dict:
+        """Check if running in browser fallback mode."""
+        return {"browser_mode": app.state.browser_mode}
+
+    @app.post("/api/shutdown", tags=["status"])
+    def shutdown_app() -> dict:
+        """Shutdown the application (only available in browser mode)."""
+        import os
+        import threading
+
+        if not app.state.browser_mode:
+            return {"success": False, "message": "Shutdown only available in browser mode"}
+
+        def delayed_shutdown():
+            import time
+            time.sleep(0.5)  # Give time for response to be sent
+            os._exit(0)
+
+        threading.Thread(target=delayed_shutdown, daemon=True).start()
+        return {"success": True, "message": "Shutting down..."}
 
     @app.get("/api/player", response_model=Optional[PlayerResponse], tags=["player"])
     def get_player() -> Optional[PlayerResponse]:

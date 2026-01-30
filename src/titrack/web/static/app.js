@@ -1570,11 +1570,55 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// --- Browser Mode / Exit App ---
+
+async function checkBrowserMode() {
+    try {
+        const response = await fetch(`${API_BASE}/browser-mode`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.browser_mode) {
+                // Show Exit button and toast notification
+                document.getElementById('exit-app-btn').classList.remove('hidden');
+                showToast('Running in browser mode (native window unavailable)', 'info');
+            }
+        }
+    } catch (error) {
+        console.error('Error checking browser mode:', error);
+    }
+}
+
+async function exitApp() {
+    if (!confirm('Are you sure you want to exit TITrack?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/shutdown`, { method: 'POST' });
+        if (response.ok) {
+            showToast('Shutting down...', 'info');
+            // Close the browser tab after a short delay
+            setTimeout(() => {
+                window.close();
+                // If window.close() doesn't work (most browsers block it),
+                // show a message
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1a1a2e;color:#eaeaea;font-family:sans-serif;"><h1>TITrack has been shut down. You can close this tab.</h1></div>';
+            }, 500);
+        }
+    } catch (error) {
+        console.error('Error shutting down:', error);
+        showToast('Failed to shut down', 'error');
+    }
+}
+
 // --- Initialization ---
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Set initial sort indicators
     updateSortIndicators();
+
+    // Check if running in browser fallback mode
+    await checkBrowserMode();
 
     // Fetch and display version info
     const versionStatus = await fetchUpdateStatus();

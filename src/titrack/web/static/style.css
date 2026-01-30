@@ -1092,3 +1092,20 @@ tr.nightmare .zone-name {
 .toast-info {
     border-left-color: var(--accent);
 }
+
+/* Exit App Button */
+.exit-btn {
+    background: var(--negative);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-left: 10px;
+    transition: background 0.2s ease;
+}
+
+.exit-btn:hover {
+    background: #ff4757;
+}
