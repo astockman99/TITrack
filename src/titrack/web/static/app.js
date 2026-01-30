@@ -176,6 +176,32 @@ function formatValue(value) {
     return formatted;
 }
 
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove after delay
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 function renderStats(stats, inventory) {
     document.getElementById('net-worth').textContent = formatNumber(Math.round(inventory?.net_worth_fe || 0));
     document.getElementById('value-per-hour').textContent = formatNumber(Math.round(stats?.value_per_hour || 0));
@@ -1414,8 +1440,10 @@ function startUpdateStatusPolling() {
 
             if (status.status === 'available') {
                 showUpdateModal(status);
+            } else if (status.status === 'up_to_date') {
+                showToast(`You're on the latest version (v${status.current_version})`, 'success');
             } else if (status.status === 'error') {
-                alert('Update check failed: ' + (status.error_message || 'Unknown error'));
+                showToast('Update check failed: ' + (status.error_message || 'Unknown error'), 'error');
             }
         }
     }, 1000);

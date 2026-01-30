@@ -1051,3 +1051,44 @@ tr.nightmare .zone-name {
     text-align: center;
     display: block;
 }
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px var(--shadow);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    max-width: 350px;
+    border-left: 4px solid var(--accent);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-success {
+    border-left-color: var(--positive);
+}
+
+.toast-error {
+    border-left-color: var(--negative);
+}
+
+.toast-info {
+    border-left-color: var(--accent);
+}
