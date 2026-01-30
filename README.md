@@ -4,16 +4,48 @@ A privacy-focused, fully local Windows desktop application that tracks loot from
 
 Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
-## Current Status: Phase 3 Complete ✓
+## Quick Start (Download)
+
+**No installation required** - just download, extract, and run.
+
+1. Go to [Releases](https://github.com/astockman99/TITrack/releases/latest)
+2. Download `TITrack-x.x.x-windows.zip`
+3. Extract to any folder (e.g., `C:\TITrack`)
+4. Run `TITrack.exe`
+5. Log in to your character in Torchlight Infinite
+
+The app opens in a native window. Your data is stored in `%LOCALAPPDATA%\TITracker\`.
+
+### First Time Setup
+
+1. **Game Location**: If TI is installed in a non-standard location, TITrack will prompt you to select the game folder
+2. **Character Detection**: Log in (or relog) your character after starting TITrack
+3. **Inventory Sync**: Click the **Sort** button in your bag to capture your full inventory
+4. **Learn Prices**: Search items on the in-game Exchange - prices are captured automatically
+
+### Portable Mode
+
+To keep all data beside the EXE (for USB drives, etc.):
+```
+TITrack.exe --portable
+```
+
+---
+
+## Current Status: Phase 4 Complete ✓
 
 | Phase | Status | Description |
 |-------|--------|-------------|
 | Phase 1 | ✓ Complete | Log parsing, delta tracking, run segmentation, CLI |
 | Phase 2 | ✓ Complete | Web UI, REST API, charts, exchange price learning |
 | Phase 3 | ✓ Complete | Cloud sync for crowd-sourced pricing (opt-in) |
-| Phase 4 | Planned | PyInstaller portable EXE packaging |
+| Phase 4 | ✓ Complete | PyInstaller portable EXE, native window, auto-update |
 
-### What Works Now
+## Features
+
+- **Native Window**: Runs in a standalone window (no browser needed)
+
+- **Auto-Update**: Checks for updates on startup, download and install with one click
 
 - **Web Dashboard** at `http://localhost:8000` with:
   - Real-time stats: Total FE, Net Worth, Value/Hour, Run Count, Prices Learned
@@ -44,7 +76,9 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
 - **CLI Commands**: init, parse-file, tail, show-runs, show-state, serve
 
-## Installation
+## Development Setup
+
+> **Regular users**: See [Quick Start](#quick-start-download) above. This section is for developers only.
 
 ### Prerequisites
 
@@ -56,7 +90,7 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
 ```bash
 # Clone the repository
-git clone <repo-url>
+git clone https://github.com/astockman99/TITrack.git
 cd TITrack
 
 # Install with dependencies
@@ -66,7 +100,16 @@ pip install -e ".[dev]"
 python -m titrack init --seed tlidb_items_seed_en.json
 ```
 
-## Usage
+### Building the EXE
+
+```bash
+pip install pyinstaller
+pyinstaller ti_tracker.spec --noconfirm
+```
+
+The output is in `dist/TITrack/`. Zip this folder for distribution.
+
+## Usage (Development Mode)
 
 ### Start the Web Dashboard
 
@@ -151,6 +194,10 @@ python -m titrack show-state
 | `POST /api/cloud/sync` | Trigger manual sync |
 | `GET /api/cloud/prices` | Cached community prices |
 | `GET /api/cloud/prices/{id}/history` | Price history for sparklines |
+| `GET /api/update/status` | Current version and update status |
+| `POST /api/update/check` | Check for available updates |
+| `POST /api/update/download` | Download available update |
+| `POST /api/update/install` | Install and restart (exits app) |
 
 ## Project Structure
 
@@ -174,6 +221,10 @@ TITrack/
 │   │   ├── client.py           # Supabase client
 │   │   ├── device.py           # Device UUID management
 │   │   └── manager.py          # Sync orchestration
+│   ├── updater/                # Auto-update system
+│   │   ├── github_client.py    # GitHub Releases API
+│   │   ├── manager.py          # Update orchestration
+│   │   └── installer.py        # Download and apply updates
 │   ├── db/                     # SQLite layer
 │   ├── collector/              # Main collection loop
 │   ├── config/                 # Settings
@@ -181,8 +232,7 @@ TITrack/
 ├── supabase/migrations/        # Supabase schema
 ├── tests/                      # 118 tests
 ├── pyproject.toml
-├── tlidb_items_seed_en.json    # 1,811 items
-└── CLAUDE.md
+└── tlidb_items_seed_en.json    # 1,811 items
 ```
 
 ## Architecture
