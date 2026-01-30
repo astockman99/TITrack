@@ -12,7 +12,12 @@ STEAM_PATHS = [
     Path("C:/Program Files/Steam/steamapps/common/Torchlight Infinite"),
     Path("D:/Steam/steamapps/common/Torchlight Infinite"),
     Path("D:/SteamLibrary/steamapps/common/Torchlight Infinite"),
+    Path("E:/Steam/steamapps/common/Torchlight Infinite"),
     Path("E:/SteamLibrary/steamapps/common/Torchlight Infinite"),
+    Path("F:/Steam/steamapps/common/Torchlight Infinite"),
+    Path("F:/SteamLibrary/steamapps/common/Torchlight Infinite"),
+    Path("G:/Steam/steamapps/common/Torchlight Infinite"),
+    Path("G:/SteamLibrary/steamapps/common/Torchlight Infinite"),
 ]
 
 # Relative path to log file within game directory
