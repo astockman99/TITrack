@@ -17,6 +17,8 @@ datas = [
     ('tlidb_items_seed_en.json', '.'),
     # Static web files
     ('src/titrack/web/static', 'titrack/web/static'),
+    # README for users
+    ('src/titrack/data/README.txt', '.'),
 ]
 
 # Hidden imports that PyInstaller might miss
