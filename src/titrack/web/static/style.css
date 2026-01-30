@@ -691,8 +691,8 @@ tr.nightmare .zone-name {
 }
 
 .sparkline {
-    width: 100%;
-    height: 100%;
+    /* Explicit dimensions set via HTML attributes for reliable canvas rendering */
+    display: block;
 }
 
 .sparkline-placeholder {

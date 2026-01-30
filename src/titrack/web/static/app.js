@@ -20,6 +20,8 @@ let priceHistoryChart = null;
 // Cloud sync state
 let cloudSyncEnabled = false;
 let cloudPricesCache = {};
+let sparklineHistoryCache = {}; // Cache for sparkline history data
+let sparklineFetchInProgress = new Set(); // Track in-flight fetches
 
 // Update state
 let updateStatus = null;
@@ -249,17 +251,21 @@ function renderInventory(data, forceRender = false) {
 
         // Check if we have cloud price for this item
         const cloudPrice = cloudPricesCache[item.config_base_id];
-        const hasCloudPrice = cloudPrice && cloudPrice.unique_devices >= 3;
+        // Show cloud indicator only if we have 3+ contributors (community validated)
+        const hasValidatedCloudPrice = cloudPrice && cloudPrice.unique_devices >= 3;
+        // Show sparkline for any cloud price (even single contributor for personal tracking)
+        const hasAnyCloudPrice = !!cloudPrice;
 
-        // Cloud price indicator
-        const cloudIndicator = hasCloudPrice
+        // Cloud price indicator (only for validated prices)
+        const cloudIndicator = hasValidatedCloudPrice
             ? `<span class="cloud-price-indicator" title="Community price (${cloudPrice.unique_devices} contributors)"></span>`
             : '';
 
         // Sparkline cell (only if cloud sync enabled)
+        // Note: Canvas needs explicit width/height attributes (not just CSS) to render correctly
         const sparklineCell = cloudSyncEnabled
             ? `<td class="sparkline-cell" onclick="showPriceHistory(${item.config_base_id}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
-                ${hasCloudPrice ? '<canvas class="sparkline" data-config-id="' + item.config_base_id + '"></canvas>' : '<div class="sparkline-placeholder"></div>'}
+                ${hasAnyCloudPrice ? '<canvas class="sparkline" data-config-id="' + item.config_base_id + '" width="60" height="24"></canvas>' : '<div class="sparkline-placeholder"></div>'}
                </td>`
             : '';
 
@@ -279,8 +285,9 @@ function renderInventory(data, forceRender = false) {
     }).join('');
 
     // Render sparklines after DOM update
+    // Use setTimeout to ensure DOM is fully ready (requestAnimationFrame can fire too early)
     if (cloudSyncEnabled) {
-        requestAnimationFrame(() => renderSparklines());
+        setTimeout(() => renderSparklines(), 50);
     }
 }
 
@@ -291,36 +298,159 @@ function renderSparklines() {
         const cloudPrice = cloudPricesCache[configId];
         if (!cloudPrice) return;
 
-        // For now, just show a simple indicator based on recent trend
-        // Full sparkline would need history data per item
-        renderSimpleSparkline(canvas, cloudPrice);
+        // Check if we have cached history
+        if (sparklineHistoryCache[configId] !== undefined) {
+            // Render with cached data (may be empty array if no history)
+            renderSparklineGraph(canvas, sparklineHistoryCache[configId]);
+        } else if (!sparklineFetchInProgress.has(configId)) {
+            // Show loading state and fetch history
+            renderSparklineLoading(canvas);
+            fetchSparklineHistory(configId);
+        }
     });
 }
 
-function renderSimpleSparkline(canvas, cloudPrice) {
+async function fetchSparklineHistory(configId) {
+    if (sparklineFetchInProgress.has(configId)) return;
+    sparklineFetchInProgress.add(configId);
+
+    try {
+        const response = await fetch(`${API_BASE}/cloud/prices/${configId}/history`);
+        if (response.ok) {
+            const data = await response.json();
+            sparklineHistoryCache[configId] = data.history || [];
+        } else {
+            sparklineHistoryCache[configId] = [];
+        }
+    } catch (error) {
+        console.error(`Failed to fetch sparkline history for ${configId}:`, error);
+        sparklineHistoryCache[configId] = [];
+    } finally {
+        sparklineFetchInProgress.delete(configId);
+        // Re-render this specific sparkline
+        const canvas = document.querySelector(`.sparkline[data-config-id="${configId}"]`);
+        if (canvas) {
+            renderSparklineGraph(canvas, sparklineHistoryCache[configId]);
+        }
+    }
+}
+
+function renderSparklineLoading(canvas) {
     const ctx = canvas.getContext('2d');
-    const width = canvas.offsetWidth || 60;
-    const height = canvas.offsetHeight || 24;
+    const width = canvas.width;
+    const height = canvas.height;
 
-    canvas.width = width;
-    canvas.height = height;
+    ctx.clearRect(0, 0, width, height);
 
-    // Simple placeholder visualization
-    // In a full implementation, this would fetch per-item history
-    ctx.strokeStyle = '#4ecca3';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-
-    // Draw a simple line representing the price
+    // Draw three dots to indicate loading
     const midY = height / 2;
-    ctx.moveTo(0, midY);
-    ctx.lineTo(width, midY);
+    ctx.fillStyle = '#4ecca3';
+    for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(width / 2 - 10 + i * 10, midY, 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function renderSparklineGraph(canvas, history) {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 2;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // If no history or only one point, show a simple indicator
+    if (!history || history.length < 2) {
+        renderSparklinePlaceholder(canvas);
+        return;
+    }
+
+    // Extract price values
+    const prices = history.map(h => h.price_fe_median);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = maxPrice - minPrice;
+
+    // Determine trend (up, down, or flat)
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
+    const trend = lastPrice > firstPrice * 1.01 ? 'up' :
+                  lastPrice < firstPrice * 0.99 ? 'down' : 'flat';
+
+    // Choose color based on trend
+    const colors = {
+        up: '#4ecca3',    // Green
+        down: '#e94560',  // Red
+        flat: '#7f8c8d'   // Gray
+    };
+    const color = colors[trend];
+
+    // Calculate points
+    const points = prices.map((price, i) => {
+        const x = padding + (i / (prices.length - 1)) * (width - padding * 2);
+        // If price range is 0 (all same price), draw flat line in middle
+        const y = priceRange === 0
+            ? height / 2
+            : padding + (1 - (price - minPrice) / priceRange) * (height - padding * 2);
+        return { x, y };
+    });
+
+    // Draw fill gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, color + '40'); // 25% opacity at top
+    gradient.addColorStop(1, color + '00'); // 0% opacity at bottom
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, height);
+    points.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(points[points.length - 1].x, height);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Draw line
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.stroke();
 
-    // Draw dot for current price
-    ctx.fillStyle = '#4ecca3';
+    // Draw end dot
+    const lastPoint = points[points.length - 1];
     ctx.beginPath();
-    ctx.arc(width - 4, midY, 3, 0, Math.PI * 2);
+    ctx.arc(lastPoint.x, lastPoint.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+function renderSparklinePlaceholder(canvas) {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const midY = height / 2;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw a visible dashed line to indicate "no trend data"
+    ctx.strokeStyle = '#7f8c8d';  // More visible gray
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(4, midY);
+    ctx.lineTo(width - 8, midY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw a visible dot at the end
+    ctx.fillStyle = '#7f8c8d';
+    ctx.beginPath();
+    ctx.arc(width - 6, midY, 3, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -448,6 +578,9 @@ async function loadCloudPrices() {
     const data = await fetchCloudPrices();
     if (data && data.prices) {
         cloudPricesCache = {};
+        // Clear sparkline history cache so fresh data is fetched
+        sparklineHistoryCache = {};
+        sparklineFetchInProgress.clear();
         for (const price of data.prices) {
             cloudPricesCache[price.config_base_id] = price;
         }
