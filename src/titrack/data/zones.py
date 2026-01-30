@@ -8,7 +8,7 @@ ZONE_NAMES = {
     "DD_ShengTingZhuangYuan": "Hideout - Sacred Court Manor",
 
     # Voidlands (entries with number suffixes must come before generic ones)
-    # KD_YuanSuKuangDong000 differentiated by LevelId in LEVEL_ID_ZONES
+    # KD_YuanSuKuangDong000 differentiated by LevelId suffix
     "DD_ShengTingZhuangYuan000": "Voidlands - Mundane Palace",
 
     # Blistering Lava Sea
@@ -35,7 +35,9 @@ ZONE_NAMES = {
     "KD_AiRenKuangDong": "Glacial Abyss - Abandoned Mines",
     "YL_YinYiZhiDi": "Glacial Abyss - Rainforest of Divine Legacy",
     "KD_WeiJiKuangDong": "Glacial Abyss - Swirling Mines",
-    # YL_BeiFengLinDi (Grimwind Woods) differentiated by level_id in LEVEL_ID_ZONES
+    # YL_BeiFengLinDi (Grimwind Woods) - differentiated by LevelId suffix
+    # Fallback for when LevelId is not available
+    "YL_BeiFengLinDi": "Grimwind Woods",
     "SD_ZhongXiGaoQiang": "Glacial Abyss - Wall of the Last Breath",
     "SD_GeBuLinYingDi": "Glacial Abyss - Blustery Canyon",
     "YongShuangBingPo": "Glacial Abyss - Throne of Winter",
@@ -85,19 +87,28 @@ ZONE_NAMES = {
     "DiaoLingWangYu": "Voidlands - Dreamless Abyss",
 }
 
-# LevelId-based zone mappings for zones that share the same path across different areas
-# Format: level_id -> zone display name
+# Ambiguous zones that appear in multiple regions with same path
+# These are resolved using the LevelId suffix (last 2 digits)
+# LevelId format: XXYY where XX = Timemark tier, YY = zone identifier
+AMBIGUOUS_ZONES = {
+    # Zone path pattern -> {suffix: "Region - Zone Name"}
+    "YL_BeiFengLinDi": {  # Grimwind Woods
+        6: "Glacial Abyss - Grimwind Woods",
+        54: "Voidlands - Grimwind Woods",
+    },
+    "KD_YuanSuKuangDong000": {  # Elemental Mine (with 000 suffix in path)
+        12: "Blistering Lava Sea - Elemental Mine",
+        55: "Voidlands - Elemental Mine",
+    },
+    "GeBuLinCunLuo": {  # Demiman Village / Grove of Calamity
+        2: "Glacial Abyss - Demiman Village",
+        # Note: Thunder Wastes variant uses fallback in ZONE_NAMES
+    },
+}
+
+# Exact LevelId mappings for special zones (bosses, secret realms, etc.)
+# These don't follow the XXYY pattern
 LEVEL_ID_ZONES = {
-    # Grimwind Woods - same path (YL_BeiFengLinDi201) in different areas
-    4606: "Glacial Abyss - Grimwind Woods",
-    5006: "Glacial Abyss - Grimwind Woods",
-    4654: "Voidlands - Grimwind Woods",
-    5054: "Voidlands - Grimwind Woods",
-    # Elemental Mine - same path (KD_YuanSuKuangDong000) in different areas
-    4612: "Blistering Lava Sea - Elemental Mine",
-    4655: "Voidlands - Elemental Mine",
-    # GeBuLinCunLuo - same path in different areas
-    5002: "Glacial Abyss - Demiman Village",
     # Boss zones (Timemark bosses)
     3016: "Blistering Lava Sea - Hellfire Chasm",
     3006: "Glacial Abyss - Throne of Winter",
@@ -120,9 +131,18 @@ def get_zone_display_name(zone_path: str, level_id: int | None = None) -> str:
     Returns:
         English display name if known, otherwise a cleaned-up version of the path
     """
-    # First, check level_id mapping (for zones with same path in different areas)
+    # First, check exact level_id mapping (for boss zones, secret realms, etc.)
     if level_id is not None and level_id in LEVEL_ID_ZONES:
         return LEVEL_ID_ZONES[level_id]
+
+    # Check if this is an ambiguous zone that needs suffix-based resolution
+    if level_id is not None:
+        for zone_pattern, suffix_map in AMBIGUOUS_ZONES.items():
+            if zone_pattern in zone_path:
+                suffix = level_id % 100
+                if suffix in suffix_map:
+                    return suffix_map[suffix]
+                # Suffix not found - fall through to ZONE_NAMES fallback
 
     # Check each known mapping
     for internal_name, english_name in ZONE_NAMES.items():
