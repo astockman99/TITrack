@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 from titrack.collector.collector import Collector
+from titrack.config.logging import setup_logging, get_logger
 from titrack.config.settings import Settings, find_log_file
 from titrack.core.models import Item, ItemDelta, Price, Run
 from titrack.data.zones import get_zone_display_name
@@ -347,13 +348,24 @@ def cmd_show_runs(args: argparse.Namespace) -> int:
 
 def cmd_serve(args: argparse.Namespace) -> int:
     """Start the web server with optional background collector."""
+    from titrack.config.paths import is_frozen
+    from titrack.version import __version__
+
+    # Set up logging early
+    portable = getattr(args, 'portable', False) or is_frozen()
+    # Show console output only in dev mode or when using --no-window
+    console_output = not is_frozen() or getattr(args, 'no_window', False)
+    logger = setup_logging(portable=portable, console=console_output)
+
+    logger.info(f"TITrack v{__version__} starting...")
+
     # Import here to avoid loading FastAPI when not needed
     try:
         import uvicorn
         from titrack.api.app import create_app
     except ImportError:
-        print("Error: FastAPI and Uvicorn are required for the serve command.")
-        print("Install with: pip install fastapi uvicorn[standard]")
+        logger.error("FastAPI and Uvicorn are required for the serve command.")
+        logger.error("Install with: pip install fastapi uvicorn[standard]")
         return 1
 
     settings = Settings.from_args(
@@ -362,7 +374,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         portable=args.portable,
     )
 
-    print(f"Database: {settings.db_path}")
+    logger.info(f"Database: {settings.db_path}")
 
     # If log file not found via auto-detect, check for saved log_directory setting
     if not settings.log_path or not settings.log_path.exists():
@@ -381,7 +393,21 @@ def cmd_serve(args: argparse.Namespace) -> int:
             found_path = find_log_file(custom_game_dir=saved_log_dir)
             if found_path and found_path.exists():
                 settings.log_path = found_path
-                print(f"Using saved log directory: {saved_log_dir}")
+                logger.info(f"Using saved log directory: {saved_log_dir}")
+
+    # Check if we should use native window mode
+    use_window = is_frozen() and not getattr(args, 'no_window', False)
+
+    if use_window:
+        return _serve_with_window(args, settings, logger)
+    else:
+        return _serve_browser_mode(args, settings, logger)
+
+
+def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) -> int:
+    """Run server in browser mode (original behavior)."""
+    import uvicorn
+    from titrack.api.app import create_app
 
     collector = None
     collector_thread = None
@@ -393,12 +419,12 @@ def cmd_serve(args: argparse.Namespace) -> int:
     try:
         # Start collector in background if log file is available
         if settings.log_path and settings.log_path.exists():
-            print(f"Log file: {settings.log_path}")
+            logger.info(f"Log file: {settings.log_path}")
 
             # Don't parse player info on startup - wait for live log detection
             # This prevents showing stale data from a previously logged-in character
             player_info = None
-            print("Waiting for character login...")
+            logger.info("Waiting for character login...")
 
             # Collector gets its own database connection
             collector_db = Database(settings.db_path)
@@ -413,13 +439,13 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
             def on_price_update(price):
                 item_name = collector_repo.get_item_name(price.config_base_id)
-                print(f"  [Price] {item_name}: {price.price_fe:.6f} FE")
+                logger.info(f"[Price] {item_name}: {price.price_fe:.6f} FE")
 
             # Placeholder for player change callback (set after app is created)
             player_change_callback = [None]  # Use list to allow closure modification
 
             def on_player_change(new_player_info):
-                print(f"  [Player] Switched to: {new_player_info.name} ({new_player_info.season_name})")
+                logger.info(f"[Player] Switched to: {new_player_info.name} ({new_player_info.season_name})")
                 # Update app state if callback is set
                 if player_change_callback[0]:
                     player_change_callback[0](new_player_info)
@@ -441,15 +467,15 @@ def cmd_serve(args: argparse.Namespace) -> int:
                 try:
                     collector.tail(poll_interval=settings.poll_interval)
                 except Exception as e:
-                    print(f"Collector error: {e}")
+                    logger.error(f"Collector error: {e}")
 
             collector_thread = threading.Thread(target=run_collector, daemon=True)
             collector_thread.start()
-            print("Collector started in background")
+            logger.info("Collector started in background")
         else:
-            print("No log file found - collector not started")
+            logger.warning("No log file found - collector not started")
             if settings.log_path:
-                print(f"  Expected: {settings.log_path}")
+                logger.warning(f"Expected: {settings.log_path}")
 
         # API gets its own database connection
         api_db = Database(settings.db_path)
@@ -483,7 +509,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
         # Set up graceful shutdown
         def signal_handler(sig, frame):
-            print("\nShutting down...")
+            logger.info("Shutting down...")
             if collector:
                 collector.stop()
             sys.exit(0)
@@ -493,11 +519,10 @@ def cmd_serve(args: argparse.Namespace) -> int:
         # Open browser unless disabled
         url = f"http://127.0.0.1:{args.port}"
         if not args.no_browser:
-            print(f"Opening browser at {url}")
+            logger.info(f"Opening browser at {url}")
             webbrowser.open(url)
 
-        print(f"Starting server on port {args.port}")
-        print("Press Ctrl+C to stop\n")
+        logger.info(f"Starting server on port {args.port}")
 
         # Run server
         uvicorn.run(
@@ -512,24 +537,211 @@ def cmd_serve(args: argparse.Namespace) -> int:
             try:
                 sync_manager.stop_background_sync()
             except Exception as e:
-                print(f"Error stopping sync manager: {e}")
+                logger.error(f"Error stopping sync manager: {e}")
         if collector:
             try:
                 collector.stop()
             except Exception as e:
-                print(f"Error stopping collector: {e}")
+                logger.error(f"Error stopping collector: {e}")
         if collector_db:
             try:
                 collector_db.close()
             except Exception as e:
-                print(f"Error closing collector DB: {e}")
+                logger.error(f"Error closing collector DB: {e}")
         if api_db:
             try:
                 api_db.close()
             except Exception as e:
-                print(f"Error closing API DB: {e}")
+                logger.error(f"Error closing API DB: {e}")
 
     return 0
+
+
+def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> int:
+    """Run server with native window using pywebview."""
+    try:
+        import webview
+    except ImportError:
+        logger.error("pywebview is required for window mode.")
+        logger.error("Falling back to browser mode...")
+        args.no_browser = False
+        return _serve_browser_mode(args, settings, logger)
+
+    import uvicorn
+    from titrack.api.app import create_app
+
+    collector = None
+    collector_thread = None
+    collector_db = None
+    player_info = None
+    sync_manager = None
+    api_db = None
+    server_thread = None
+    shutdown_event = threading.Event()
+
+    def cleanup():
+        """Clean up all resources."""
+        logger.info("Cleaning up resources...")
+        shutdown_event.set()
+
+        if sync_manager:
+            try:
+                sync_manager.stop_background_sync()
+            except Exception as e:
+                logger.error(f"Error stopping sync manager: {e}")
+        if collector:
+            try:
+                collector.stop()
+            except Exception as e:
+                logger.error(f"Error stopping collector: {e}")
+        if collector_db:
+            try:
+                collector_db.close()
+            except Exception as e:
+                logger.error(f"Error closing collector DB: {e}")
+        if api_db:
+            try:
+                api_db.close()
+            except Exception as e:
+                logger.error(f"Error closing API DB: {e}")
+
+    try:
+        # Start collector in background if log file is available
+        if settings.log_path and settings.log_path.exists():
+            logger.info(f"Log file: {settings.log_path}")
+            player_info = None
+            logger.info("Waiting for character login...")
+
+            collector_db = Database(settings.db_path)
+            collector_db.connect()
+
+            collector_repo = Repository(collector_db)
+
+            sync_manager = SyncManager(collector_db)
+            sync_manager.initialize()
+
+            def on_price_update(price):
+                item_name = collector_repo.get_item_name(price.config_base_id)
+                logger.info(f"[Price] {item_name}: {price.price_fe:.6f} FE")
+
+            player_change_callback = [None]
+
+            def on_player_change(new_player_info):
+                logger.info(f"[Player] Switched to: {new_player_info.name} ({new_player_info.season_name})")
+                if player_change_callback[0]:
+                    player_change_callback[0](new_player_info)
+
+            collector = Collector(
+                db=collector_db,
+                log_path=settings.log_path,
+                on_delta=lambda d: None,
+                on_run_start=lambda r: None,
+                on_run_end=lambda r: None,
+                on_price_update=on_price_update,
+                on_player_change=on_player_change,
+                player_info=player_info,
+                sync_manager=sync_manager,
+            )
+            collector.initialize()
+
+            def run_collector():
+                try:
+                    collector.tail(poll_interval=settings.poll_interval)
+                except Exception as e:
+                    logger.error(f"Collector error: {e}")
+
+            collector_thread = threading.Thread(target=run_collector, daemon=True)
+            collector_thread.start()
+            logger.info("Collector started in background")
+        else:
+            logger.warning("No log file found - collector not started")
+            if settings.log_path:
+                logger.warning(f"Expected: {settings.log_path}")
+
+        # API gets its own database connection
+        api_db = Database(settings.db_path)
+        api_db.connect()
+
+        # Create FastAPI app
+        app = create_app(
+            db=api_db,
+            log_path=settings.log_path,
+            collector_running=collector is not None,
+            collector=collector,
+            player_info=player_info,
+            sync_manager=sync_manager,
+        )
+
+        # Set up player change callback
+        if collector is not None:
+            def update_app_player(new_player_info):
+                app.state.player_info = new_player_info
+                if hasattr(app.state, 'repo'):
+                    effective_id = get_effective_player_id(new_player_info)
+                    app.state.repo.set_player_context(
+                        new_player_info.season_id,
+                        effective_id
+                    )
+                if hasattr(app.state, 'sync_manager') and app.state.sync_manager:
+                    app.state.sync_manager.set_season_context(new_player_info.season_id)
+            player_change_callback[0] = update_app_player
+
+        # Start uvicorn in a background thread
+        url = f"http://127.0.0.1:{args.port}"
+
+        class Server(uvicorn.Server):
+            def install_signal_handlers(self):
+                # Don't install signal handlers - we handle shutdown via window close
+                pass
+
+        config = uvicorn.Config(
+            app,
+            host=args.host,
+            port=args.port,
+            log_level="warning",
+        )
+        server = Server(config)
+
+        def run_server():
+            try:
+                server.run()
+            except Exception as e:
+                logger.error(f"Server error: {e}")
+
+        server_thread = threading.Thread(target=run_server, daemon=True)
+        server_thread.start()
+        logger.info(f"Server started on port {args.port}")
+
+        # Wait briefly for server to start
+        import time
+        time.sleep(0.5)
+
+        # Create and run the native window
+        def on_closing():
+            logger.info("Window closed, initiating shutdown...")
+            server.should_exit = True
+            cleanup()
+
+        logger.info("Opening native window...")
+        window = webview.create_window(
+            "TITrack - Torchlight Infinite Loot Tracker",
+            url,
+            width=1280,
+            height=800,
+            min_size=(800, 600),
+        )
+        window.events.closing += on_closing
+
+        # This blocks until the window is closed
+        webview.start()
+
+        logger.info("Application shutdown complete")
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error in window mode: {e}")
+        cleanup()
+        return 1
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -630,6 +842,11 @@ def create_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Don't open browser automatically",
     )
+    serve_parser.add_argument(
+        "--no-window",
+        action="store_true",
+        help="Run in browser mode instead of native window (useful for debugging)",
+    )
 
     return parser
 
@@ -645,14 +862,13 @@ def main() -> int:
     # Default to serve mode when running as frozen exe with no command
     if args.command is None:
         if is_frozen():
-            # Running as packaged EXE - default to serve with portable mode
-            print(f"TITrack v{__version__}")
-            print("Starting in portable mode...")
+            # Running as packaged EXE - default to serve with portable mode and native window
             args.command = "serve"
             args.file = None
             args.port = 8000
             args.host = "127.0.0.1"
-            args.no_browser = False
+            args.no_browser = True  # Window mode handles its own display
+            args.no_window = False  # Use native window by default
             args.portable = True  # Force portable mode for frozen exe
         else:
             parser.print_help()

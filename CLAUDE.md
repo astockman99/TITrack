@@ -113,6 +113,31 @@ Seeds the `items` table on first run.
 - Default: `%LOCALAPPDATA%\TITracker\tracker.db`
 - Portable mode: `.\data\tracker.db` beside exe
 
+## Native Window Mode
+
+The packaged EXE runs in a native window using pywebview (EdgeChromium on Windows) instead of opening in the default browser. This provides a cleaner user experience with no visible CLI window.
+
+- **Window title**: "TITrack - Torchlight Infinite Loot Tracker"
+- **Default size**: 1280x800, minimum 800x600
+- **Shutdown**: Closing the window gracefully stops all services
+
+For debugging, run with `--no-window` flag to use browser mode instead:
+```bash
+TITrack.exe --no-window
+```
+
+## Logging
+
+All console output is redirected to a log file when running as a packaged EXE:
+- **Portable mode**: `.\data\titrack.log` beside exe
+- **Default**: `%LOCALAPPDATA%\TITracker\titrack.log`
+
+Log rotation:
+- Maximum file size: 5MB
+- Keeps 3 backup files (titrack.log.1, .2, .3)
+
+In development mode (non-frozen), logs also output to console.
+
 ## MVP Requirements
 
 1. Select & persist log file path

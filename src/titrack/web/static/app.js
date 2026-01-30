@@ -982,6 +982,11 @@ async function refreshAll(forceRender = false) {
         if (forceRender || playerHash !== lastPlayerHash) {
             renderPlayer(player);
             lastPlayerHash = playerHash;
+
+            // Auto-close no-character modal when character is detected
+            if (player && noCharacterModalShown) {
+                closeNoCharacterModal();
+            }
         }
 
         updateLastRefresh();

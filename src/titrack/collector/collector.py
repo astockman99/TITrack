@@ -469,6 +469,9 @@ class Collector:
             self._cleanup_stale_pending_searches(timestamp)
 
         if isinstance(event, ExchangePriceRequest):
+            # Skip invalid config_base_id (0 = browse all, not a real item)
+            if event.config_base_id == 0:
+                return
             # Store pending search for correlation with timestamp
             self._pending_price_searches[event.syn_id] = (event.config_base_id, timestamp)
 
@@ -546,10 +549,34 @@ class Collector:
             poll_interval: Seconds between file checks
         """
         self._running = True
+        consecutive_errors = 0
+        max_consecutive_errors = 5
+
         while self._running:
-            line_count = self.process_file()
-            if line_count == 0:
-                time.sleep(poll_interval)
+            try:
+                line_count = self.process_file()
+                consecutive_errors = 0  # Reset on success
+                if line_count == 0:
+                    time.sleep(poll_interval)
+            except Exception as e:
+                consecutive_errors += 1
+                error_msg = str(e)
+
+                # Log the error (import at top level would cause circular import)
+                try:
+                    from titrack.config.logging import get_logger
+                    logger = get_logger()
+                    logger.warning(f"Collector error (attempt {consecutive_errors}): {error_msg}")
+                except Exception:
+                    print(f"Collector error (attempt {consecutive_errors}): {error_msg}")
+
+                if consecutive_errors >= max_consecutive_errors:
+                    # Too many consecutive errors - re-raise to stop collector
+                    raise
+
+                # Wait before retrying (exponential backoff capped at 5 seconds)
+                backoff = min(poll_interval * (2 ** consecutive_errors), 5.0)
+                time.sleep(backoff)
 
     def stop(self) -> None:
         """Stop the tail loop."""

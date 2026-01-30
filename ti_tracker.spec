@@ -44,6 +44,12 @@ hiddenimports = [
     'httptools',
     'watchfiles',
     'websockets',
+    # pywebview for native window
+    'webview',
+    'webview.platforms',
+    'webview.platforms.edgechromium',
+    'clr_loader',
+    'pythonnet',
 ]
 
 # Exclude unnecessary modules to reduce size
@@ -90,7 +96,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,  # Show console for log output
+    console=False,  # Hide console - logs go to data/titrack.log
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

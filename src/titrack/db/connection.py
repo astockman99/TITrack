@@ -40,8 +40,9 @@ class Database:
         self._connection.execute("PRAGMA journal_mode=WAL")
         self._connection.execute("PRAGMA synchronous=NORMAL")
         self._connection.execute("PRAGMA foreign_keys=ON")
-        # Wait up to 5 seconds for locks instead of failing immediately
-        self._connection.execute("PRAGMA busy_timeout=5000")
+        # Wait up to 30 seconds for locks instead of failing immediately
+        # Higher timeout needed when running with pywebview (3 thread contexts)
+        self._connection.execute("PRAGMA busy_timeout=30000")
 
         # Initialize schema
         self._init_schema()
