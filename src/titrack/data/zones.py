@@ -76,6 +76,12 @@ ZONE_NAMES = {
     "YJ_LiuJinJieQu": "Thunder Wastes - Gallery of Moon",
     "LeiYingJiDian": "Thunder Wastes - Summit of Thunder",
 
+    # Rift of Dimensions
+    "LieXiKongJing": "Rift of Dimensions",
+
+    # Secret Realms
+    "HD_YingGuangDianTang": "Secret Realm - Invaluable Time",
+
     # Voidlands (remaining zones without conflicts)
     "DD_QunLangJieXiang": "Voidlands - Grim Alleys",
     "YL_MaNeiLaYuLin": "Voidlands - Filthy Forest",
