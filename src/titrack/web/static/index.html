@@ -44,6 +44,10 @@
                 </div>
             </div>
             <div class="header-controls">
+                <label class="toggle" title="Apply 12.5% trade house tax to item values">
+                    <input type="checkbox" id="trade-tax-toggle">
+                    <span>Trade Tax</span>
+                </label>
                 <div class="cloud-sync-control">
                     <label class="toggle cloud-toggle">
                         <input type="checkbox" id="cloud-sync-toggle">
@@ -74,8 +78,23 @@
         </section>
 
         <main>
-            <section class="panel">
-                <h2>Recent Runs</h2>
+            <div class="left-column">
+                <section id="active-run-panel" class="panel active-run-panel hidden">
+                    <h2>
+                        <span class="active-indicator"></span>
+                        Current Run: <span id="active-run-zone">--</span>
+                        <span id="active-run-duration" class="active-run-duration">--</span>
+                    </h2>
+                    <div class="active-run-stats">
+                        <span class="active-run-value">Value: <strong id="active-run-value">0</strong> FE</span>
+                    </div>
+                    <div id="active-run-loot" class="active-run-loot">
+                        <!-- Live drops will appear here -->
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>Recent Runs</h2>
                 <table id="runs-table">
                     <thead>
                         <tr>
@@ -89,7 +108,8 @@
                         <tr><td colspan="4" class="loading">Loading...</td></tr>
                     </tbody>
                 </table>
-            </section>
+                </section>
+            </div>
 
             <section class="panel">
                 <h2>Current Inventory</h2>

@@ -43,6 +43,19 @@ class RunListResponse(BaseModel):
     page_size: int
 
 
+class ActiveRunResponse(BaseModel):
+    """Currently active run with live loot drops."""
+
+    id: int
+    zone_name: str
+    zone_signature: str
+    start_ts: datetime
+    duration_seconds: float  # Time since run started
+    fe_gained: int  # Raw FE currency gained so far
+    total_value: float  # Total value including priced items
+    loot: list[LootItem]  # Items picked up so far
+
+
 class RunStatsResponse(BaseModel):
     """Summary statistics for runs."""
 

@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from titrack.api.schemas import (
+    ActiveRunResponse,
     LootItem,
     RunListResponse,
     RunResponse,
@@ -275,6 +276,44 @@ def get_stats(
         total_duration_seconds=round(total_duration, 2),
         fe_per_hour=round(fe_per_hour, 2),
         value_per_hour=round(value_per_hour, 2),
+    )
+
+
+@router.get("/active", response_model=Optional[ActiveRunResponse])
+def get_active_run(
+    repo: Repository = Depends(get_repository),
+) -> Optional[ActiveRunResponse]:
+    """Get the currently active run with live loot drops."""
+    from datetime import datetime
+
+    active_run = repo.get_active_run()
+
+    if not active_run:
+        return None
+
+    # Skip hub runs - only show active map runs
+    if active_run.is_hub:
+        return None
+
+    # Get loot for this run
+    summary = repo.get_run_summary(active_run.id)
+    fe_gained, total_value = repo.get_run_value(active_run.id)
+
+    # Calculate duration since run started (use naive datetime to match DB)
+    now = datetime.now()
+    duration = (now - active_run.start_ts).total_seconds()
+
+    zone_name = get_zone_display_name(active_run.zone_signature, active_run.level_id)
+
+    return ActiveRunResponse(
+        id=active_run.id,
+        zone_name=zone_name,
+        zone_signature=active_run.zone_signature,
+        start_ts=active_run.start_ts,
+        duration_seconds=round(duration, 1),
+        fe_gained=fe_gained,
+        total_value=round(total_value, 2),
+        loot=_build_loot(summary, repo),
     )
 
 

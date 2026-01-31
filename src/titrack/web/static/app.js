@@ -58,6 +58,10 @@ async function fetchRuns(page = 1, pageSize = 20) {
     return fetchJson(`/runs?page=${page}&page_size=${pageSize}&exclude_hubs=true`);
 }
 
+async function fetchActiveRun() {
+    return fetchJson('/runs/active');
+}
+
 async function fetchInventory(sortBy = inventorySortBy, sortOrder = inventorySortOrder) {
     return fetchJson(`/inventory?sort_by=${sortBy}&sort_order=${sortOrder}`);
 }
@@ -114,6 +118,54 @@ async function triggerCloudSync() {
 
 async function fetchCloudPrices() {
     return fetchJson('/cloud/prices');
+}
+
+// Trade tax setting functions
+async function fetchTradeTaxSetting() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/trade_tax_enabled`);
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.value === 'true';
+    } catch (error) {
+        console.error('Error fetching trade tax setting:', error);
+        return false;
+    }
+}
+
+async function updateTradeTaxSetting(enabled) {
+    try {
+        const response = await fetch(`${API_BASE}/settings/trade_tax_enabled`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: enabled ? 'true' : 'false' })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error updating trade tax setting:', error);
+        return false;
+    }
+}
+
+async function handleTradeTaxToggle(event) {
+    const enabled = event.target.checked;
+    const toggle = event.target;
+
+    // Disable toggle while processing
+    toggle.disabled = true;
+
+    const success = await updateTradeTaxSetting(enabled);
+
+    if (success) {
+        // Refresh all data to reflect new values
+        await refreshAll(true);
+    } else {
+        // Revert toggle on failure
+        toggle.checked = !enabled;
+        alert('Failed to update trade tax setting');
+    }
+
+    toggle.disabled = false;
 }
 
 async function fetchCloudPriceHistory(configBaseId) {
@@ -245,6 +297,75 @@ function renderRuns(data, forceRender = false) {
             </tr>
         `;
     }).join('');
+}
+
+let lastActiveRunHash = null;
+
+let lastActiveRunId = null;
+
+function renderActiveRun(data, forceRender = false) {
+    const panel = document.getElementById('active-run-panel');
+    const zoneEl = document.getElementById('active-run-zone');
+    const durationEl = document.getElementById('active-run-duration');
+    const valueEl = document.getElementById('active-run-value');
+    const lootEl = document.getElementById('active-run-loot');
+
+    // No active run - hide and clear panel
+    if (!data) {
+        panel.classList.add('hidden');
+        lastActiveRunHash = null;
+        lastActiveRunId = null;
+        // Clear content so old data doesn't flash when new run starts
+        zoneEl.textContent = '--';
+        valueEl.textContent = '0';
+        lootEl.innerHTML = '';
+        return;
+    }
+
+    // Check if data changed
+    const newHash = simpleHash({ id: data.id, val: data.total_value, dur: data.duration_seconds, loot: data.loot?.length });
+    if (!forceRender && newHash === lastActiveRunHash) {
+        // Just update duration (always changes)
+        durationEl.textContent = `(${formatDuration(data.duration_seconds)})`;
+        return;
+    }
+    lastActiveRunHash = newHash;
+    lastActiveRunId = data.id;
+
+    // Show panel and update content
+    panel.classList.remove('hidden');
+    zoneEl.textContent = data.zone_name;
+    durationEl.textContent = `(${formatDuration(data.duration_seconds)})`;
+    valueEl.innerHTML = formatValue(data.total_value);
+
+    // Render loot items - sorted by value descending
+    if (!data.loot || data.loot.length === 0) {
+        lootEl.innerHTML = '<span class="no-loot">No drops yet...</span>';
+    } else {
+        // Sort by total_value_fe descending (items without value go to end)
+        const sortedLoot = [...data.loot].sort((a, b) => {
+            const aVal = a.total_value_fe || 0;
+            const bVal = b.total_value_fe || 0;
+            return bVal - aVal;
+        });
+
+        lootEl.innerHTML = sortedLoot.map(item => {
+            const isNegative = item.quantity < 0;
+            const negativeClass = isNegative ? ' negative' : '';
+            const qtyPrefix = item.quantity > 0 ? '+' : '';
+            const valueText = item.total_value_fe ? formatValue(item.total_value_fe) : '--';
+            const iconHtml = getIconHtml(item.config_base_id, 'loot-icon');
+
+            return `
+                <div class="loot-item${negativeClass}">
+                    ${iconHtml}
+                    <span class="loot-name">${escapeHtml(item.name)}</span>
+                    <span class="loot-qty">${qtyPrefix}${item.quantity}</span>
+                    <span class="loot-value">${valueText}</span>
+                </div>
+            `;
+        }).join('');
+    }
 }
 
 function renderInventory(data, forceRender = false) {
@@ -1164,14 +1285,15 @@ document.getElementById('help-modal').addEventListener('click', (e) => {
 
 async function refreshAll(forceRender = false) {
     try {
-        const [status, stats, runs, inventory, statsHistory, player, cloudStatus] = await Promise.all([
+        const [status, stats, runs, inventory, statsHistory, player, cloudStatus, activeRun] = await Promise.all([
             fetchStatus(),
             fetchStats(),
             fetchRuns(),
             fetchInventory(),
             fetchStatsHistory(24),
             fetchPlayer(),
-            fetchCloudStatus()
+            fetchCloudStatus(),
+            fetchActiveRun()
         ]);
 
         lastRunsData = runs;
@@ -1180,7 +1302,18 @@ async function refreshAll(forceRender = false) {
         renderStatus(status);
         renderStats(stats, inventory);
         renderCloudStatus(cloudStatus);
-        renderRuns(runs, forceRender);
+        renderActiveRun(activeRun, forceRender);
+
+        // Filter out active/incomplete runs from recent runs list
+        // A run is complete if it has end_ts set
+        let filteredRuns = runs;
+        if (runs?.runs) {
+            filteredRuns = {
+                ...runs,
+                runs: runs.runs.filter(r => r.end_ts != null)
+            };
+        }
+        renderRuns(filteredRuns, forceRender);
 
         // Load cloud prices if sync is enabled
         if (cloudStatus && cloudStatus.enabled && Object.keys(cloudPricesCache).length === 0) {
@@ -1634,6 +1767,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!player) {
         showNoCharacterModal();
     }
+
+    // Set up trade tax toggle
+    const tradeTaxToggle = document.getElementById('trade-tax-toggle');
+    tradeTaxToggle.addEventListener('change', handleTradeTaxToggle);
+    tradeTaxToggle.checked = await fetchTradeTaxSetting();
 
     // Set up cloud sync toggle
     const cloudSyncToggle = document.getElementById('cloud-sync-toggle');

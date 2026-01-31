@@ -1109,3 +1109,122 @@ tr.nightmare .zone-name {
 .exit-btn:hover {
     background: #ff4757;
 }
+
+/* Left column container */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Active Run Panel */
+.active-run-panel {
+    background: linear-gradient(135deg, var(--bg-card) 0%, #1a4a3a 100%);
+    border: 1px solid var(--positive);
+    animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% { border-color: var(--positive); }
+    50% { border-color: rgba(78, 204, 163, 0.5); }
+}
+
+.active-run-panel h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.active-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: var(--positive);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.active-run-duration {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.active-run-stats {
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+.active-run-value strong {
+    color: var(--positive);
+    font-size: 1.2rem;
+}
+
+.active-run-loot {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 15px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.loot-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.loot-item img,
+.loot-item .loot-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.loot-item .loot-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.loot-item .loot-qty {
+    color: var(--positive);
+    font-weight: bold;
+    min-width: 50px;
+    text-align: right;
+}
+
+.loot-item .loot-value {
+    color: var(--text-secondary);
+    min-width: 70px;
+    text-align: right;
+}
+
+.loot-item.negative .loot-qty {
+    color: var(--negative);
+}
+
+.loot-item .loot-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.no-loot {
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 10px;
+}

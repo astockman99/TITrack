@@ -44,6 +44,9 @@ def get_inventory(
         if state.num > 0:
             totals[state.config_base_id] = totals.get(state.config_base_id, 0) + state.num
 
+    # Get trade tax multiplier (1.0 if disabled, 0.875 if enabled)
+    tax_multiplier = repo.get_trade_tax_multiplier()
+
     # Build response with prices
     items = []
     total_fe = totals.get(FE_CONFIG_BASE_ID, 0)
@@ -58,7 +61,10 @@ def get_inventory(
         # FE currency is worth 1:1
         if config_id == FE_CONFIG_BASE_ID:
             price_fe = 1.0
-        total_value = price_fe * quantity if price_fe else None
+            total_value = price_fe * quantity if price_fe else None
+        else:
+            # Apply trade tax to non-FE items (would need to sell them)
+            total_value = price_fe * quantity * tax_multiplier if price_fe else None
 
         if total_value and config_id != FE_CONFIG_BASE_ID:
             net_worth += total_value

@@ -57,6 +57,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3: Manual price editing UI, import/export
 - Phase 4: PyInstaller portable EXE packaging
 
+## [0.2.5] - 2026-01-31
+
+### Added
+- **Trade Tax Toggle**: Option to calculate item values with 12.5% trade house tax applied
+  - Toggle in dashboard header applies tax to non-FE items
+  - Affects all value displays: runs, inventory net worth, value/hour
+  - Setting persists across sessions
+- **Live Drops Display**: Real-time loot tracking during active map runs
+  - "Current Run" panel shows zone name, duration, and running value total
+  - Items appear as they're picked up, sorted by value (highest first)
+  - Panel clears when returning to hub, run moves to Recent Runs
+  - Pulsing green indicator shows when a run is active
+- New API endpoint: `GET /api/runs/active` - Returns current active run with live loot
+
+### Changed
+- Disabled UPX compression in PyInstaller build to avoid Windows Defender false positives
+- Recent Runs list now filters by completion status (only shows runs with end_ts)
+- Rebuilt PyInstaller from source for fresh bootloader signature
+
+### Fixed
+- Active run panel properly clears when returning to hub zone
+- Value display in Current Run panel now renders HTML correctly
+
 ## [0.2.4] - 2026-01-30
 
 ### Fixed

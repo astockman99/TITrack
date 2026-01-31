@@ -20,6 +20,7 @@ ALLOWED_SETTINGS = {
     "cloud_upload_enabled",
     "cloud_download_enabled",
     "log_directory",
+    "trade_tax_enabled",
 }
 
 # Settings that are read-only via API (can be read but not written)

@@ -153,6 +153,7 @@ In development mode (non-frozen), logs also output to console.
 
 ### Runs
 - `GET /api/runs` - List recent runs with pagination
+- `GET /api/runs/active` - Get currently active run with live loot drops
 - `GET /api/runs/stats` - Summary statistics (value/hour, avg per run, etc.)
 - `GET /api/runs/{run_id}` - Get single run details
 - `POST /api/runs/reset` - Clear all run tracking data (preserves prices, items, settings)
@@ -187,9 +188,17 @@ In development mode (non-frozen), logs also output to console.
 
 - **Stats Header**: Net Worth, Value/Hour, Value/Map, Runs, Avg Run Time, Prices count
 - **Charts**: Cumulative Value, Value/Hour (rolling)
+- **Current Run Panel**: Live drops display during active map runs (sorted by value)
 - **Recent Runs**: Zone, duration, value with details modal
 - **Current Inventory**: Sortable by quantity or value
-- **Controls**: Reset Stats, Cloud Sync toggle, Auto-refresh toggle
+- **Controls**: Trade Tax toggle, Cloud Sync toggle, Reset Stats, Auto-refresh toggle
+
+## Trade Tax
+
+The Torchlight trade house takes a 12.5% tax (1 FE per 8 FE). Enable the "Trade Tax" toggle in the header to see after-tax values:
+- Applied to non-FE items only (FE currency is not taxed)
+- Affects: Run values, inventory net worth, value/hour calculations
+- Setting stored in database as `trade_tax_enabled`
 
 ## Zone Translation
 

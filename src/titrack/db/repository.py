@@ -671,6 +671,20 @@ class Repository:
             season_id=season_id,
         )
 
+    def get_trade_tax_multiplier(self) -> float:
+        """
+        Get the trade tax multiplier based on settings.
+
+        The Torchlight trade house takes 1 FE per 8 FE (12.5% tax).
+        When enabled, values are multiplied by 0.875 to show after-tax amounts.
+
+        Returns:
+            1.0 if tax disabled, 0.875 if enabled
+        """
+        if self.get_setting("trade_tax_enabled") == "true":
+            return 0.875  # 7/8 = 87.5% after 12.5% tax
+        return 1.0
+
     def get_run_value(self, run_id: int) -> tuple[int, float]:
         """
         Calculate total value of a run's loot.
@@ -679,12 +693,15 @@ class Repository:
             Tuple of (raw_fe_gained, total_value_fe)
             - raw_fe_gained: Just the FE currency picked up
             - total_value_fe: FE + value of other items based on prices
+              (with trade tax applied to non-FE items if enabled)
         """
         from titrack.parser.patterns import FE_CONFIG_BASE_ID
 
         summary = self.get_run_summary(run_id)
         raw_fe = summary.get(FE_CONFIG_BASE_ID, 0)
         total_value = float(raw_fe)
+
+        tax_multiplier = self.get_trade_tax_multiplier()
 
         for config_id, quantity in summary.items():
             if config_id == FE_CONFIG_BASE_ID:
@@ -696,7 +713,8 @@ class Repository:
             price_fe = self.get_effective_price(config_id)
 
             if price_fe and price_fe > 0:
-                total_value += price_fe * quantity
+                # Apply trade tax to non-FE items (would need to sell them)
+                total_value += price_fe * quantity * tax_multiplier
 
         return raw_fe, total_value
 
