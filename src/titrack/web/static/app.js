@@ -23,6 +23,9 @@ let cloudPricesCache = {};
 let sparklineHistoryCache = {}; // Cache for sparkline history data
 let sparklineFetchInProgress = new Set(); // Track in-flight fetches
 
+// Map costs state
+let mapCostsEnabled = false;
+
 // Update state
 let updateStatus = null;
 let updateCheckInterval = null;
@@ -168,6 +171,55 @@ async function handleTradeTaxToggle(event) {
     toggle.disabled = false;
 }
 
+// Map costs setting functions
+async function fetchMapCostsSetting() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/map_costs_enabled`);
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.value === 'true';
+    } catch (error) {
+        console.error('Error fetching map costs setting:', error);
+        return false;
+    }
+}
+
+async function updateMapCostsSetting(enabled) {
+    try {
+        const response = await fetch(`${API_BASE}/settings/map_costs_enabled`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: enabled ? 'true' : 'false' })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error updating map costs setting:', error);
+        return false;
+    }
+}
+
+async function handleMapCostsToggle(event) {
+    const enabled = event.target.checked;
+    const toggle = event.target;
+
+    // Disable toggle while processing
+    toggle.disabled = true;
+
+    const success = await updateMapCostsSetting(enabled);
+
+    if (success) {
+        mapCostsEnabled = enabled;
+        // Refresh all data to reflect new values
+        await refreshAll(true);
+    } else {
+        // Revert toggle on failure
+        toggle.checked = !enabled;
+        alert('Failed to update map costs setting');
+    }
+
+    toggle.disabled = false;
+}
+
 async function fetchCloudPriceHistory(configBaseId) {
     return fetchJson(`/cloud/prices/${configBaseId}/history`);
 }
@@ -228,6 +280,19 @@ function formatValue(value) {
     return formatted;
 }
 
+function buildCostTooltip(costItems) {
+    if (!costItems || costItems.length === 0) return '';
+    const lines = costItems.map(item => {
+        const qty = Math.abs(item.quantity);
+        const value = item.total_value_fe !== null
+            ? `${item.total_value_fe.toFixed(2)} FE`
+            : '? FE';
+        return `${item.name} x${qty} = ${value}`;
+    });
+    // Escape for HTML attribute and use newline character
+    return escapeAttr(lines.join('\n'));
+}
+
 function showToast(message, type = 'info') {
     // Create toast container if it doesn't exist
     let container = document.getElementById('toast-container');
@@ -268,7 +333,7 @@ function renderStats(stats, inventory) {
 }
 
 function renderRuns(data, forceRender = false) {
-    const newHash = simpleHash(data?.runs?.map(r => ({ id: r.id, val: r.total_value, dur: r.duration_seconds })));
+    const newHash = simpleHash(data?.runs?.map(r => ({ id: r.id, val: r.total_value, dur: r.duration_seconds, cost: r.map_cost_fe })));
     if (!forceRender && newHash === lastRunsHash) {
         return; // No change, skip re-render
     }
@@ -284,11 +349,21 @@ function renderRuns(data, forceRender = false) {
     tbody.innerHTML = data.runs.map(run => {
         const nightmareClass = run.is_nightmare ? ' nightmare' : '';
         const consolidatedInfo = run.consolidated_run_ids ? ` (${run.consolidated_run_ids.length} segments)` : '';
+
+        // Show net value if costs are enabled and there are costs
+        let valueDisplay;
+        if (run.net_value_fe !== null && run.net_value_fe !== undefined && run.map_cost_fe > 0) {
+            const warningIcon = run.map_cost_has_unpriced ? ' <span class="cost-warning" title="Some costs have unknown prices">⚠</span>' : '';
+            valueDisplay = `${formatValue(run.net_value_fe)}${warningIcon}`;
+        } else {
+            valueDisplay = formatValue(run.total_value);
+        }
+
         return `
             <tr class="${nightmareClass}">
                 <td class="zone-name" title="${run.zone_signature}${consolidatedInfo}">${escapeHtml(run.zone_name)}</td>
                 <td class="duration">${formatDuration(run.duration_seconds)}</td>
-                <td>${formatValue(run.total_value)}</td>
+                <td>${valueDisplay}</td>
                 <td>
                     <button class="expand-btn" onclick="showRunDetails(${run.id})">
                         Details
@@ -322,8 +397,14 @@ function renderActiveRun(data, forceRender = false) {
         return;
     }
 
-    // Check if data changed
-    const newHash = simpleHash({ id: data.id, val: data.total_value, dur: data.duration_seconds, loot: data.loot?.length });
+    // Check if data changed (include cost data in hash)
+    const newHash = simpleHash({
+        id: data.id,
+        val: data.total_value,
+        dur: data.duration_seconds,
+        loot: data.loot?.length,
+        cost: data.map_cost_fe
+    });
     if (!forceRender && newHash === lastActiveRunHash) {
         // Just update duration (always changes)
         durationEl.textContent = `(${formatDuration(data.duration_seconds)})`;
@@ -336,7 +417,16 @@ function renderActiveRun(data, forceRender = false) {
     panel.classList.remove('hidden');
     zoneEl.textContent = data.zone_name;
     durationEl.textContent = `(${formatDuration(data.duration_seconds)})`;
-    valueEl.innerHTML = formatValue(data.total_value);
+
+    // Show value with cost info if map costs are enabled
+    if (data.map_cost_fe !== null && data.map_cost_fe !== undefined && data.map_cost_fe > 0) {
+        const netValue = data.net_value_fe !== null ? data.net_value_fe : data.total_value;
+        const warningIcon = data.map_cost_has_unpriced ? ' <span class="cost-warning" title="Some costs have unknown prices">⚠</span>' : '';
+        const costTooltip = buildCostTooltip(data.map_cost_items);
+        valueEl.innerHTML = `${formatValue(netValue)} <span class="cost-info">(gross: ${formatNumber(Math.round(data.total_value))}, cost: <span class="cost-hover" title="${costTooltip}">-${formatNumber(Math.round(data.map_cost_fe))}</span>${warningIcon})</span>`;
+    } else {
+        valueEl.innerHTML = formatValue(data.total_value);
+    }
 
     // Render loot items - sorted by value descending
     if (!data.loot || data.loot.length === 0) {
@@ -756,80 +846,70 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- Log Path Configuration Modal ---
+// --- Settings Modal ---
 
-let logPathModalShown = false;
+let settingsModalShown = false;
 let validatedLogPath = null;
-let logPathReconfigureMode = false;
 
-function showLogPathModal(reconfigure = false) {
-    // Only show once per session for auto-popup mode
-    if (!reconfigure && logPathModalShown) return;
-    if (!reconfigure) logPathModalShown = true;
-
-    logPathReconfigureMode = reconfigure;
-
-    const titleEl = document.getElementById('log-path-modal-title');
-    const descEl = document.getElementById('log-path-description');
-    const currentEl = document.getElementById('log-path-current');
+async function openSettingsModal() {
+    const modal = document.getElementById('settings-modal');
     const currentPathEl = document.getElementById('current-log-path');
-    const statusEl = document.getElementById('log-path-status');
     const inputEl = document.getElementById('log-directory-input');
+    const statusEl = document.getElementById('log-path-status');
     const saveBtn = document.getElementById('save-log-dir-btn');
+    const tradeTaxToggle = document.getElementById('settings-trade-tax');
+    const mapCostsToggle = document.getElementById('settings-map-costs');
 
-    // Reset state
+    // Reset log path state
     statusEl.textContent = '';
     statusEl.className = 'log-path-status';
     saveBtn.disabled = true;
     saveBtn.textContent = 'Save & Restart';
     validatedLogPath = null;
 
-    if (reconfigure) {
-        titleEl.textContent = 'Game Directory Settings';
-        descEl.innerHTML = '<p>Change the Torchlight Infinite game directory if the current configuration is incorrect.</p>';
-        currentEl.style.display = 'block';
+    // Load current settings
+    tradeTaxToggle.checked = await fetchTradeTaxSetting();
+    mapCostsToggle.checked = await fetchMapCostsSetting();
+    mapCostsEnabled = mapCostsToggle.checked;
 
-        // Fetch current log path from status
-        fetch(`${API_BASE}/status`)
-            .then(r => r.json())
-            .then(status => {
-                if (status.log_path) {
-                    currentPathEl.textContent = status.log_path;
-                    // Extract game directory from full path (remove UE_Game\Torchlight\Saved\Logs\UE_game.log)
-                    const pathParts = status.log_path.split('\\');
-                    if (pathParts.length > 5) {
-                        const gameDir = pathParts.slice(0, -5).join('\\');
-                        inputEl.value = gameDir;
-                    }
-                } else {
-                    currentPathEl.textContent = 'Not found - please configure below';
-                }
-            })
-            .catch(() => {
-                currentPathEl.textContent = 'Unable to fetch current path';
-            });
-    } else {
-        titleEl.textContent = 'Game Log File Not Found';
-        descEl.innerHTML = '<p>TITrack could not find the Torchlight Infinite log file. This usually means the game is installed in a non-standard location.</p>';
-        currentEl.style.display = 'none';
-        inputEl.value = '';
+    // Fetch current log path from status
+    try {
+        const status = await fetchStatus();
+        if (status && status.log_path) {
+            currentPathEl.textContent = status.log_path;
+            // Extract game directory from full path
+            const pathParts = status.log_path.split('\\');
+            if (pathParts.length > 5) {
+                const gameDir = pathParts.slice(0, -5).join('\\');
+                inputEl.value = gameDir;
+            }
+        } else {
+            currentPathEl.textContent = 'Not found - please configure below';
+            inputEl.value = '';
+        }
+    } catch (error) {
+        currentPathEl.textContent = 'Unable to fetch current path';
     }
 
-    document.getElementById('log-path-modal').classList.remove('hidden');
+    modal.classList.remove('hidden');
 }
 
-function closeLogPathModal() {
-    document.getElementById('log-path-modal').classList.add('hidden');
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.add('hidden');
 }
 
-function openSettingsModal() {
-    showLogPathModal(true);
+// Show settings modal when log path missing (called from renderStatus)
+function showLogPathModal() {
+    // Only show once per session
+    if (settingsModalShown) return;
+    settingsModalShown = true;
+    openSettingsModal();
 }
 
-// Close log-path modal on outside click
+// Close settings modal on outside click
 document.addEventListener('click', (e) => {
-    if (e.target.id === 'log-path-modal') {
-        closeLogPathModal();
+    if (e.target.id === 'settings-modal') {
+        closeSettingsModal();
     }
 });
 
@@ -1078,16 +1158,24 @@ async function showRunDetails(runId) {
 
     title.textContent = `${run.zone_name} - ${formatDuration(run.duration_seconds)}`;
 
+    let content = '';
+
+    // Show loot section
     if (!run.loot || run.loot.length === 0) {
-        body.innerHTML = '<p>No loot recorded for this run.</p>';
+        content += '<p>No loot recorded for this run.</p>';
     } else {
-        body.innerHTML = `
+        // Sort by FE value (highest first), items without price at the end
+        const sortedLoot = [...run.loot].sort((a, b) => {
+            const aVal = a.total_value_fe ?? -Infinity;
+            const bVal = b.total_value_fe ?? -Infinity;
+            return bVal - aVal;
+        });
+        content += `
             <ul class="loot-list">
-                ${run.loot.map(item => {
+                ${sortedLoot.map(item => {
                     const iconHtml = getIconHtml(item.config_base_id, 'loot-item-icon');
-                    const qtyStr = (item.quantity > 0 ? '+' : '') + formatNumber(item.quantity);
                     const valueStr = item.total_value_fe !== null
-                        ? `= ${item.total_value_fe.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} FE`
+                        ? `${item.total_value_fe.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} FE`
                         : '<span class="no-price">no price</span>';
                     return `
                         <li class="loot-item">
@@ -1096,8 +1184,8 @@ async function showRunDetails(runId) {
                                 <span>${escapeHtml(item.name)}</span>
                             </div>
                             <div class="loot-item-values">
-                                <span class="loot-item-qty ${item.quantity > 0 ? 'positive' : 'negative'}">${qtyStr}</span>
-                                <span class="loot-item-value">${valueStr}</span>
+                                <span class="loot-item-qty ${item.total_value_fe !== null ? (item.total_value_fe > 0 ? 'positive' : 'negative') : ''}">${valueStr}</span>
+                                <span class="loot-item-value">x${formatNumber(Math.abs(item.quantity))}</span>
                             </div>
                         </li>
                     `;
@@ -1106,6 +1194,32 @@ async function showRunDetails(runId) {
         `;
     }
 
+    // Show summary if there are costs
+    if (run.map_cost_fe !== null && run.map_cost_fe !== undefined && run.map_cost_fe > 0) {
+        const netValue = run.net_value_fe !== null ? run.net_value_fe : run.total_value;
+        const costTooltip = buildCostTooltip(run.map_cost_items);
+        const warningIcon = run.map_cost_has_unpriced
+            ? ' <span class="cost-warning" title="Some items have unknown prices">⚠</span>'
+            : '';
+        content += `
+            <div class="run-summary">
+                <div class="run-summary-row">
+                    <span class="run-summary-label">Gross Value</span>
+                    <span class="run-summary-value">${formatFEValue(run.total_value)} FE</span>
+                </div>
+                <div class="run-summary-row">
+                    <span class="run-summary-label">Map Cost</span>
+                    <span class="run-summary-value negative cost-hover" title="${costTooltip}">-${formatFEValue(run.map_cost_fe)} FE${warningIcon}</span>
+                </div>
+                <div class="run-summary-row total">
+                    <span class="run-summary-label">Net Value</span>
+                    <span class="run-summary-value ${netValue >= 0 ? 'positive' : 'negative'}">${formatFEValue(netValue)} FE</span>
+                </div>
+            </div>
+        `;
+    }
+
+    body.innerHTML = content;
     modal.classList.remove('hidden');
 }
 
@@ -1126,7 +1240,7 @@ document.addEventListener('keydown', (e) => {
         closeModal();
         closeHelpModal();
         closePriceHistoryModal();
-        closeLogPathModal();
+        closeSettingsModal();
     }
 });
 
@@ -1421,6 +1535,16 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function escapeAttr(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
 function simpleHash(obj) {
@@ -1768,10 +1892,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         showNoCharacterModal();
     }
 
-    // Set up trade tax toggle
-    const tradeTaxToggle = document.getElementById('trade-tax-toggle');
-    tradeTaxToggle.addEventListener('change', handleTradeTaxToggle);
-    tradeTaxToggle.checked = await fetchTradeTaxSetting();
+    // Set up settings modal toggles
+    const settingsTradeTaxToggle = document.getElementById('settings-trade-tax');
+    settingsTradeTaxToggle.addEventListener('change', handleTradeTaxToggle);
+
+    const settingsMapCostsToggle = document.getElementById('settings-map-costs');
+    settingsMapCostsToggle.addEventListener('change', handleMapCostsToggle);
+
+    // Load initial map costs state
+    mapCostsEnabled = await fetchMapCostsSetting();
 
     // Set up cloud sync toggle
     const cloudSyncToggle = document.getElementById('cloud-sync-toggle');

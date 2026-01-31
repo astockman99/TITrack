@@ -188,17 +188,53 @@ In development mode (non-frozen), logs also output to console.
 
 - **Stats Header**: Net Worth, Value/Hour, Value/Map, Runs, Avg Run Time, Prices count
 - **Charts**: Cumulative Value, Value/Hour (rolling)
-- **Current Run Panel**: Live drops display during active map runs (sorted by value)
-- **Recent Runs**: Zone, duration, value with details modal
+- **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
+- **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
 - **Current Inventory**: Sortable by quantity or value
-- **Controls**: Trade Tax toggle, Cloud Sync toggle, Reset Stats, Auto-refresh toggle
+- **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
+- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Game Directory configuration
 
 ## Trade Tax
 
-The Torchlight trade house takes a 12.5% tax (1 FE per 8 FE). Enable the "Trade Tax" toggle in the header to see after-tax values:
+The Torchlight trade house takes a 12.5% tax (1 FE per 8 FE). Enable the "Trade Tax" toggle in Settings to see after-tax values:
 - Applied to non-FE items only (FE currency is not taxed)
 - Affects: Run values, inventory net worth, value/hour calculations
 - Setting stored in database as `trade_tax_enabled`
+
+## Map Costs
+
+When enabled, TITrack tracks compass/beacon consumption when opening maps and subtracts these costs from run values.
+
+### How It Works
+
+1. When you open a map with a compass/beacon, the game logs an `ItemChange@ ProtoName=Spv3Open` block
+2. TITrack captures these consumption events and associates them with the next map run
+3. Run values show net profit (gross loot value minus map cost)
+
+### Enabling Map Costs
+
+Click the gear icon (Settings) in the header and enable "Map Costs" toggle.
+
+### Display
+
+When map costs are enabled:
+- **Recent Runs table**: Shows net value (with warning icon if some costs are unpriced)
+- **Run Details modal**: Shows map costs section with consumed items, followed by summary (Gross / Cost / Net)
+- **Current Run panel**: Shows net value with cost breakdown
+- **Stats**: Value/Hour and Value/Map reflect net values after costs
+
+### Unknown Prices
+
+If a consumed item doesn't have a known price:
+- The item shows "?" instead of a value with tooltip
+- A warning icon appears next to the run value
+- The cost is excluded from calculations (only priced items are summed)
+- Search the item on the Exchange to learn its price
+
+### Settings
+
+- Setting stored in database as `map_costs_enabled`
+- Default: disabled (gross values shown)
 
 ## Zone Translation
 

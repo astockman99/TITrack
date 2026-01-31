@@ -44,10 +44,6 @@
                 </div>
             </div>
             <div class="header-controls">
-                <label class="toggle" title="Apply 12.5% trade house tax to item values">
-                    <input type="checkbox" id="trade-tax-toggle">
-                    <span>Trade Tax</span>
-                </label>
                 <div class="cloud-sync-control">
                     <label class="toggle cloud-toggle">
                         <input type="checkbox" id="cloud-sync-toggle">
@@ -270,41 +266,46 @@
         </div>
     </div>
 
-    <div id="log-path-modal" class="modal hidden">
+    <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="log-path-modal-title">Game Log File Not Found</h3>
-                <button class="close-btn" onclick="closeLogPathModal()">&times;</button>
+                <h3>Settings</h3>
+                <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
             </div>
-            <div class="help-body">
-                <section class="help-section" id="log-path-description">
-                    <p>TITrack could not find the Torchlight Infinite log file. This usually means the game is installed in a non-standard location.</p>
+            <div class="settings-body">
+                <!-- Value Calculations Section -->
+                <section class="settings-section">
+                    <h4>Value Calculations</h4>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settings-trade-tax">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Trade Tax</span>
+                            <span class="toggle-desc">Apply 12.5% trade house tax to item values</span>
+                        </div>
+                    </label>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settings-map-costs">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Map Costs</span>
+                            <span class="toggle-desc">Track and subtract compass/beacon costs from run values</span>
+                        </div>
+                    </label>
                 </section>
-                <section class="help-section" id="log-path-current" style="display: none;">
-                    <h4>Current Configuration</h4>
-                    <p>Log file: <code id="current-log-path">Not configured</code></p>
-                </section>
-                <section class="help-section">
-                    <h4>Configure Game Directory</h4>
-                    <p>Enter the path to your Torchlight Infinite installation folder:</p>
+
+                <!-- Game Directory Section -->
+                <section class="settings-section">
+                    <h4>Game Directory</h4>
+                    <p id="settings-log-path-current">Current: <code id="current-log-path">Loading...</code></p>
                     <div class="log-path-input-group">
                         <input type="text" id="log-directory-input" placeholder="C:\Program Files (x86)\Steam\steamapps\common\Torchlight Infinite" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
                         <button onclick="validateLogDirectory()" class="validate-btn">Validate</button>
                     </div>
                     <p id="log-path-status" class="log-path-status"></p>
                     <p class="help-note">The log file should be at: [game folder]\UE_Game\Torchlight\Saved\Logs\UE_game.log</p>
+                    <div class="settings-section-actions">
+                        <button onclick="saveLogDirectory()" id="save-log-dir-btn" class="settings-btn-primary" disabled>Save & Restart</button>
+                    </div>
                 </section>
-                <section class="help-section">
-                    <h4>Common Locations</h4>
-                    <ul>
-                        <li><code>C:\Program Files (x86)\Steam\steamapps\common\Torchlight Infinite</code></li>
-                        <li><code>D:\SteamLibrary\steamapps\common\Torchlight Infinite</code></li>
-                    </ul>
-                </section>
-                <div class="modal-actions">
-                    <button onclick="saveLogDirectory()" id="save-log-dir-btn" class="save-btn" disabled>Save & Restart</button>
-                    <button onclick="closeLogPathModal()" class="cancel-btn">Cancel</button>
-                </div>
             </div>
         </div>
     </div>

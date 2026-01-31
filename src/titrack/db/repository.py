@@ -235,7 +235,7 @@ class Repository:
 
     def get_run_summary(self, run_id: int, include_excluded: bool = False) -> dict[int, int]:
         """
-        Get aggregated delta per item for a run.
+        Get aggregated delta per item for a run (excludes map costs).
 
         Args:
             run_id: The run ID to get summary for.
@@ -245,10 +245,12 @@ class Repository:
         Returns:
             Dict mapping config_base_id -> total delta
         """
+        # Always exclude Spv3Open (map costs) from loot summary
         if include_excluded or not EXCLUDED_PAGES:
             rows = self.db.fetchall(
                 """SELECT config_base_id, SUM(delta) as total_delta
-                   FROM item_deltas WHERE run_id = ?
+                   FROM item_deltas
+                   WHERE run_id = ? AND (proto_name IS NULL OR proto_name != 'Spv3Open')
                    GROUP BY config_base_id""",
                 (run_id,),
             )
@@ -256,7 +258,9 @@ class Repository:
             placeholders = ",".join("?" * len(EXCLUDED_PAGES))
             rows = self.db.fetchall(
                 f"""SELECT config_base_id, SUM(delta) as total_delta
-                   FROM item_deltas WHERE run_id = ? AND page_id NOT IN ({placeholders})
+                   FROM item_deltas
+                   WHERE run_id = ? AND page_id NOT IN ({placeholders})
+                   AND (proto_name IS NULL OR proto_name != 'Spv3Open')
                    GROUP BY config_base_id""",
                 (run_id, *EXCLUDED_PAGES),
             )
@@ -717,6 +721,42 @@ class Repository:
                 total_value += price_fe * quantity * tax_multiplier
 
         return raw_fe, total_value
+
+    def get_run_cost(self, run_id: int) -> tuple[dict[int, int], float, list[int]]:
+        """
+        Get map costs for a run (Spv3Open consumption).
+
+        Args:
+            run_id: The run ID to get costs for.
+
+        Returns:
+            Tuple of (cost_summary, total_cost_fe, unpriced_config_ids)
+            - cost_summary: {config_base_id: quantity} (negative values for consumption)
+            - total_cost_fe: Sum of priced items only (absolute value)
+            - unpriced_config_ids: List of items without known prices
+        """
+        rows = self.db.fetchall(
+            """SELECT config_base_id, SUM(delta) as total_delta
+               FROM item_deltas
+               WHERE run_id = ? AND proto_name = 'Spv3Open'
+               GROUP BY config_base_id""",
+            (run_id,),
+        )
+        summary = {row["config_base_id"]: row["total_delta"] for row in rows}
+
+        total_cost = 0.0
+        unpriced: list[int] = []
+        tax_multiplier = self.get_trade_tax_multiplier()
+
+        for config_id, quantity in summary.items():
+            price_fe = self.get_effective_price(config_id)
+            if price_fe and price_fe > 0:
+                # Use absolute value since quantity is negative (consumption)
+                total_cost += abs(quantity) * price_fe * tax_multiplier
+            else:
+                unpriced.append(config_id)
+
+        return summary, total_cost, unpriced
 
     # --- Data Management ---
 

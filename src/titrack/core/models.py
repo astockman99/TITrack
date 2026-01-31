@@ -10,6 +10,7 @@ class EventContext(Enum):
     """Context in which an item change occurred."""
 
     PICK_ITEMS = auto()  # Inside PickItems block (loot pickup)
+    MAP_OPEN = auto()  # Inside Spv3Open block (map opening costs)
     OTHER = auto()  # Any other context (vendor, stash, etc.)
 
 

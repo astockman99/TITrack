@@ -65,7 +65,34 @@ def _build_loot(summary: dict[int, int], repo: Repository) -> list[LootItem]:
     return sorted(loot, key=lambda x: abs(x.quantity), reverse=True)
 
 
-def _consolidate_runs(all_runs_including_hubs: list[Run], repo: Repository) -> list[RunResponse]:
+def _build_cost_items(cost_summary: dict[int, int], repo: Repository) -> list[LootItem]:
+    """Build cost items from a run's map cost summary."""
+    cost_items = []
+    for config_id, quantity in cost_summary.items():
+        if quantity != 0:
+            item = repo.get_item(config_id)
+            item_price_fe = repo.get_effective_price(config_id)
+            # Use absolute quantity for display (costs are negative)
+            abs_qty = abs(quantity)
+            item_total = item_price_fe * abs_qty if item_price_fe else None
+            cost_items.append(
+                LootItem(
+                    config_base_id=config_id,
+                    name=item.name_en if item else f"Unknown {config_id}",
+                    quantity=quantity,  # Keep negative to indicate consumption
+                    icon_url=item.icon_url if item else None,
+                    price_fe=item_price_fe,
+                    total_value_fe=round(item_total, 2) if item_total else None,
+                )
+            )
+    return sorted(cost_items, key=lambda x: abs(x.total_value_fe or 0), reverse=True)
+
+
+def _consolidate_runs(
+    all_runs_including_hubs: list[Run],
+    repo: Repository,
+    map_costs_enabled: bool = False,
+) -> list[RunResponse]:
     """
     Consolidate runs from the same map instance.
 
@@ -136,10 +163,13 @@ def _consolidate_runs(all_runs_including_hubs: list[Run], repo: Repository) -> l
 
             # Aggregate summaries
             combined_summary: dict[int, int] = defaultdict(int)
+            combined_cost_summary: dict[int, int] = defaultdict(int)
             total_fe = 0
             total_value = 0.0
+            total_cost = 0.0
             total_duration = 0.0
             run_ids = []
+            has_unpriced_costs = False
 
             for run in normal_runs:
                 run_ids.append(run.id)
@@ -151,6 +181,24 @@ def _consolidate_runs(all_runs_including_hubs: list[Run], repo: Repository) -> l
                 total_value += value
                 if run.duration_seconds:
                     total_duration += run.duration_seconds
+
+                # Aggregate costs if enabled
+                if map_costs_enabled:
+                    cost_summary, cost_value, unpriced = repo.get_run_cost(run.id)
+                    for config_id, qty in cost_summary.items():
+                        combined_cost_summary[config_id] += qty
+                    total_cost += cost_value
+                    if unpriced:
+                        has_unpriced_costs = True
+
+            # Build cost items if enabled
+            cost_items = None
+            cost_fe = None
+            net_value = None
+            if map_costs_enabled and combined_cost_summary:
+                cost_items = _build_cost_items(dict(combined_cost_summary), repo)
+                cost_fe = round(total_cost, 2)
+                net_value = round(total_value - total_cost, 2)
 
             result.append(
                 RunResponse(
@@ -166,6 +214,10 @@ def _consolidate_runs(all_runs_including_hubs: list[Run], repo: Repository) -> l
                     total_value=round(total_value, 2),
                     loot=_build_loot(dict(combined_summary), repo),
                     consolidated_run_ids=run_ids if len(run_ids) > 1 else None,
+                    map_cost_items=cost_items,
+                    map_cost_fe=cost_fe,
+                    map_cost_has_unpriced=has_unpriced_costs,
+                    net_value_fe=net_value,
                 )
             )
 
@@ -173,6 +225,20 @@ def _consolidate_runs(all_runs_including_hubs: list[Run], repo: Repository) -> l
         for run in nightmare_runs:
             summary = repo.get_run_summary(run.id)
             fe_gained, total_value = repo.get_run_value(run.id)
+
+            # Get costs if enabled
+            cost_items = None
+            cost_fe = None
+            net_value = None
+            has_unpriced_costs = False
+            if map_costs_enabled:
+                cost_summary, cost_value, unpriced = repo.get_run_cost(run.id)
+                if cost_summary:
+                    cost_items = _build_cost_items(cost_summary, repo)
+                    cost_fe = round(cost_value, 2)
+                    net_value = round(total_value - cost_value, 2)
+                    has_unpriced_costs = bool(unpriced)
+
             result.append(
                 RunResponse(
                     id=run.id,
@@ -186,6 +252,10 @@ def _consolidate_runs(all_runs_including_hubs: list[Run], repo: Repository) -> l
                     fe_gained=fe_gained,
                     total_value=round(total_value, 2),
                     loot=_build_loot(summary, repo),
+                    map_cost_items=cost_items,
+                    map_cost_fe=cost_fe,
+                    map_cost_has_unpriced=has_unpriced_costs,
+                    net_value_fe=net_value,
                 )
             )
 
@@ -221,12 +291,15 @@ def list_runs(
     fetch_limit = page_size * 5
     offset = (page - 1) * page_size
 
+    # Check if map costs are enabled
+    map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
+
     # Fetch all runs INCLUDING hubs for session detection
     all_runs = repo.get_recent_runs(limit=fetch_limit + offset * 2)
 
     # Consolidate runs (merges normal runs in same map instance, uses hubs to detect session breaks)
     # This function receives all runs including hubs but only returns non-hub consolidated results
-    consolidated = _consolidate_runs(all_runs, repo)
+    consolidated = _consolidate_runs(all_runs, repo, map_costs_enabled=map_costs_enabled)
 
     # Apply pagination to consolidated results
     paginated = consolidated[offset : offset + page_size]
@@ -245,6 +318,9 @@ def get_stats(
     repo: Repository = Depends(get_repository),
 ) -> RunStatsResponse:
     """Get summary statistics for all runs."""
+    # Check if map costs are enabled
+    map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
+
     all_runs = repo.get_recent_runs(limit=1000)
 
     if exclude_hubs:
@@ -252,6 +328,7 @@ def get_stats(
 
     total_fe = 0
     total_value = 0.0
+    total_cost = 0.0
     total_duration = 0.0
 
     for run in all_runs:
@@ -261,16 +338,24 @@ def get_stats(
         if run.duration_seconds:
             total_duration += run.duration_seconds
 
+        # Subtract costs if enabled
+        if map_costs_enabled:
+            _, cost_value, _ = repo.get_run_cost(run.id)
+            total_cost += cost_value
+
+    # Use net value if costs are enabled
+    net_value = total_value - total_cost if map_costs_enabled else total_value
+
     total_runs = len(all_runs)
     avg_fe = total_fe / total_runs if total_runs > 0 else 0
-    avg_value = total_value / total_runs if total_runs > 0 else 0
+    avg_value = net_value / total_runs if total_runs > 0 else 0
     fe_per_hour = (total_fe / total_duration * 3600) if total_duration > 0 else 0
-    value_per_hour = (total_value / total_duration * 3600) if total_duration > 0 else 0
+    value_per_hour = (net_value / total_duration * 3600) if total_duration > 0 else 0
 
     return RunStatsResponse(
         total_runs=total_runs,
         total_fe=total_fe,
-        total_value=round(total_value, 2),
+        total_value=round(net_value, 2),
         avg_fe_per_run=round(avg_fe, 2),
         avg_value_per_run=round(avg_value, 2),
         total_duration_seconds=round(total_duration, 2),
@@ -295,9 +380,25 @@ def get_active_run(
     if active_run.is_hub:
         return None
 
+    # Check if map costs are enabled
+    map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
+
     # Get loot for this run
     summary = repo.get_run_summary(active_run.id)
     fe_gained, total_value = repo.get_run_value(active_run.id)
+
+    # Get costs if enabled
+    cost_items = None
+    cost_fe = None
+    net_value = None
+    has_unpriced_costs = False
+    if map_costs_enabled:
+        cost_summary, cost_value, unpriced = repo.get_run_cost(active_run.id)
+        if cost_summary:
+            cost_items = _build_cost_items(cost_summary, repo)
+            cost_fe = round(cost_value, 2)
+            net_value = round(total_value - cost_value, 2)
+            has_unpriced_costs = bool(unpriced)
 
     # Calculate duration since run started (use naive datetime to match DB)
     now = datetime.now()
@@ -314,6 +415,10 @@ def get_active_run(
         fe_gained=fe_gained,
         total_value=round(total_value, 2),
         loot=_build_loot(summary, repo),
+        map_cost_items=cost_items,
+        map_cost_fe=cost_fe,
+        map_cost_has_unpriced=has_unpriced_costs,
+        net_value_fe=net_value,
     )
 
 
@@ -348,8 +453,24 @@ def get_run(
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
 
+    # Check if map costs are enabled
+    map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
+
     summary = repo.get_run_summary(run.id)
     fe_gained, total_value = repo.get_run_value(run.id)
+
+    # Get costs if enabled
+    cost_items = None
+    cost_fe = None
+    net_value = None
+    has_unpriced_costs = False
+    if map_costs_enabled:
+        cost_summary, cost_value, unpriced = repo.get_run_cost(run.id)
+        if cost_summary:
+            cost_items = _build_cost_items(cost_summary, repo)
+            cost_fe = round(cost_value, 2)
+            net_value = round(total_value - cost_value, 2)
+            has_unpriced_costs = bool(unpriced)
 
     is_nightmare = run.level_type == LEVEL_TYPE_NIGHTMARE
     zone_name = get_zone_display_name(run.zone_signature, run.level_id)
@@ -368,4 +489,8 @@ def get_run(
         fe_gained=fe_gained,
         total_value=round(total_value, 2),
         loot=_build_loot(summary, repo),
+        map_cost_items=cost_items,
+        map_cost_fe=cost_fe,
+        map_cost_has_unpriced=has_unpriced_costs,
+        net_value_fe=net_value,
     )

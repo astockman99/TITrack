@@ -1166,6 +1166,12 @@ tr.nightmare .zone-name {
     font-size: 1.2rem;
 }
 
+.active-run-value .cost-info {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+
 .active-run-loot {
     display: flex;
     flex-direction: column;
@@ -1227,4 +1233,198 @@ tr.nightmare .zone-name {
     color: var(--text-secondary);
     font-style: italic;
     padding: 10px;
+}
+
+/* Settings Modal */
+.settings-body {
+    padding: 20px;
+}
+
+.settings-section {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.settings-section h4 {
+    color: var(--accent);
+    font-size: 1rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.settings-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    transition: background-color 0.2s;
+}
+
+.settings-toggle:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.settings-toggle:last-of-type {
+    margin-bottom: 0;
+}
+
+.settings-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.toggle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.toggle-label {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.toggle-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.settings-section-actions {
+    margin-top: 15px;
+}
+
+.settings-btn-primary {
+    background: var(--positive);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.settings-btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.settings-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#settings-log-path-current {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+#settings-log-path-current code {
+    background: var(--bg-card);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    word-break: break-all;
+}
+
+/* Map cost display in runs */
+.run-costs {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.run-costs h4 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cost-warning {
+    color: #ffb74d;
+    cursor: help;
+}
+
+.cost-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+}
+
+.cost-item .cost-name {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cost-item .cost-value {
+    color: var(--negative);
+}
+
+.cost-unknown {
+    color: var(--text-secondary);
+    cursor: help;
+    font-style: italic;
+}
+
+.cost-hover {
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+}
+
+.run-summary {
+    margin-top: 15px;
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: 6px;
+}
+
+.run-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.run-summary-row.total {
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    padding-top: 8px;
+    font-weight: bold;
+}
+
+.run-summary-label {
+    color: var(--text-secondary);
+}
+
+.run-summary-value {
+    color: var(--text-primary);
+}
+
+.run-summary-value.negative {
+    color: var(--negative);
+}
+
+.run-summary-value.positive {
+    color: var(--positive);
 }

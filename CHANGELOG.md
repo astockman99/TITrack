@@ -57,6 +57,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3: Manual price editing UI, import/export
 - Phase 4: PyInstaller portable EXE packaging
 
+## [0.2.6] - 2026-01-31
+
+### Added
+- **Map Cost Tracking**: Optional feature to track compass/beacon consumption when opening maps
+  - Enable via Settings modal (gear icon) → "Map Costs" toggle
+  - Captures `Spv3Open` events and associates costs with the next map run
+  - Run values show net profit (gross loot value minus map costs)
+  - Hover over cost values to see breakdown of consumed items
+  - Warning indicator when some cost items have unknown prices
+  - Affects stats: Value/Hour and Value/Map reflect net values
+- **Unified Settings Modal**: New settings panel accessed via gear icon
+  - Trade Tax toggle (moved from header)
+  - Map Costs toggle
+  - Game Directory configuration (moved from separate modal)
+
+### Changed
+- Run details modal now sorts items by FE value (highest first) instead of quantity
+- Run details modal now shows FE value as the primary number, quantity as secondary
+- Trade Tax toggle moved from header to Settings modal
+
 ## [0.2.5] - 2026-01-31
 
 ### Added

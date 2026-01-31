@@ -108,6 +108,9 @@ class Collector:
         self._pending_price_searches: dict[int, tuple[int, datetime]] = {}
         self._pending_price_search_ttl_seconds = 300  # 5 minute TTL for pending searches
 
+        # Map cost tracking: buffer costs until run starts
+        self._pending_map_costs: list[ItemDelta] = []
+
         # InitBagData batch tracking: page_id -> last init timestamp
         # Used to detect new init batches and clear stale slot states
         self._last_init_page: Optional[int] = None
@@ -300,6 +303,8 @@ class Collector:
         if event.is_start:
             if event.proto_name == "PickItems":
                 self._current_context = EventContext.PICK_ITEMS
+            elif event.proto_name == "Spv3Open":
+                self._current_context = EventContext.MAP_OPEN
             self._current_proto_name = event.proto_name
         else:
             self._current_context = EventContext.OTHER
@@ -354,6 +359,11 @@ class Collector:
         if event.is_init:
             return
 
+        # Buffer map costs to associate with next run
+        if self._current_proto_name == "Spv3Open" and delta:
+            self._pending_map_costs.append(delta)
+            return  # Don't persist yet - will attach to next run
+
         # Persist and notify delta
         if delta:
             self.repository.insert_delta(delta)
@@ -390,6 +400,14 @@ class Collector:
         if new_run:
             run_id = self.repository.insert_run(new_run)
             new_run.id = run_id
+
+            # Attach pending map costs to this run (if it's not a hub)
+            if not new_run.is_hub and self._pending_map_costs:
+                for cost_delta in self._pending_map_costs:
+                    cost_delta.run_id = run_id
+                    self.repository.insert_delta(cost_delta)
+                self._pending_map_costs = []
+
             if self._on_run_start:
                 self._on_run_start(new_run)
 

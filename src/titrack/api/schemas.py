@@ -29,9 +29,14 @@ class RunResponse(BaseModel):
     is_hub: bool
     is_nightmare: bool = False  # True if this is a nightmare run (Twinightmare)
     fe_gained: int  # Raw FE currency gained
-    total_value: float  # Total value including priced items
+    total_value: float  # Total value including priced items (gross)
     loot: list[LootItem]
     consolidated_run_ids: Optional[list[int]] = None  # IDs of runs merged into this one
+    # Map cost tracking fields (only populated when map_costs_enabled)
+    map_cost_items: Optional[list[LootItem]] = None  # Items consumed (each item has price_fe=None if unknown)
+    map_cost_fe: Optional[float] = None  # Sum of priced items only
+    map_cost_has_unpriced: bool = False  # True if any items have unknown price
+    net_value_fe: Optional[float] = None  # total_value - map_cost_fe
 
 
 class RunListResponse(BaseModel):
@@ -52,8 +57,13 @@ class ActiveRunResponse(BaseModel):
     start_ts: datetime
     duration_seconds: float  # Time since run started
     fe_gained: int  # Raw FE currency gained so far
-    total_value: float  # Total value including priced items
+    total_value: float  # Total value including priced items (gross)
     loot: list[LootItem]  # Items picked up so far
+    # Map cost tracking fields (only populated when map_costs_enabled)
+    map_cost_items: Optional[list[LootItem]] = None  # Items consumed (each item has price_fe=None if unknown)
+    map_cost_fe: Optional[float] = None  # Sum of priced items only
+    map_cost_has_unpriced: bool = False  # True if any items have unknown price
+    net_value_fe: Optional[float] = None  # total_value - map_cost_fe
 
 
 class RunStatsResponse(BaseModel):
