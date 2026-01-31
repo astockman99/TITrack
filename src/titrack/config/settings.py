@@ -64,12 +64,10 @@ def validate_game_directory(game_dir: str) -> tuple[bool, Optional[Path]]:
         Tuple of (is_valid, log_path) where log_path is the full path if valid
     """
     game_path = Path(game_dir)
-    print(f"game path: {game_path}")
     if not game_path.exists():
         return False, None
 
     log_path = game_path / LOG_RELATIVE_PATH
-    print(f"log path: {log_path}")
     if log_path.exists():
         return True, log_path
 
