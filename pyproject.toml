@@ -31,11 +31,9 @@ dependencies = [
     "pywebview>=5.0.0",
 ]
 
-[project.optional-dependencies.cloud]
-# Cloud sync support (optional - install with: pip install titrack[cloud])
-supabase = ["supabase>=2.0.0"]
-
 [project.optional-dependencies]
+# Cloud sync support (optional - install with: pip install titrack[cloud])
+cloud = ["supabase>=2.0.0"]
 dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
