@@ -82,6 +82,9 @@ ZONE_NAMES = {
     # Secret Realms
     "HD_YingGuangDianTang": "Secret Realm - Invaluable Time",
 
+    # Void Sea
+    "XuHaiZhongGang": "Void Sea Terminal",
+
     # Voidlands (remaining zones without conflicts)
     "DD_QunLangJieXiang": "Voidlands - Grim Alleys",
     "YL_MaNeiLaYuLin": "Voidlands - Filthy Forest",
