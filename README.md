@@ -123,6 +123,12 @@ TITrack.exe --portable
 git clone https://github.com/astockman99/TITrack.git
 cd TITrack
 
+# If Arch-based Linux, create a .venv to install dependencies into:
+python -m venv ./venv
+
+# Activate it (if you're using a Terminal like fish, ensure you use the corresponding activate file):
+./.venv/bin/activate
+
 # Install with dependencies
 pip install -e ".[dev]"
 
@@ -138,6 +144,12 @@ pyinstaller ti_tracker.spec --noconfirm
 ```
 
 The output is in `dist/TITrack/`. Zip this folder for distribution.
+
+### Starting the app on arch-based Linux:
+```bash
+# If you get a GBM buffer error, start the app with the following command (from the directory with the application file):
+env WEBKIT_DISABLE_COMPOSITING_MODE=1 ./TITrack
+```
 
 ## Usage (Development Mode)
 
