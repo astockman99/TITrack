@@ -21,20 +21,88 @@ TITrack is a **Torchlight Infinite Local Loot Tracker** - a Windows desktop appl
 - **Packaging:** PyInstaller (--onedir preferred)
 - **Target:** Windows 10/11
 
-## Build Commands (Planned)
+## Build Commands
 
 ```bash
 # Testing
-pytest tests/                    # Parser unit tests
-pytest tests/e2e/               # End-to-end tests
-
-# Building
-pyinstaller ti_tracker.spec     # Build EXE
+pytest tests/                    # Run all tests
+pytest tests/ -v                # Verbose output
 
 # Linting
 black .
-flake8 .
+ruff check .
+
+# Build main application (PyInstaller)
+python -m PyInstaller ti_tracker.spec --noconfirm
+
+# Build TITrack-Setup.exe (C# portable extractor)
+dotnet publish setup/TITrackSetup.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o setup/publish
+
+# Development server
+python -m titrack serve
+python -m titrack serve --no-window    # Browser mode (for debugging)
 ```
+
+## Release Process
+
+Each release includes two files:
+- `TITrack-Setup.exe` - Recommended for users (avoids Windows MOTW security issues)
+- `TITrack-x.x.x-windows.zip` - For advanced users who prefer manual extraction
+
+### Steps to Release
+
+1. **Update version** in both files:
+   - `pyproject.toml` → `version = "x.x.x"`
+   - `src/titrack/version.py` → `__version__ = "x.x.x"`
+
+2. **Build main application**:
+   ```bash
+   python -m PyInstaller ti_tracker.spec --noconfirm
+   ```
+
+3. **Create ZIP**:
+   ```powershell
+   Compress-Archive -Path dist\TITrack -DestinationPath dist\TITrack-x.x.x-windows.zip -Force
+   ```
+
+4. **Build Setup.exe**:
+   ```bash
+   dotnet publish setup/TITrackSetup.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o setup/publish
+   ```
+
+5. **Commit, tag, and push**:
+   ```bash
+   git add -A && git commit -m "Release vx.x.x"
+   git tag vx.x.x && git push origin master && git push origin vx.x.x
+   ```
+
+6. **Create GitHub release** with both files:
+   ```bash
+   gh release create vx.x.x setup/publish/TITrack-Setup.exe dist/TITrack-x.x.x-windows.zip --title "vx.x.x" --notes "Release notes here"
+   ```
+
+### Code Signing (Optional)
+
+If you have an OV/EV code signing certificate:
+```powershell
+# Sign both executables
+signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a "setup\publish\TITrack-Setup.exe"
+signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a "dist\TITrack\TITrack.exe"
+```
+
+Sign before creating the ZIP and uploading to GitHub.
+
+## Setup Project (TITrack-Setup.exe)
+
+Located in `setup/` folder. A lightweight C# WinForms application (~174 KB) that:
+- Downloads the latest release ZIP from GitHub
+- Extracts to user-chosen location (portable, no installation)
+- Avoids Mark of the Web (MOTW) issues since programmatic downloads aren't marked
+- Optional desktop shortcut creation
+
+The Setup.exe automatically fetches the latest release from GitHub API, so it doesn't need rebuilding for every release unless functionality changes.
+
+**Requirements to build**: .NET 8 SDK (`winget install Microsoft.DotNet.SDK.8`)
 
 ## Architecture
 
@@ -120,11 +188,21 @@ The packaged EXE runs in a native window using pywebview (EdgeChromium on Window
 - **Window title**: "TITrack - Torchlight Infinite Loot Tracker"
 - **Default size**: 1280x800, minimum 800x600
 - **Shutdown**: Closing the window gracefully stops all services
+- **Browser fallback**: If pywebview/pythonnet fails (e.g., due to Windows MOTW blocking DLLs), the app automatically falls back to browser mode with an Exit button
 
 For debugging, run with `--no-window` flag to use browser mode instead:
 ```bash
 TITrack.exe --no-window
 ```
+
+### Windows Mark of the Web (MOTW) Issue
+
+Files downloaded from the internet are marked by Windows as untrusted. This can prevent pythonnet DLLs from loading, causing native window mode to fail.
+
+**Solutions:**
+1. **Use TITrack-Setup.exe** (recommended) - Downloads programmatically, no MOTW
+2. **Unblock after extracting**: `Get-ChildItem -Path "C:\TITrack" -Recurse | Unblock-File`
+3. **Code signing** - Signed executables bypass MOTW restrictions
 
 ## Logging
 
