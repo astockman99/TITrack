@@ -10,8 +10,8 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
 1. Go to [Releases](https://github.com/astockman99/TITrack/releases/latest)
 2. Download `TITrack-x.x.x-windows.zip`
-3. **Right-click the ZIP → Properties → check "Unblock"** (if present) → OK
-4. Extract to any folder (e.g., `C:\TITrack`)
+3. Extract to any folder (e.g., `C:\TITrack`)
+4. **Unblock the files** (see [Windows Defender / SmartScreen](#windows-defender--smartscreen) below)
 5. Run `TITrack.exe`
 6. Log in to your character in Torchlight Infinite
 
@@ -22,8 +22,16 @@ The app opens in a native window. Your data is stored in `%LOCALAPPDATA%\TITrack
 Since TITrack is not code-signed, Windows may show security warnings:
 
 - **SmartScreen warning**: Click "More info" → "Run anyway". This is normal for unsigned applications.
-- **First run may fail**: Windows Defender scans new executables and their DLLs in real-time. The first launch attempt may fail while Defender analyzes the files. **Wait a few seconds and try again** - subsequent launches will work normally.
-- **Unblock the ZIP first**: Right-click the downloaded ZIP → Properties → check "Unblock" before extracting. This removes the "Mark of the Web" that triggers extra security checks.
+- **First run may fail**: Windows marks downloaded files as untrusted ("Mark of the Web"), which can prevent DLLs from loading. If the native window doesn't open, the app will fall back to browser mode.
+
+**To enable native window mode**, unblock all extracted files using PowerShell:
+```powershell
+Get-ChildItem -Path "C:\path\to\TITrack" -Recurse | Unblock-File
+```
+
+Or right-click the folder → Properties → check "Unblock" (if available).
+
+**Note:** Unblocking just the ZIP before extracting is not sufficient - Windows' built-in extractor still marks the extracted files. You must unblock after extracting.
 
 If the app still won't start, check the log file at `data\titrack.log` (beside the EXE) for error details.
 
