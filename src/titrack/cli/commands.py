@@ -744,20 +744,43 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
             cleanup()
 
         logger.info("Opening native window...")
-        window = webview.create_window(
-            "TITrack - Torchlight Infinite Loot Tracker",
-            url,
-            width=1280,
-            height=800,
-            min_size=(800, 600),
-        )
-        window.events.closing += on_closing
+        try:
+            window = webview.create_window(
+                "TITrack - Torchlight Infinite Loot Tracker",
+                url,
+                width=1280,
+                height=800,
+                min_size=(800, 600),
+            )
+            window.events.closing += on_closing
 
-        # This blocks until the window is closed
-        webview.start()
+            # This blocks until the window is closed
+            webview.start()
 
-        logger.info("Application shutdown complete")
-        return 0
+            logger.info("Application shutdown complete")
+            return 0
+        except Exception as webview_error:
+            # pywebview/pythonnet failed - fall back to browser mode
+            logger.warning(f"Native window failed: {webview_error}")
+            logger.info("Falling back to browser mode...")
+
+            # Enable browser mode in app so UI shows Exit button
+            app.state.browser_mode = True
+
+            # Open browser since window mode failed
+            import webbrowser
+            webbrowser.open(url)
+
+            # Keep server running until shutdown is triggered (via UI Exit button or interrupt)
+            logger.info("Running in browser mode. Use Exit button in UI to close.")
+            try:
+                shutdown_event.wait()
+            except KeyboardInterrupt:
+                pass
+
+            server.should_exit = True
+            cleanup()
+            return 0
 
     except Exception as e:
         logger.error(f"Error in window mode: {e}")
