@@ -6,16 +6,27 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
 ## Quick Start (Download)
 
-**No installation required** - just download, extract, and run.
+**No installation required** - portable app, just extract and run.
+
+### Recommended: Use Setup (Easiest)
 
 1. Go to [Releases](https://github.com/astockman99/TITrack/releases/latest)
-2. Download `TITrack-x.x.x-windows.zip`
-3. Extract to any folder (e.g., `C:\TITrack`)
-4. **Unblock the files** (see [Windows Defender / SmartScreen](#windows-defender--smartscreen) below)
-5. Run `TITrack.exe`
+2. Download `TITrack-Setup.exe`
+3. Run it, choose where to extract (e.g., `C:\TITrack`)
+4. Click **Extract**, then **Open Folder**
+5. Run `TITrack.exe` from the extracted folder
 6. Log in to your character in Torchlight Infinite
 
-The app opens in a native window. Your data is stored in `%LOCALAPPDATA%\TITracker\`.
+The Setup downloads and extracts TITrack without Windows security restrictions that can cause issues with manual ZIP extraction.
+
+### Alternative: Manual ZIP Download
+
+1. Download `TITrack-x.x.x-windows.zip` from [Releases](https://github.com/astockman99/TITrack/releases/latest)
+2. Extract to any folder
+3. **Unblock the files** (see [Windows Defender / SmartScreen](#windows-defender--smartscreen) below)
+4. Run `TITrack.exe`
+
+The app opens in a native window. Your data is stored in a `data` folder beside the exe.
 
 ### Windows Defender / SmartScreen
 
