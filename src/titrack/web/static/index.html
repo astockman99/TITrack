@@ -90,7 +90,10 @@
                 </section>
 
                 <section class="panel">
-                    <h2>Recent Runs</h2>
+                    <div class="section-header">
+                        <h2>Recent Runs</h2>
+                        <button class="report-btn" onclick="showLootReport()">Report</button>
+                    </div>
                 <table id="runs-table">
                     <thead>
                         <tr>
@@ -339,6 +342,74 @@
                     </div>
                 </div>
                 <p class="price-history-note">Prices are aggregated from anonymous community submissions. Minimum 3 unique contributors required.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loot-report-modal" class="modal hidden">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3>Loot Report</h3>
+                <button class="close-btn" onclick="closeLootReportModal()">&times;</button>
+            </div>
+            <div id="loot-report-body">
+                <div class="report-summary">
+                    <div class="report-stat">
+                        <span class="report-stat-label">Gross Value</span>
+                        <span id="report-total-value" class="report-stat-value">--</span>
+                    </div>
+                    <div id="report-cost-stat" class="report-stat hidden">
+                        <span class="report-stat-label">Map Costs</span>
+                        <span id="report-map-costs" class="report-stat-value negative">--</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">Profit</span>
+                        <span id="report-profit" class="report-stat-value primary">--</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">Runs</span>
+                        <span id="report-run-count" class="report-stat-value">--</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">Total Time</span>
+                        <span id="report-total-time" class="report-stat-value">--</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">Profit/Hour</span>
+                        <span id="report-profit-per-hour" class="report-stat-value">--</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">Profit/Map</span>
+                        <span id="report-profit-per-map" class="report-stat-value">--</span>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-label">Unique Items</span>
+                        <span id="report-total-items" class="report-stat-value">--</span>
+                    </div>
+                </div>
+                <div class="report-chart-container">
+                    <canvas id="loot-report-chart"></canvas>
+                </div>
+                <div class="report-table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Total Value</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loot-report-table-body">
+                            <tr><td colspan="5" class="loading">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-actions">
+                    <button onclick="exportLootReportCSV()" class="export-btn">Export CSV</button>
+                    <button onclick="closeLootReportModal()" class="cancel-btn">Close</button>
+                </div>
             </div>
         </div>
     </div>

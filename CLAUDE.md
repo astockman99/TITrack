@@ -155,6 +155,8 @@ In development mode (non-frozen), logs also output to console.
 - `GET /api/runs` - List recent runs with pagination
 - `GET /api/runs/active` - Get currently active run with live loot drops
 - `GET /api/runs/stats` - Summary statistics (value/hour, avg per run, etc.)
+- `GET /api/runs/report` - Cumulative loot statistics across all runs
+- `GET /api/runs/report/csv` - Export loot report as CSV file
 - `GET /api/runs/{run_id}` - Get single run details
 - `POST /api/runs/reset` - Clear all run tracking data (preserves prices, items, settings)
 
@@ -193,6 +195,49 @@ In development mode (non-frozen), logs also output to console.
 - **Current Inventory**: Sortable by quantity or value
 - **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
 - **Settings Modal**: Trade Tax toggle, Map Costs toggle, Game Directory configuration
+
+## Loot Report
+
+The "Report" button in the Recent Runs section opens a modal showing cumulative loot statistics across all runs since the last reset.
+
+### Summary Stats
+
+- **Gross Value**: Total value of all loot picked up in maps
+- **Map Costs**: Total cost of compasses/beacons consumed (only shown if Map Costs setting enabled)
+- **Profit**: Gross Value minus Map Costs
+- **Runs**: Number of completed map runs
+- **Total Time**: Combined duration of all map runs
+- **Profit/Hour**: Profit divided by total time spent in maps
+- **Profit/Map**: Average profit per map run
+- **Unique Items**: Number of distinct item types collected
+
+### Chart
+
+A doughnut chart visualizes the top 10 items by value, with remaining items grouped as "Other". The legend shows item names with percentages.
+
+### Table
+
+A scrollable table lists all items with:
+- Icon and name
+- Quantity collected
+- Unit price (from local or cloud pricing)
+- Total value (quantity × unit price)
+- Percentage of total value
+
+Items without known prices show "--" and appear at the bottom.
+
+### CSV Export
+
+Click "Export CSV" to save the report. A native "Save As" dialog lets you choose the file location. The CSV includes:
+- All items with quantities, prices, and values
+- Summary section with all stats
+
+### Data Filtering
+
+- Only includes items picked up during map runs (excludes trade house purchases, crafting, etc.)
+- Excludes map costs (Spv3Open events) from loot totals
+- Excludes gear page items (PageId 100)
+- Respects Trade Tax setting when calculating values
 
 ## Trade Tax
 

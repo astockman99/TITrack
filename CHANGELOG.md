@@ -57,6 +57,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3: Manual price editing UI, import/export
 - Phase 4: PyInstaller portable EXE packaging
 
+## [0.2.7] - 2026-02-01
+
+### Added
+- **Loot Report**: New cumulative loot statistics feature accessible via "Report" button in Recent Runs section
+  - Summary stats: Gross Value, Map Costs (if enabled), Profit, Runs, Total Time, Profit/Hour, Profit/Map, Unique Items
+  - Doughnut chart visualization showing top 10 items by value with "Other" category
+  - Scrollable table with all items: Icon, Name, Quantity, Unit Price, Total Value, Percentage
+  - CSV export with native "Save As" dialog for choosing file location
+  - Only includes items picked up during map runs (excludes trade house purchases)
+- **New API Endpoints**:
+  - `GET /api/runs/report` - Cumulative loot statistics across all runs
+  - `GET /api/runs/report/csv` - Export loot report as CSV file
+
+### Changed
+- Loot report respects trade tax and map cost settings when calculating values
+
 ## [0.2.6] - 2026-01-31
 
 ### Added

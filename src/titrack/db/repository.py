@@ -832,3 +832,190 @@ class Repository:
         if not row:
             return None
         return (Path(row["file_path"]), row["position"], row["file_size"])
+
+    def get_cumulative_loot(
+        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+    ) -> list[dict]:
+        """
+        Get cumulative loot statistics across all runs.
+
+        Aggregates all item deltas (positive quantities only) grouped by config_base_id.
+        Excludes map costs (proto_name='Spv3Open') and gear page (PageId 100).
+
+        Args:
+            season_id: Filter by season (uses context if None)
+            player_id: Filter by player (uses context if None)
+
+        Returns:
+            List of dicts with keys: config_base_id, total_quantity
+        """
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return empty list if no player context is set
+        if self._current_player_id is None and player_id is None:
+            return []
+
+        # Build query with appropriate filters
+        # Only include items picked up during map runs (run_id IS NOT NULL)
+        base_query = """
+            SELECT config_base_id, SUM(delta) as total_quantity
+            FROM item_deltas
+            WHERE run_id IS NOT NULL
+            AND (proto_name IS NULL OR proto_name != 'Spv3Open')
+        """
+
+        params: list = []
+
+        # Filter by season/player
+        if season_id is not None:
+            base_query += " AND (season_id IS NULL OR season_id = ?)"
+            params.append(season_id)
+            base_query += " AND (player_id IS NULL OR player_id = ?)"
+            params.append(player_id or '')
+
+        # Exclude gear page
+        if EXCLUDED_PAGES:
+            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            base_query += f" AND page_id NOT IN ({placeholders})"
+            params.extend(EXCLUDED_PAGES)
+
+        # Group and filter for positive quantities only
+        base_query += " GROUP BY config_base_id HAVING SUM(delta) > 0"
+
+        rows = self.db.fetchall(base_query, tuple(params))
+        return [
+            {"config_base_id": row["config_base_id"], "total_quantity": row["total_quantity"]}
+            for row in rows
+        ]
+
+    def get_completed_run_count(
+        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+    ) -> int:
+        """
+        Get count of completed (non-hub) runs.
+
+        Args:
+            season_id: Filter by season (uses context if None)
+            player_id: Filter by player (uses context if None)
+
+        Returns:
+            Number of completed runs
+        """
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return 0 if no player context is set
+        if self._current_player_id is None and player_id is None:
+            return 0
+
+        if season_id is not None:
+            row = self.db.fetchone(
+                """SELECT COUNT(*) as cnt FROM runs
+                   WHERE end_ts IS NOT NULL AND is_hub = 0
+                   AND (season_id IS NULL OR season_id = ?)
+                   AND (player_id IS NULL OR player_id = ?)""",
+                (season_id, player_id or ''),
+            )
+        else:
+            row = self.db.fetchone(
+                "SELECT COUNT(*) as cnt FROM runs WHERE end_ts IS NOT NULL AND is_hub = 0"
+            )
+        return row["cnt"] if row else 0
+
+    def get_total_run_duration(
+        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+    ) -> float:
+        """
+        Get total duration of all completed (non-hub) runs in seconds.
+
+        Args:
+            season_id: Filter by season (uses context if None)
+            player_id: Filter by player (uses context if None)
+
+        Returns:
+            Total duration in seconds
+        """
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return 0 if no player context is set
+        if self._current_player_id is None and player_id is None:
+            return 0.0
+
+        if season_id is not None:
+            row = self.db.fetchone(
+                """SELECT SUM(
+                       (julianday(end_ts) - julianday(start_ts)) * 86400
+                   ) as total_seconds
+                   FROM runs
+                   WHERE end_ts IS NOT NULL AND is_hub = 0
+                   AND (season_id IS NULL OR season_id = ?)
+                   AND (player_id IS NULL OR player_id = ?)""",
+                (season_id, player_id or ''),
+            )
+        else:
+            row = self.db.fetchone(
+                """SELECT SUM(
+                       (julianday(end_ts) - julianday(start_ts)) * 86400
+                   ) as total_seconds
+                   FROM runs
+                   WHERE end_ts IS NOT NULL AND is_hub = 0"""
+            )
+        return row["total_seconds"] if row and row["total_seconds"] else 0.0
+
+    def get_total_map_costs(
+        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+    ) -> float:
+        """
+        Get total map costs across all runs.
+
+        Args:
+            season_id: Filter by season (uses context if None)
+            player_id: Filter by player (uses context if None)
+
+        Returns:
+            Total map cost in FE
+        """
+        # Use provided values or fall back to context
+        season_id = season_id if season_id is not None else self._current_season_id
+        player_id = player_id if player_id is not None else self._current_player_id
+
+        # Return 0 if no player context is set
+        if self._current_player_id is None and player_id is None:
+            return 0.0
+
+        # Get all map cost deltas (Spv3Open events with run_id)
+        if season_id is not None:
+            rows = self.db.fetchall(
+                """SELECT config_base_id, SUM(delta) as total_delta
+                   FROM item_deltas
+                   WHERE run_id IS NOT NULL AND proto_name = 'Spv3Open'
+                   AND (season_id IS NULL OR season_id = ?)
+                   AND (player_id IS NULL OR player_id = ?)
+                   GROUP BY config_base_id""",
+                (season_id, player_id or ''),
+            )
+        else:
+            rows = self.db.fetchall(
+                """SELECT config_base_id, SUM(delta) as total_delta
+                   FROM item_deltas
+                   WHERE run_id IS NOT NULL AND proto_name = 'Spv3Open'
+                   GROUP BY config_base_id"""
+            )
+
+        total_cost = 0.0
+        tax_multiplier = self.get_trade_tax_multiplier()
+
+        for row in rows:
+            config_id = row["config_base_id"]
+            quantity = row["total_delta"]  # Negative for consumption
+            price_fe = self.get_effective_price(config_id)
+            if price_fe and price_fe > 0:
+                # Use absolute value since quantity is negative
+                total_cost += abs(quantity) * price_fe * tax_multiplier
+
+        return total_cost

@@ -16,6 +16,10 @@ const failedIcons = new Set(); // Track icons that failed to load
 let cumulativeValueChart = null;
 let valueRateChart = null;
 let priceHistoryChart = null;
+let lootReportChart = null;
+
+// Loot report data cache
+let lastLootReportData = null;
 
 // Cloud sync state
 let cloudSyncEnabled = false;
@@ -222,6 +226,10 @@ async function handleMapCostsToggle(event) {
 
 async function fetchCloudPriceHistory(configBaseId) {
     return fetchJson(`/cloud/prices/${configBaseId}/history`);
+}
+
+async function fetchLootReport() {
+    return fetchJson('/runs/report');
 }
 
 async function postResetStats() {
@@ -1241,6 +1249,7 @@ document.addEventListener('keydown', (e) => {
         closeHelpModal();
         closePriceHistoryModal();
         closeSettingsModal();
+        closeLootReportModal();
     }
 });
 
@@ -1377,6 +1386,267 @@ document.addEventListener('click', (e) => {
         closePriceHistoryModal();
     }
 });
+
+// --- Loot Report Modal ---
+
+function formatDurationLong(seconds) {
+    if (!seconds) return '--';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+async function showLootReport() {
+    const modal = document.getElementById('loot-report-modal');
+    const tableBody = document.getElementById('loot-report-table-body');
+
+    // Show loading state
+    tableBody.innerHTML = '<tr><td colspan="5" class="loading">Loading report...</td></tr>';
+    document.getElementById('report-total-value').textContent = '...';
+    document.getElementById('report-profit').textContent = '...';
+    document.getElementById('report-total-items').textContent = '...';
+    document.getElementById('report-run-count').textContent = '...';
+    document.getElementById('report-total-time').textContent = '...';
+    document.getElementById('report-profit-per-hour').textContent = '...';
+    document.getElementById('report-profit-per-map').textContent = '...';
+
+    modal.classList.remove('hidden');
+
+    // Fetch report data
+    const data = await fetchLootReport();
+    lastLootReportData = data;
+
+    if (!data) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading">Failed to load report</td></tr>';
+        return;
+    }
+
+    // Update summary stats
+    document.getElementById('report-total-value').textContent = formatFEValue(data.total_value_fe) + ' FE';
+    document.getElementById('report-profit').textContent = formatFEValue(data.profit_fe) + ' FE';
+    document.getElementById('report-total-items').textContent = formatNumber(data.total_items);
+    document.getElementById('report-run-count').textContent = formatNumber(data.run_count);
+    document.getElementById('report-total-time').textContent = formatDurationLong(data.total_duration_seconds);
+    document.getElementById('report-profit-per-hour').textContent = formatNumber(Math.round(data.profit_per_hour)) + ' FE';
+    document.getElementById('report-profit-per-map').textContent = formatNumber(Math.round(data.profit_per_map)) + ' FE';
+
+    // Show/hide map costs based on setting
+    const costStat = document.getElementById('report-cost-stat');
+    if (data.map_costs_enabled && data.total_map_cost_fe > 0) {
+        document.getElementById('report-map-costs').textContent = '-' + formatFEValue(data.total_map_cost_fe) + ' FE';
+        costStat.classList.remove('hidden');
+    } else {
+        costStat.classList.add('hidden');
+    }
+
+    // Handle empty state
+    if (!data.items || data.items.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading">No loot recorded yet. Complete some runs to see your report.</td></tr>';
+        // Clear any existing chart
+        if (lootReportChart) {
+            lootReportChart.destroy();
+            lootReportChart = null;
+        }
+        return;
+    }
+
+    // Render table
+    tableBody.innerHTML = data.items.map(item => {
+        const iconHtml = getIconHtml(item.config_base_id, 'item-icon');
+        const priceText = item.price_fe !== null ? formatFEValue(item.price_fe) : '<span class="no-price">--</span>';
+        const valueText = item.total_value_fe !== null ? formatFEValue(item.total_value_fe) : '<span class="no-price">--</span>';
+        const percentText = item.percentage !== null ? `${item.percentage.toFixed(1)}%` : '--';
+
+        return `
+            <tr>
+                <td>
+                    <div class="item-col">
+                        ${iconHtml}
+                        <span>${escapeHtml(item.name)}</span>
+                    </div>
+                </td>
+                <td>${formatNumber(item.quantity)}</td>
+                <td>${priceText}</td>
+                <td>${valueText}</td>
+                <td>${percentText}</td>
+            </tr>
+        `;
+    }).join('');
+
+    // Render chart (top 10 items + "Other")
+    renderLootReportChart(data);
+}
+
+function renderLootReportChart(data) {
+    const canvas = document.getElementById('loot-report-chart');
+
+    // Destroy existing chart
+    if (lootReportChart) {
+        lootReportChart.destroy();
+        lootReportChart = null;
+    }
+
+    // Filter items with value and sort by value
+    const pricedItems = data.items.filter(item => item.total_value_fe !== null && item.total_value_fe > 0);
+
+    if (pricedItems.length === 0) {
+        return;
+    }
+
+    // Take top 10, group rest as "Other"
+    const top10 = pricedItems.slice(0, 10);
+    const others = pricedItems.slice(10);
+
+    const labels = top10.map(item => item.name);
+    const values = top10.map(item => item.total_value_fe);
+
+    // Add "Other" category if there are more items
+    if (others.length > 0) {
+        const otherValue = others.reduce((sum, item) => sum + (item.total_value_fe || 0), 0);
+        labels.push(`Other (${others.length} items)`);
+        values.push(otherValue);
+    }
+
+    // Color palette matching app theme
+    const colors = [
+        '#e94560',  // Accent red
+        '#4ecca3',  // Positive green
+        '#ff6b6b',  // Accent secondary
+        '#64b5f6',  // Light blue
+        '#ffb74d',  // Orange
+        '#ba68c8',  // Purple
+        '#4db6ac',  // Teal
+        '#f06292',  // Pink
+        '#7986cb',  // Indigo
+        '#aed581',  // Light green
+        '#9e9e9e',  // Gray (for "Other")
+    ];
+
+    // Include percentage in labels for the legend
+    const labelsWithPercent = labels.map((label, i) => {
+        const total = values.reduce((a, b) => a + b, 0);
+        const percentage = ((values[i] / total) * 100).toFixed(1);
+        const truncLabel = label.length > 18 ? label.substring(0, 16) + '...' : label;
+        return `${truncLabel} (${percentage}%)`;
+    });
+
+    lootReportChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: labelsWithPercent,
+            datasets: [{
+                data: values,
+                backgroundColor: colors.slice(0, labels.length),
+                borderColor: 'rgba(22, 33, 62, 0.8)',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#a0a0a0',
+                        padding: 8,
+                        usePointStyle: true,
+                        font: {
+                            size: 11,
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(22, 33, 62, 0.9)',
+                    titleColor: '#eaeaea',
+                    bodyColor: '#eaeaea',
+                    borderColor: '#2a2a4a',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(ctx) {
+                            const value = ctx.parsed;
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${formatFEValue(value)} FE (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function closeLootReportModal() {
+    document.getElementById('loot-report-modal').classList.add('hidden');
+}
+
+// Close loot report modal on outside click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'loot-report-modal') {
+        closeLootReportModal();
+    }
+});
+
+async function exportLootReportCSV() {
+    if (!lastLootReportData || !lastLootReportData.items) {
+        alert('No data to export');
+        return;
+    }
+
+    try {
+        // Fetch CSV from server
+        const response = await fetch(`${API_BASE}/runs/report/csv`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const csvContent = await response.text();
+        const filename = `titrack-loot-report-${new Date().toISOString().split('T')[0]}.csv`;
+
+        // Try using the File System Access API (modern browsers)
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{
+                        description: 'CSV Files',
+                        accept: { 'text/csv': ['.csv'] },
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(csvContent);
+                await writable.close();
+                showToast(`Exported to ${handle.name}`, 'success');
+                return;
+            } catch (err) {
+                // User cancelled or API not supported, fall through to legacy method
+                if (err.name === 'AbortError') {
+                    return; // User cancelled
+                }
+            }
+        }
+
+        // Fallback: Create blob and download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast(`Exported to Downloads folder as ${filename}`, 'success');
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        showToast('Failed to export CSV', 'error');
+    }
+}
 
 // --- Help Modal ---
 

@@ -170,3 +170,30 @@ class PlayerResponse(BaseModel):
     hero_id: int
     hero_name: str
     player_id: Optional[str] = None
+
+
+class LootReportItem(BaseModel):
+    """Single item in loot report."""
+
+    config_base_id: int
+    name: str
+    quantity: int
+    icon_url: Optional[str] = None
+    price_fe: Optional[float] = None  # Price per unit
+    total_value_fe: Optional[float] = None  # quantity * price
+    percentage: Optional[float] = None  # Percentage of total value
+
+
+class LootReportResponse(BaseModel):
+    """Cumulative loot report across all runs."""
+
+    items: list[LootReportItem]
+    total_value_fe: float  # Gross value of all loot
+    total_map_cost_fe: float  # Total map costs (if enabled)
+    profit_fe: float  # total_value_fe - total_map_cost_fe
+    total_items: int  # Count of unique item types
+    run_count: int
+    total_duration_seconds: float  # Total time spent in maps
+    profit_per_hour: float  # Profit per hour of map time
+    profit_per_map: float  # Average profit per map
+    map_costs_enabled: bool  # Whether map costs are being tracked

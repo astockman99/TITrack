@@ -1428,3 +1428,149 @@ tr.nightmare .zone-name {
 .run-summary-value.positive {
     color: var(--positive);
 }
+
+/* Section Header with Button */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.section-header h2 {
+    margin-bottom: 0;
+}
+
+.report-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.report-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Loot Report Modal */
+#loot-report-body {
+    padding: 20px;
+}
+
+.report-summary {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: var(--bg-card);
+    border-radius: 8px;
+}
+
+.report-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.report-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.report-stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.report-stat-value.primary {
+    color: var(--positive);
+}
+
+.report-stat-value.negative {
+    color: var(--negative);
+}
+
+.report-chart-container {
+    height: 250px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.report-chart-container canvas {
+    max-height: 250px;
+}
+
+/* Ensure Chart.js legend text is visible on dark background */
+#loot-report-chart + div,
+#loot-report-modal .chartjs-legend,
+#loot-report-modal [class*="legend"] {
+    color: var(--text-secondary) !important;
+}
+
+.report-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 1;
+}
+
+.report-table tbody td {
+    padding: 8px 12px;
+}
+
+.report-table .item-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.report-table .item-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: contain;
+    background: var(--bg-card);
+}
+
+.report-table .no-price {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.export-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.export-btn:hover {
+    opacity: 0.9;
+}

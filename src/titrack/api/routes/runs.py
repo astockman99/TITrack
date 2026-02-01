@@ -4,11 +4,15 @@ from collections import defaultdict
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import Response
 from pydantic import BaseModel
+from datetime import date
 
 from titrack.api.schemas import (
     ActiveRunResponse,
     LootItem,
+    LootReportItem,
+    LootReportResponse,
     RunListResponse,
     RunResponse,
     RunStatsResponse,
@@ -440,6 +444,140 @@ def reset_stats(
         success=True,
         runs_deleted=runs_deleted,
         message=f"Cleared {runs_deleted} runs and all associated loot data.",
+    )
+
+
+@router.get("/report", response_model=LootReportResponse)
+def get_loot_report(
+    repo: Repository = Depends(get_repository),
+) -> LootReportResponse:
+    """Get cumulative loot statistics across all runs since last reset."""
+    # Get aggregated loot data
+    cumulative_loot = repo.get_cumulative_loot()
+
+    # Check if map costs are enabled
+    map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
+
+    # Get trade tax multiplier
+    tax_multiplier = repo.get_trade_tax_multiplier()
+
+    # Build report items with pricing
+    items: list[LootReportItem] = []
+    total_value = 0.0
+
+    for loot in cumulative_loot:
+        config_id = loot["config_base_id"]
+        quantity = loot["total_quantity"]
+
+        # Get item metadata
+        item = repo.get_item(config_id)
+
+        # Get price (FE is worth 1:1)
+        if config_id == FE_CONFIG_BASE_ID:
+            price_fe = 1.0
+            item_total = float(quantity)  # FE is not taxed
+        else:
+            price_fe = repo.get_effective_price(config_id)
+            if price_fe and price_fe > 0:
+                item_total = price_fe * quantity * tax_multiplier
+            else:
+                item_total = None
+
+        if item_total:
+            total_value += item_total
+
+        items.append(
+            LootReportItem(
+                config_base_id=config_id,
+                name=item.name_en if item else f"Unknown {config_id}",
+                quantity=quantity,
+                icon_url=item.icon_url if item else None,
+                price_fe=price_fe,
+                total_value_fe=round(item_total, 2) if item_total else None,
+                percentage=None,  # Will be calculated after total is known
+            )
+        )
+
+    # Calculate percentages now that we have total_value
+    if total_value > 0:
+        for item in items:
+            if item.total_value_fe is not None:
+                item.percentage = round((item.total_value_fe / total_value) * 100, 2)
+
+    # Sort by total value (highest first), unpriced items at the end
+    items.sort(key=lambda x: (x.total_value_fe is None, -(x.total_value_fe or 0)))
+
+    # Get run stats
+    run_count = repo.get_completed_run_count()
+    total_duration = repo.get_total_run_duration()
+
+    # Get map costs if enabled
+    total_map_cost = repo.get_total_map_costs() if map_costs_enabled else 0.0
+
+    # Calculate profit
+    profit = total_value - total_map_cost
+
+    # Calculate rates
+    profit_per_hour = (profit / total_duration * 3600) if total_duration > 0 else 0.0
+    profit_per_map = profit / run_count if run_count > 0 else 0.0
+
+    return LootReportResponse(
+        items=items,
+        total_value_fe=round(total_value, 2),
+        total_map_cost_fe=round(total_map_cost, 2),
+        profit_fe=round(profit, 2),
+        total_items=len(items),
+        run_count=run_count,
+        total_duration_seconds=round(total_duration, 2),
+        profit_per_hour=round(profit_per_hour, 2),
+        profit_per_map=round(profit_per_map, 2),
+        map_costs_enabled=map_costs_enabled,
+    )
+
+
+@router.get("/report/csv")
+def export_loot_report_csv(
+    repo: Repository = Depends(get_repository),
+) -> Response:
+    """Export loot report as CSV file."""
+    # Get the report data (reuse the same logic)
+    report = get_loot_report(repo)
+
+    # Build CSV content
+    lines = []
+    lines.append("Item Name,Config ID,Quantity,Unit Price (FE),Total Value (FE),Percentage")
+
+    for item in report.items:
+        name = f'"{item.name.replace(chr(34), chr(34)+chr(34))}"'  # Escape quotes
+        config_id = item.config_base_id
+        quantity = item.quantity
+        unit_price = f"{item.price_fe:.2f}" if item.price_fe is not None else ""
+        total_value = f"{item.total_value_fe:.2f}" if item.total_value_fe is not None else ""
+        percentage = f"{item.percentage:.2f}" if item.percentage is not None else ""
+        lines.append(f"{name},{config_id},{quantity},{unit_price},{total_value},{percentage}")
+
+    # Summary section
+    lines.append("")
+    lines.append("Summary")
+    lines.append(f"Gross Value (FE),{report.total_value_fe:.2f}")
+    if report.map_costs_enabled:
+        lines.append(f"Map Costs (FE),{report.total_map_cost_fe:.2f}")
+    lines.append(f"Profit (FE),{report.profit_fe:.2f}")
+    lines.append(f"Runs,{report.run_count}")
+    lines.append(f"Total Time (seconds),{report.total_duration_seconds:.0f}")
+    lines.append(f"Profit/Hour (FE),{report.profit_per_hour:.2f}")
+    lines.append(f"Profit/Map (FE),{report.profit_per_map:.2f}")
+    lines.append(f"Unique Items,{report.total_items}")
+
+    csv_content = "\n".join(lines)
+    filename = f"titrack-loot-report-{date.today().isoformat()}.csv"
+
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
     )
 
 
