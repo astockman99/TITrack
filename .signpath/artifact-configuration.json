@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "artifact-configurations": {
+    "zip-artifact": {
+      "type": "zip",
+      "content": {
+        "TITrack/TITrack.exe": {
+          "type": "pe",
+          "signing": {
+            "certificate": "release"
+          }
+        }
+      }
+    }
+  }
+}
