@@ -824,6 +824,22 @@ tr.nightmare .zone-name {
     cursor: not-allowed;
 }
 
+.browse-btn {
+    padding: 10px 20px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.browse-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+}
+
 .log-path-status {
     font-size: 0.9rem;
     min-height: 1.5em;

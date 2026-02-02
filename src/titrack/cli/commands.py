@@ -743,6 +743,46 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
             server.should_exit = True
             cleanup()
 
+        # JavaScript API for native dialogs
+        class Api:
+            def __init__(self, window_ref):
+                self._window = window_ref
+
+            def browse_folder(self):
+                """Open a folder browser dialog and return the selected path."""
+                try:
+                    result = self._window[0].create_file_dialog(
+                        webview.FOLDER_DIALOG,
+                        directory='',
+                        allow_multiple=False
+                    )
+                    if result and len(result) > 0:
+                        return result[0]
+                    return None
+                except Exception as e:
+                    logger.error(f"Browse dialog error: {e}")
+                    return None
+
+            def browse_file(self):
+                """Open a file browser dialog for log files."""
+                try:
+                    result = self._window[0].create_file_dialog(
+                        webview.OPEN_DIALOG,
+                        directory='',
+                        allow_multiple=False,
+                        file_types=('Log files (*.log)', 'All files (*.*)')
+                    )
+                    if result and len(result) > 0:
+                        return result[0]
+                    return None
+                except Exception as e:
+                    logger.error(f"Browse dialog error: {e}")
+                    return None
+
+        # Use a list to allow the API to reference the window after creation
+        window_ref = [None]
+        api = Api(window_ref)
+
         logger.info("Opening native window...")
         try:
             window = webview.create_window(
@@ -751,7 +791,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
                 width=1280,
                 height=800,
                 min_size=(800, 600),
+                js_api=api,
             )
+            window_ref[0] = window
             window.events.closing += on_closing
 
             # This blocks until the window is closed

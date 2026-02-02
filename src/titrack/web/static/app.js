@@ -921,6 +921,41 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Browse for game folder using native dialog (only works in pywebview window mode)
+async function browseForGameFolder() {
+    // Check if pywebview API is available
+    if (window.pywebview && window.pywebview.api) {
+        try {
+            const path = await window.pywebview.api.browse_folder();
+            if (path) {
+                document.getElementById('log-directory-input').value = path;
+                // Automatically validate after selection
+                validateLogDirectory();
+            }
+        } catch (e) {
+            console.error('Browse dialog error:', e);
+        }
+    } else {
+        alert('Browse is only available in native window mode.');
+    }
+}
+
+// Initialize browse button visibility (show only if pywebview is available)
+function initBrowseButton() {
+    const browseBtn = document.getElementById('browse-folder-btn');
+    if (browseBtn) {
+        // pywebview.api may not be immediately available, check with a small delay
+        setTimeout(() => {
+            if (window.pywebview && window.pywebview.api) {
+                browseBtn.style.display = 'inline-block';
+            }
+        }, 500);
+    }
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', initBrowseButton);
+
 async function validateLogDirectory() {
     const input = document.getElementById('log-directory-input');
     const status = document.getElementById('log-path-status');

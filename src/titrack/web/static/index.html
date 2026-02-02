@@ -301,6 +301,7 @@
                     <p id="settings-log-path-current">Current: <code id="current-log-path">Loading...</code></p>
                     <div class="log-path-input-group">
                         <input type="text" id="log-directory-input" placeholder="C:\Torchlight Infinite or C:\...\Logs\UE_game.log" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
+                        <button onclick="browseForGameFolder()" class="browse-btn" id="browse-folder-btn" style="display: none;">Browse</button>
                         <button onclick="validateLogDirectory()" class="validate-btn">Validate</button>
                     </div>
                     <p id="log-path-status" class="log-path-status"></p>
