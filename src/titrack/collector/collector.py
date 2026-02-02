@@ -305,6 +305,9 @@ class Collector:
                 self._current_context = EventContext.PICK_ITEMS
             elif event.proto_name == "Spv3Open":
                 self._current_context = EventContext.MAP_OPEN
+                # Clear any previous pending costs - only keep costs from the last Spv3Open block
+                # This handles cancel-and-retry scenarios where items might be logged multiple times
+                self._pending_map_costs = []
             self._current_proto_name = event.proto_name
         else:
             self._current_context = EventContext.OTHER
