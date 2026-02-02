@@ -123,9 +123,11 @@ Five main components:
 
 ## Log Parsing
 
-**Source:** `<SteamLibrary>\steamapps\common\Torchlight Infinite\UE_Game\Torchlight\Saved\Logs\UE_game.log`
+**Log file locations (auto-detected):**
+- **Steam:** `<SteamLibrary>\steamapps\common\Torchlight Infinite\UE_Game\Torchlight\Saved\Logs\UE_game.log`
+- **Standalone client:** `<InstallDir>\Game\UE_game\Torchlight\Saved\Logs\UE_game.log`
 
-**Custom Log Directory:** If the game is installed in a non-standard location, TITrack will prompt for the game directory on startup. The setting is saved to the database (`log_directory` in settings table) and persists across restarts.
+TITrack automatically checks common installation paths for both Steam and the standalone client. If the game is installed in a non-standard location, TITrack will prompt for the game directory on startup. The setting is saved to the database (`log_directory` in settings table) and persists across restarts.
 
 **Key patterns to parse:**
 

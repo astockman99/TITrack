@@ -115,5 +115,5 @@ def validate_log_directory(
         return LogDirectoryValidateResponse(
             valid=False,
             log_path=None,
-            error="Log file not found. Make sure this is the Torchlight Infinite installation directory.",
+            error="Log file not found. You can point to the game folder, the Logs folder, or the UE_game.log file directly.",
         )

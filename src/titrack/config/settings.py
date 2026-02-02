@@ -6,8 +6,9 @@ from pathlib import Path
 from typing import Optional
 
 
-# Common Steam library locations
-STEAM_PATHS = [
+# Common game installation locations (Steam and standalone client)
+GAME_PATHS = [
+    # Steam library locations
     Path("C:/Program Files (x86)/Steam/steamapps/common/Torchlight Infinite"),
     Path("C:/Program Files/Steam/steamapps/common/Torchlight Infinite"),
     Path("D:/Steam/steamapps/common/Torchlight Infinite"),
@@ -18,10 +19,82 @@ STEAM_PATHS = [
     Path("F:/SteamLibrary/steamapps/common/Torchlight Infinite"),
     Path("G:/Steam/steamapps/common/Torchlight Infinite"),
     Path("G:/SteamLibrary/steamapps/common/Torchlight Infinite"),
+    # Standalone client locations
+    Path("C:/Program Files (x86)/Torchlight Infinite"),
+    Path("C:/Program Files/Torchlight Infinite"),
+    Path("D:/Torchlight Infinite"),
+    Path("E:/Torchlight Infinite"),
 ]
 
-# Relative path to log file within game directory
-LOG_RELATIVE_PATH = Path("UE_Game/Torchlight/Saved/Logs/UE_game.log")
+# Keep for backwards compatibility
+STEAM_PATHS = GAME_PATHS
+
+# Relative paths to log file within game directory
+# Steam version uses UE_Game directly, standalone client has Game/UE_game
+LOG_RELATIVE_PATHS = [
+    Path("UE_Game/Torchlight/Saved/Logs/UE_game.log"),  # Steam
+    Path("Game/UE_game/Torchlight/Saved/Logs/UE_game.log"),  # Standalone client
+]
+
+# Keep for backwards compatibility
+LOG_RELATIVE_PATH = LOG_RELATIVE_PATHS[0]
+
+# Log file name
+LOG_FILE_NAME = "UE_game.log"
+
+
+def resolve_log_path(user_path: str) -> Optional[Path]:
+    """
+    Intelligently resolve a user-provided path to the log file.
+
+    Handles various user inputs:
+    - Direct path to UE_game.log file
+    - Path to Logs directory
+    - Path to any parent directory (Saved, Torchlight, UE_Game, game root, etc.)
+
+    Args:
+        user_path: Any path the user provides
+
+    Returns:
+        Path to log file if found, None otherwise
+    """
+    path = Path(user_path)
+
+    if not path.exists():
+        return None
+
+    # Case 1: User pointed directly to the log file
+    if path.is_file() and path.name.lower() == LOG_FILE_NAME.lower():
+        return path
+
+    # Case 2: User pointed to a directory - try to find the log file
+    if path.is_dir():
+        # Check if log file is directly in this directory (e.g., user pointed to Logs folder)
+        direct_log = path / LOG_FILE_NAME
+        if direct_log.exists():
+            return direct_log
+
+        # Try appending known relative paths (user pointed to game root)
+        for relative_path in LOG_RELATIVE_PATHS:
+            log_path = path / relative_path
+            if log_path.exists():
+                return log_path
+
+        # Try partial path matching - user might have pointed to an intermediate directory
+        # e.g., UE_Game, Torchlight, Saved, etc.
+        # Build possible suffixes from the relative paths
+        for relative_path in LOG_RELATIVE_PATHS:
+            parts = relative_path.parts  # e.g., ('UE_Game', 'Torchlight', 'Saved', 'Logs', 'UE_game.log')
+            # Try matching from each part of the relative path
+            for i, part in enumerate(parts[:-1]):  # Exclude the filename
+                if path.name.lower() == part.lower():
+                    # User pointed to this directory, append the rest
+                    remaining = Path(*parts[i + 1 :])
+                    log_path = path / remaining
+                    if log_path.exists():
+                        return log_path
+
+    return None
 
 
 def find_log_file(custom_game_dir: Optional[str] = None) -> Optional[Path]:
@@ -29,45 +102,51 @@ def find_log_file(custom_game_dir: Optional[str] = None) -> Optional[Path]:
     Auto-detect the game log file location.
 
     Checks custom directory first (if provided), then common Steam library locations.
+    Supports both Steam and standalone client folder structures.
+    Handles flexible user input (game root, log directory, or log file path).
 
     Args:
-        custom_game_dir: Custom game installation directory to check first
+        custom_game_dir: Custom path to check first (can be game root, log dir, or log file)
 
     Returns:
         Path to log file if found, None otherwise
     """
-    # Check custom directory first if provided
+    # Check custom directory first if provided (with smart resolution)
     if custom_game_dir:
-        custom_path = Path(custom_game_dir) / LOG_RELATIVE_PATH
-        if custom_path.exists():
-            return custom_path
+        resolved = resolve_log_path(custom_game_dir)
+        if resolved:
+            return resolved
 
-    # Fall back to common Steam paths
-    for steam_path in STEAM_PATHS:
-        log_path = steam_path / LOG_RELATIVE_PATH
-        if log_path.exists():
-            return log_path
+    # Fall back to common game installation paths (try all relative paths for each)
+    for game_path in GAME_PATHS:
+        for relative_path in LOG_RELATIVE_PATHS:
+            log_path = game_path / relative_path
+            if log_path.exists():
+                return log_path
     return None
 
 
 def validate_game_directory(game_dir: str) -> tuple[bool, Optional[Path]]:
     """
-    Validate that a directory contains the game log file.
+    Validate that a path can be resolved to the game log file.
+
+    Handles flexible user input:
+    - Game installation root directory
+    - Direct path to the log file
+    - Path to the Logs directory
+    - Path to any intermediate directory (UE_Game, Torchlight, Saved, etc.)
+
+    Supports both Steam and standalone client folder structures.
 
     Args:
-        game_dir: Path to the game installation directory
+        game_dir: Path provided by user (can be game root, log dir, or log file)
 
     Returns:
         Tuple of (is_valid, log_path) where log_path is the full path if valid
     """
-    game_path = Path(game_dir)
-    if not game_path.exists():
-        return False, None
-
-    log_path = game_path / LOG_RELATIVE_PATH
-    if log_path.exists():
+    log_path = resolve_log_path(game_dir)
+    if log_path:
         return True, log_path
-
     return False, None
 
 

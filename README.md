@@ -48,7 +48,7 @@ If the app still won't start, check the log file at `data\titrack.log` (beside t
 
 ### First Time Setup
 
-1. **Game Location**: If TI is installed in a non-standard location, TITrack will prompt you to select the game folder
+1. **Game Location**: TITrack auto-detects Steam and standalone client installations. If needed, it will prompt you to select the game folder
 2. **Character Detection**: Log in (or relog) your character after starting TITrack
 3. **Inventory Sync**: Click the **Sort** button in your bag to capture your full inventory
 4. **Learn Prices**: Search items on the in-game Exchange - prices are captured automatically
@@ -114,7 +114,7 @@ TITrack.exe --portable
 
 - Python 3.11 or higher
 - Windows 10/11
-- Torchlight Infinite installed via Steam
+- Torchlight Infinite (Steam or standalone client)
 
 ### Setup
 
@@ -154,7 +154,7 @@ python -m titrack serve --no-browser       # Don't open browser
 
 **Important**: After starting the tracker, you must **log in (or relog) your character** in-game for tracking to begin. The dashboard will show "Waiting for character login..." until a character is detected.
 
-**Custom Install Location**: If Torchlight Infinite is installed in a non-standard location, TITrack will prompt you to enter the game directory. The setting is saved and persists across restarts.
+**Custom Install Location**: TITrack auto-detects common Steam and standalone client installation paths. If your game is installed elsewhere, TITrack will prompt you to enter the game directory. The setting is saved and persists across restarts.
 
 The dashboard shows:
 - **Header Stats**: Total FE, Net Worth, Value/Hour, Runs, Learned Prices

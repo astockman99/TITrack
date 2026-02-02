@@ -300,11 +300,11 @@
                     <h4>Game Directory</h4>
                     <p id="settings-log-path-current">Current: <code id="current-log-path">Loading...</code></p>
                     <div class="log-path-input-group">
-                        <input type="text" id="log-directory-input" placeholder="C:\Program Files (x86)\Steam\steamapps\common\Torchlight Infinite" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
+                        <input type="text" id="log-directory-input" placeholder="C:\Torchlight Infinite or C:\...\Logs\UE_game.log" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
                         <button onclick="validateLogDirectory()" class="validate-btn">Validate</button>
                     </div>
                     <p id="log-path-status" class="log-path-status"></p>
-                    <p class="help-note">The log file should be at: [game folder]\UE_Game\Torchlight\Saved\Logs\UE_game.log</p>
+                    <p class="help-note">You can enter the game folder, the Logs folder, or the full path to UE_game.log</p>
                     <div class="settings-section-actions">
                         <button onclick="saveLogDirectory()" id="save-log-dir-btn" class="settings-btn-primary" disabled>Save & Restart</button>
                     </div>
