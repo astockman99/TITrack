@@ -129,6 +129,8 @@ Five main components:
 
 TITrack automatically checks common installation paths for both Steam and the standalone client. If the game is installed in a non-standard location, TITrack will prompt for the game directory on startup. The setting is saved to the database (`log_directory` in settings table) and persists across restarts.
 
+**Flexible path input:** Users can provide the game root folder, the Logs folder, or the direct path to `UE_game.log` - TITrack will resolve any of these to the correct log file location.
+
 **Key patterns to parse:**
 
 ```text
@@ -274,7 +276,7 @@ In development mode (non-frozen), logs also output to console.
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
 - **Current Inventory**: Sortable by quantity or value
 - **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
-- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Game Directory configuration
+- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Game Directory configuration (with Browse button in native window mode)
 
 ## Loot Report
 
