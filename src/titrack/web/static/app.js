@@ -956,8 +956,41 @@ function initBrowseButton() {
     }
 }
 
+// Initialize overlay button visibility (show only if pywebview is available)
+function initOverlayButton() {
+    const overlayBtn = document.getElementById('overlay-btn');
+    if (overlayBtn) {
+        // pywebview.api may not be immediately available, check with a small delay
+        setTimeout(() => {
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.launch_overlay) {
+                overlayBtn.classList.remove('hidden');
+            }
+        }, 500);
+    }
+}
+
+// Launch the mini overlay window
+async function launchOverlay() {
+    if (window.pywebview && window.pywebview.api && window.pywebview.api.launch_overlay) {
+        try {
+            const result = await window.pywebview.api.launch_overlay();
+            if (result) {
+                showToast('Overlay opened', 'success');
+            } else {
+                showToast('Could not open overlay', 'error');
+            }
+        } catch (e) {
+            console.error('Error launching overlay:', e);
+            showToast('Failed to launch overlay', 'error');
+        }
+    } else {
+        showToast('Overlay is only available in native window mode', 'info');
+    }
+}
+
 // Call on page load
 document.addEventListener('DOMContentLoaded', initBrowseButton);
+document.addEventListener('DOMContentLoaded', initOverlayButton);
 
 async function validateLogDirectory() {
     const input = document.getElementById('log-directory-input');

@@ -1,0 +1,362 @@
+/* TITrack Mini-Overlay Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 12px;
+    color: #eaeaea;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Opaque mode (default) */
+body.opaque {
+    background: #1a1a2e;
+}
+
+body.opaque .overlay-container {
+    background: #1a1a2e;
+}
+
+/* Transparent mode - uses chroma key (magenta #00ff00 becomes transparent) */
+body.transparent {
+    background: #00ff00 !important;
+}
+
+body.transparent .overlay-container {
+    background: #00ff00 !important;
+}
+
+body.transparent .overlay-header {
+    background: #00ff00 !important;
+}
+
+body.transparent .stats-grid {
+    background: #00ff00 !important;
+}
+
+body.transparent .stats-grid .stat-item {
+    background: #00ff00 !important;
+}
+
+body.transparent .current-run-section {
+    background: #00ff00 !important;
+}
+
+body.transparent .active-run {
+    background: #00ff00 !important;
+}
+
+body.transparent .no-run {
+    background: #00ff00 !important;
+}
+
+body.transparent .loot-item {
+    border-bottom-color: #00ff00;
+}
+
+/* Text shadows for readability in transparent mode */
+body.transparent .header-stat-label,
+body.transparent .header-stat-value,
+body.transparent .stat-label,
+body.transparent .stat-value,
+body.transparent .zone-name,
+body.transparent .run-duration,
+body.transparent .loot-name,
+body.transparent .loot-qty,
+body.transparent .loot-value,
+body.transparent .no-run-text,
+body.transparent .control-btn {
+    text-shadow:
+        0 0 3px rgba(0, 0, 0, 0.9),
+        0 0 6px rgba(0, 0, 0, 0.7),
+        1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.overlay-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 8px;
+}
+
+/* Header */
+.overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background: rgba(42, 42, 74, 0.5);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    /* Enable window dragging */
+    -webkit-app-region: drag;
+}
+
+.header-stat {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.header-stat-label {
+    font-size: 9px;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.header-stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e94560;
+}
+
+.header-controls {
+    display: flex;
+    gap: 4px;
+    /* Exclude buttons from drag */
+    -webkit-app-region: no-drag;
+}
+
+.control-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.transparency-btn {
+    background: rgba(78, 204, 163, 0.3);
+    color: #4ecca3;
+}
+
+.transparency-btn:hover {
+    background: rgba(78, 204, 163, 0.5);
+}
+
+body.transparent .transparency-btn {
+    background: rgba(233, 69, 96, 0.3);
+    color: #e94560;
+}
+
+body.transparent .transparency-btn:hover {
+    background: rgba(233, 69, 96, 0.5);
+}
+
+.close-btn {
+    background: rgba(233, 69, 96, 0.3);
+    color: #e94560;
+}
+
+.close-btn:hover {
+    background: rgba(233, 69, 96, 0.6);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.stat-item {
+    background: rgba(42, 42, 74, 0.5);
+    border-radius: 4px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 10px;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #eaeaea;
+}
+
+/* Primary stat highlight (This Run value) */
+.stat-item.primary .stat-value {
+    color: #4ecca3;
+}
+
+/* Current Run Section */
+.current-run-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: rgba(42, 42, 74, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.active-run {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 8px;
+}
+
+.active-run.hidden {
+    display: none;
+}
+
+.run-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.active-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ecca3;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.zone-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.run-duration {
+    color: #a0a0a0;
+    font-size: 11px;
+}
+
+/* Loot List */
+.loot-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.loot-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(42, 42, 74, 0.5);
+}
+
+.loot-item:last-child {
+    border-bottom: none;
+}
+
+.loot-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.loot-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #d0d0d0;
+}
+
+.loot-qty {
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+}
+
+.loot-value {
+    min-width: 50px;
+    text-align: right;
+    color: #a0a0a0;
+    font-size: 10px;
+}
+
+/* Positive/Negative values */
+.positive {
+    color: #4ecca3;
+}
+
+.negative {
+    color: #e94560;
+}
+
+.loot-item.negative .loot-name {
+    color: #e94560;
+}
+
+/* No Active Run */
+.no-run {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+}
+
+.no-run-text {
+    color: #606070;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Scrollbar styling */
+.loot-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.loot-list::-webkit-scrollbar-track {
+    background: rgba(42, 42, 74, 0.3);
+}
+
+.loot-list::-webkit-scrollbar-thumb {
+    background: rgba(78, 204, 163, 0.5);
+    border-radius: 2px;
+}
+
+.loot-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(78, 204, 163, 0.7);
+}
+
+/* Cost warning icon */
+.cost-warning {
+    color: #ffb74d;
+    cursor: help;
+}
+
+/* Cost hover tooltip */
+.cost-hover {
+    cursor: help;
+    text-decoration: underline dotted;
+}

@@ -22,6 +22,7 @@ ALLOWED_SETTINGS = {
     "log_directory",
     "trade_tax_enabled",
     "map_costs_enabled",
+    "overlay_transparent",
 }
 
 # Settings that are read-only via API (can be read but not written)

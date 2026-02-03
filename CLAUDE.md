@@ -208,6 +208,50 @@ Files downloaded from the internet are marked by Windows as untrusted. This can 
 2. **Unblock after extracting**: `Get-ChildItem -Path "C:\TITrack" -Recurse | Unblock-File`
 3. **Code signing** - Signed executables bypass MOTW restrictions
 
+## Mini-Overlay Mode
+
+TITrack includes a compact always-on-top overlay window designed for users without multiple monitors who want to see stats while playing.
+
+### Features
+
+- **Always-on-top**: Stays above the game window
+- **Compact layout**: ~320x500px showing essential stats
+- **Frameless window**: Clean look without title bar, draggable via header
+- **Fast refresh**: Updates every 2 seconds
+- **Displays**:
+  - All 6 header stats (Net Worth, Value/Hour, Value/Map, Runs, Avg Time, Total Time)
+  - Current run zone, duration, and value
+  - Top 10 loot drops by value during active run
+
+### Launch Methods
+
+**CLI flags**:
+```bash
+TITrack.exe --overlay        # Main window + overlay
+TITrack.exe --overlay-only   # Just the overlay (no main dashboard)
+```
+
+**From UI**: Click the "Overlay" button in the dashboard header (only visible in native window mode).
+
+### Transparency Toggle (Not Yet Working)
+
+The overlay includes a "T" button intended to toggle between opaque and transparent modes. **However, transparency is not yet functional** due to WebView2 rendering limitations on Windows.
+
+**Current status**: Clicking "T" changes the CSS background to the chroma key color (green), but WinForms `TransparencyKey` does not work with WebView2's DirectComposition/Direct3D rendering pipeline. The overlay becomes unresponsive when transparency is toggled.
+
+**Attempted approaches**:
+- Win32 `SetLayeredWindowAttributes` with `LWA_COLORKEY` - doesn't work with WebView2's hardware-accelerated rendering
+- WinForms `TransparencyKey` + `BackColor` - causes WebView2 to become unresponsive
+- Setting `WebView2.DefaultBackgroundColor` - also causes rendering issues
+
+**Potential solutions to explore**:
+- Use MSHTML backend instead of EdgeChromium (older IE renderer supports TransparencyKey)
+- Disable WebView2 hardware acceleration
+- Use a different windowing framework entirely
+- Accept opaque-only mode as a limitation
+
+For now, the overlay works in **opaque mode only**. The transparency toggle button is present but non-functional.
+
 ## Single Instance Enforcement
 
 TITrack prevents multiple instances from running simultaneously to avoid duplicate data (e.g., map costs being recorded twice).

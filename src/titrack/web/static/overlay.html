@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TITrack Overlay</title>
+    <link rel="stylesheet" href="overlay.css">
+</head>
+<body class="opaque">
+    <div class="overlay-container">
+        <header class="overlay-header">
+            <div class="header-stat">
+                <span class="header-stat-label">Net Worth</span>
+                <span id="net-worth" class="header-stat-value">0</span>
+            </div>
+            <div class="header-controls">
+                <button class="control-btn transparency-btn" onclick="toggleTransparency()" title="Toggle transparency">
+                    <span id="transparency-icon">T</span>
+                </button>
+                <button class="control-btn close-btn" onclick="closeOverlay()" title="Close overlay">&times;</button>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-item primary">
+                <span class="stat-label">This Run</span>
+                <span id="current-run-value" class="stat-value">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Value/Hour</span>
+                <span id="value-per-hour" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Value/Map</span>
+                <span id="value-per-map" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Runs</span>
+                <span id="total-runs" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Avg Time</span>
+                <span id="avg-run-time" class="stat-value">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Time</span>
+                <span id="total-time" class="stat-value">--</span>
+            </div>
+        </div>
+
+        <div class="current-run-section">
+            <div id="active-run-panel" class="active-run hidden">
+                <div class="run-header">
+                    <span class="active-indicator"></span>
+                    <span id="active-run-zone" class="zone-name">--</span>
+                    <span id="active-run-duration" class="run-duration">--</span>
+                </div>
+                <div id="active-run-loot" class="loot-list">
+                    <!-- Live drops will appear here -->
+                </div>
+            </div>
+            <div id="no-active-run" class="no-run">
+                <span class="no-run-text">No active run</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="overlay.js"></script>
+</body>
+</html>

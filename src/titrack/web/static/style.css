@@ -329,7 +329,8 @@ tbody tr:last-child td {
 
 .reset-btn,
 .help-btn,
-.settings-btn {
+.settings-btn,
+.overlay-btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--text-secondary);
@@ -355,6 +356,11 @@ tbody tr:last-child td {
     color: #64b5f6;
 }
 
+.overlay-btn:hover {
+    border-color: var(--positive);
+    color: var(--positive);
+}
+
 .settings-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
@@ -362,7 +368,8 @@ tbody tr:last-child td {
 
 .reset-btn:disabled,
 .help-btn:disabled,
-.settings-btn:disabled {
+.settings-btn:disabled,
+.overlay-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -1321,6 +1328,12 @@ tr.nightmare .zone-name {
 
 .settings-section-actions {
     margin-top: 15px;
+}
+
+.settings-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
 }
 
 .settings-btn-primary {

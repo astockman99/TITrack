@@ -455,9 +455,13 @@ def cmd_serve(args: argparse.Namespace) -> int:
     # Check if we should use native window mode
     use_window = is_frozen() and not getattr(args, 'no_window', False)
 
+    # Check for overlay-only mode
+    overlay_only = getattr(args, 'overlay_only', False)
+    show_overlay = getattr(args, 'overlay', False) or overlay_only
+
     if use_window:
         # Try window mode - it will fall back to browser mode on failure
-        return _serve_with_window(args, settings, logger)
+        return _serve_with_window(args, settings, logger, show_overlay=show_overlay, overlay_only=overlay_only)
     else:
         args.browser_mode = False
         return _serve_browser_mode(args, settings, logger)
@@ -618,7 +622,161 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
     return 0
 
 
-def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> int:
+# Chroma key color for transparent overlay (green #00ff00)
+# Used by CSS and WinForms TransparencyKey
+CHROMA_KEY_COLOR_RGB = (0, 255, 0)  # RGB tuple for green
+
+
+def _find_webview2_control(root):
+    """Recursively find Microsoft.Web.WebView2.WinForms.WebView2 control in a form."""
+    try:
+        type_name = root.GetType().FullName
+        if "WebView2" in type_name:
+            return root
+    except Exception:
+        pass
+
+    try:
+        for child in root.Controls:
+            found = _find_webview2_control(child)
+            if found is not None:
+                return found
+    except Exception:
+        pass
+
+    return None
+
+
+def _get_winforms_form(window, logger=None):
+    """Get the WinForms Form from a pywebview window.
+
+    Tries multiple approaches since pywebview's internal structure varies.
+    """
+    def log(msg):
+        if logger:
+            logger.info(msg)
+
+    # Try window.native (pywebview 5.x+)
+    form = getattr(window, 'native', None)
+    if form is not None:
+        log("Found form via window.native")
+        return form
+
+    # Try window.gui.BrowserForm (older pywebview)
+    gui = getattr(window, 'gui', None)
+    if gui is not None:
+        form = getattr(gui, 'BrowserForm', None)
+        if form is not None:
+            log("Found form via window.gui.BrowserForm")
+            return form
+        form = getattr(gui, 'form', None)
+        if form is not None:
+            log("Found form via window.gui.form")
+            return form
+
+    log("Could not find WinForms form")
+    return None
+
+
+def _remove_chroma_key(window, logger=None) -> bool:
+    """Remove chroma key transparency from a pywebview window on Windows.
+
+    Resets the TransparencyKey to disable color keying.
+    """
+    def log(msg):
+        if logger:
+            logger.info(msg)
+        else:
+            print(msg)
+
+    try:
+        form = _get_winforms_form(window, logger)
+        if form is None:
+            log("Remove chroma key: Could not get WinForms form")
+            return False
+
+        try:
+            from System.Drawing import Color
+            from System import Action
+        except ImportError as e:
+            log(f"Remove chroma key: Could not import .NET types: {e}")
+            return False
+
+        # Marshal to UI thread using Invoke
+        def do_remove():
+            # Only reset TransparencyKey
+            form.TransparencyKey = Color.Empty
+
+        if form.InvokeRequired:
+            form.Invoke(Action(do_remove))
+        else:
+            do_remove()
+
+        log("Remove chroma key: Reset TransparencyKey to Empty")
+        return True
+
+    except Exception as e:
+        log(f"Remove chroma key: Exception - {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def _apply_chroma_key(window, logger=None) -> bool:
+    """Apply chroma key (color key) transparency to a pywebview window on Windows.
+
+    This makes the green color (#00ff00) fully transparent while preserving
+    mouse input on non-transparent areas.
+
+    Uses WinForms TransparencyKey combined with WebView2.DefaultBackgroundColor
+    to achieve true transparency with the EdgeChromium backend.
+    """
+    def log(msg):
+        if logger:
+            logger.info(msg)
+        else:
+            print(msg)
+
+    try:
+        form = _get_winforms_form(window, logger)
+        if form is None:
+            log("Chroma key: Could not get WinForms form")
+            return False
+
+        # Import .NET types via pythonnet
+        try:
+            from System.Drawing import Color
+            from System import Action
+        except ImportError as e:
+            log(f"Chroma key: Could not import .NET types: {e}")
+            return False
+
+        # Create the chroma key color (green #00ff00)
+        r, g, b = CHROMA_KEY_COLOR_RGB
+        key_color = Color.FromArgb(255, r, g, b)
+
+        # Marshal to UI thread using Invoke
+        def do_apply():
+            # Only set TransparencyKey - CSS handles the green background
+            form.TransparencyKey = key_color
+
+        if form.InvokeRequired:
+            log("Chroma key: Marshaling to UI thread via Invoke")
+            form.Invoke(Action(do_apply))
+        else:
+            do_apply()
+
+        log(f"Chroma key: Set form.TransparencyKey to green ({r}, {g}, {b})")
+        return True
+
+    except Exception as e:
+        log(f"Chroma key: Exception - {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False, overlay_only: bool = False) -> int:
     """Run server with native window using pywebview."""
     # Test pywebview/pythonnet availability early, before starting any resources
     try:
@@ -802,8 +960,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
 
         # JavaScript API for native dialogs
         class Api:
-            def __init__(self, window_ref):
+            def __init__(self, window_ref, overlay_ref):
                 self._window = window_ref
+                self._overlay = overlay_ref
 
             def browse_folder(self):
                 """Open a folder browser dialog and return the selected path."""
@@ -836,24 +995,116 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger) -> 
                     logger.error(f"Browse dialog error: {e}")
                     return None
 
-        # Use a list to allow the API to reference the window after creation
+            def launch_overlay(self):
+                """Launch the mini-overlay window."""
+                try:
+                    if self._overlay[0] is not None:
+                        # Overlay already exists, bring to front
+                        logger.info("Overlay already open")
+                        return True
+
+                    overlay_url = f"{url}/overlay.html"
+                    overlay = webview.create_window(
+                        "TITrack Overlay",
+                        overlay_url,
+                        width=320,
+                        height=500,
+                        min_size=(280, 300),
+                        on_top=True,
+                        frameless=True,
+                        js_api=self,
+                    )
+                    self._overlay[0] = overlay
+                    # Chroma key is applied via toggle_overlay_transparency(), not on creation
+
+                    def on_overlay_closing():
+                        logger.info("Overlay window closed")
+                        self._overlay[0] = None
+
+                    overlay.events.closing += on_overlay_closing
+                    logger.info("Overlay window launched")
+                    return True
+                except Exception as e:
+                    logger.error(f"Error launching overlay: {e}")
+                    return False
+
+            def close_overlay(self):
+                """Close the overlay window."""
+                try:
+                    if self._overlay[0] is not None:
+                        self._overlay[0].destroy()
+                        self._overlay[0] = None
+                        return True
+                    return False
+                except Exception as e:
+                    logger.error(f"Error closing overlay: {e}")
+                    return False
+
+            def toggle_overlay_transparency(self, enabled: bool):
+                """Enable or disable chroma key transparency on the overlay window."""
+                try:
+                    overlay = self._overlay[0]
+                    if overlay is None:
+                        logger.warning("toggle_overlay_transparency: No overlay window")
+                        return False
+
+                    if enabled:
+                        # Apply chroma key
+                        return _apply_chroma_key(overlay, logger)
+                    else:
+                        # Remove chroma key by resetting TransparencyKey
+                        return _remove_chroma_key(overlay, logger)
+                except Exception as e:
+                    logger.error(f"Error toggling overlay transparency: {e}")
+                    return False
+
+        # Use lists to allow the API to reference windows after creation
         window_ref = [None]
-        api = Api(window_ref)
+        overlay_ref = [None]
+        api = Api(window_ref, overlay_ref)
 
         logger.info("Opening native window...")
         try:
-            window = webview.create_window(
-                "TITrack - Torchlight Infinite Loot Tracker",
-                url,
-                width=1280,
-                height=800,
-                min_size=(800, 600),
-                js_api=api,
-            )
-            window_ref[0] = window
-            window.events.closing += on_closing
+            # Create main window unless overlay-only mode
+            if not overlay_only:
+                window = webview.create_window(
+                    "TITrack - Torchlight Infinite Loot Tracker",
+                    url,
+                    width=1280,
+                    height=800,
+                    min_size=(800, 600),
+                    js_api=api,
+                )
+                window_ref[0] = window
+                window.events.closing += on_closing
 
-            # This blocks until the window is closed
+            # Create overlay window if requested
+            if show_overlay:
+                overlay_url = f"{url}/overlay.html"
+                overlay = webview.create_window(
+                    "TITrack Overlay",
+                    overlay_url,
+                    width=320,
+                    height=500,
+                    min_size=(280, 300),
+                    on_top=True,
+                    frameless=True,
+                    js_api=api,
+                )
+                # Chroma key is applied via toggle_overlay_transparency(), not on creation
+                overlay_ref[0] = overlay
+
+                def on_overlay_closing():
+                    logger.info("Overlay window closed")
+                    overlay_ref[0] = None
+                    # If overlay-only mode, trigger shutdown when overlay closes
+                    if overlay_only:
+                        on_closing()
+
+                overlay.events.closing += on_overlay_closing
+                logger.info("Overlay window created")
+
+            # This blocks until all windows are closed
             webview.start()
 
             logger.info("Application shutdown complete")
@@ -990,6 +1241,16 @@ def create_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run in browser mode instead of native window (useful for debugging)",
     )
+    serve_parser.add_argument(
+        "--overlay",
+        action="store_true",
+        help="Open mini-overlay window alongside main window",
+    )
+    serve_parser.add_argument(
+        "--overlay-only",
+        action="store_true",
+        help="Open only the mini-overlay window (no main dashboard)",
+    )
 
     return parser
 
@@ -1013,6 +1274,8 @@ def main() -> int:
             args.no_browser = True  # Window mode handles its own display
             args.no_window = False  # Use native window by default
             args.portable = True  # Force portable mode for frozen exe
+            args.overlay = False  # No overlay by default
+            args.overlay_only = False
         else:
             parser.print_help()
             return 0
