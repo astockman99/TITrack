@@ -13,14 +13,16 @@ from titrack.db.schema import ALL_CREATE_STATEMENTS, SCHEMA_VERSION
 class Database:
     """SQLite database connection manager with thread safety."""
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Path, auto_seed: bool = True) -> None:
         """
         Initialize database connection.
 
         Args:
             db_path: Path to SQLite database file
+            auto_seed: If True, auto-seed items on first run. Set to False for tests.
         """
         self.db_path = db_path
+        self._auto_seed = auto_seed
         self._connection: sqlite3.Connection | None = None
         self._lock = threading.Lock()
 
@@ -63,7 +65,8 @@ class Database:
         )
 
         # Auto-seed items if table is empty (first run experience)
-        self._auto_seed_items(cursor)
+        if self._auto_seed:
+            self._auto_seed_items(cursor)
 
     def _run_migrations(self, cursor: sqlite3.Cursor) -> None:
         """Run database migrations for schema changes."""

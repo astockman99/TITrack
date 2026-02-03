@@ -23,7 +23,7 @@ def db():
     """Create a temporary database for each test."""
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test.db"
-        database = Database(db_path)
+        database = Database(db_path, auto_seed=False)
         database.connect()
         yield database
         database.close()
@@ -32,7 +32,10 @@ def db():
 @pytest.fixture
 def repo(db):
     """Create a repository for each test."""
-    return Repository(db)
+    repo = Repository(db)
+    # Set a test player context so queries return results
+    repo.set_player_context(season_id=1, player_id="test_player")
+    return repo
 
 
 class TestSettingsRepository:

@@ -10,13 +10,24 @@ from titrack.core.models import EventContext, Item, ItemDelta, Price, Run, SlotS
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
+from titrack.parser.player_parser import PlayerInfo
+
+
+# Test player info for setting player context
+TEST_PLAYER_INFO = PlayerInfo(
+    name="TestPlayer",
+    level=100,
+    season_id=1,
+    hero_id=1,
+    player_id="test_player_123",
+)
 
 
 @pytest.fixture
 def db(tmp_path):
     """Create a temporary database."""
     db_path = tmp_path / "test.db"
-    db = Database(db_path)
+    db = Database(db_path, auto_seed=False)
     db.connect()
     yield db
     db.close()
@@ -25,13 +36,16 @@ def db(tmp_path):
 @pytest.fixture
 def repo(db):
     """Create a repository."""
-    return Repository(db)
+    repo = Repository(db)
+    # Set test player context so queries return results
+    repo.set_player_context(TEST_PLAYER_INFO.season_id, "test_player_123")
+    return repo
 
 
 @pytest.fixture
 def client(db):
     """Create a test client."""
-    app = create_app(db, collector_running=False)
+    app = create_app(db, collector_running=False, player_info=TEST_PLAYER_INFO)
     return TestClient(app)
 
 
@@ -124,7 +138,7 @@ class TestRunsEndpoints:
         assert data["total"] == 0
 
     def test_list_runs_with_data(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/runs")
@@ -135,7 +149,7 @@ class TestRunsEndpoints:
         assert data["runs"][0]["fe_gained"] == 100
 
     def test_get_run_by_id(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/runs/1")
@@ -149,7 +163,7 @@ class TestRunsEndpoints:
         assert response.status_code == 404
 
     def test_get_stats(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/runs/stats")
@@ -168,7 +182,7 @@ class TestInventoryEndpoint:
         assert data["total_fe"] == 0
 
     def test_get_inventory_with_data(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/inventory")
@@ -186,7 +200,7 @@ class TestItemsEndpoints:
         assert data["items"] == []
 
     def test_list_items_with_data(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/items")
@@ -195,7 +209,7 @@ class TestItemsEndpoints:
         assert len(data["items"]) == 2
 
     def test_search_items(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/items?search=Flame")
@@ -205,7 +219,7 @@ class TestItemsEndpoints:
         assert data["items"][0]["name_en"] == "Flame Elementium"
 
     def test_get_item_by_id(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get(f"/api/items/{FE_CONFIG_BASE_ID}")
@@ -228,7 +242,7 @@ class TestStatsEndpoints:
         assert data["cumulative_fe"] == []
 
     def test_get_stats_history_with_data(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/stats/history?hours=24")
@@ -247,7 +261,7 @@ class TestPricesEndpoints:
         assert data["prices"] == []
 
     def test_list_prices_with_data(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.get("/api/prices")
@@ -261,7 +275,7 @@ class TestPricesEndpoints:
         assert response.status_code == 404
 
     def test_update_price(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.put(
@@ -277,7 +291,7 @@ class TestPricesEndpoints:
         assert response.json()["price_fe"] == 20.0
 
     def test_create_price(self, seeded_db):
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)
 
         response = client.put(
@@ -298,7 +312,7 @@ class TestIconsEndpoint:
 
     def test_get_icon_no_url(self, seeded_db):
         """Test getting icon for item with no icon_url returns 404."""
-        app = create_app(seeded_db)
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         repo = Repository(seeded_db)
 
         # Add item without icon_url

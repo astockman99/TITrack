@@ -51,7 +51,10 @@ class Repository:
     # --- Runs ---
 
     def insert_run(self, run: Run) -> int:
-        """Insert a new run and return its ID."""
+        """Insert a new run and return its ID. Uses context as fallback for season_id/player_id."""
+        # Use run values if set, otherwise fall back to context
+        season_id = run.season_id if run.season_id is not None else self._current_season_id
+        player_id = run.player_id if run.player_id is not None else self._current_player_id
         cursor = self.db.execute(
             """INSERT INTO runs (zone_signature, start_ts, end_ts, is_hub, level_id, level_type, level_uid, season_id, player_id)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -63,8 +66,8 @@ class Repository:
                 run.level_id,
                 run.level_type,
                 run.level_uid,
-                run.season_id,
-                run.player_id,
+                season_id,
+                player_id,
             ),
         )
         return cursor.lastrowid
@@ -286,9 +289,10 @@ class Repository:
     # --- Slot State ---
 
     def upsert_slot_state(self, state: SlotState) -> None:
-        """Insert or update slot state."""
-        # Use empty string for NULL player_id to match PK constraint
-        player_id = state.player_id if state.player_id else ""
+        """Insert or update slot state. Uses context as fallback for player_id."""
+        # Use state value if set, otherwise fall back to context, then empty string for PK
+        player_id = state.player_id if state.player_id else self._current_player_id
+        player_id = player_id if player_id else ""
         self.db.execute(
             """INSERT OR REPLACE INTO slot_state
                (player_id, page_id, slot_id, config_base_id, num, updated_at)
@@ -477,9 +481,10 @@ class Repository:
     # --- Prices ---
 
     def upsert_price(self, price: Price) -> None:
-        """Insert or update a price entry."""
-        # Use 0 for NULL season_id to match PK constraint
-        season_id = price.season_id if price.season_id is not None else 0
+        """Insert or update a price entry. Uses context as fallback for season_id."""
+        # Use price value if set, otherwise fall back to context, then 0 for PK
+        season_id = price.season_id if price.season_id is not None else self._current_season_id
+        season_id = season_id if season_id is not None else 0
         self.db.execute(
             """INSERT OR REPLACE INTO prices
                (config_base_id, season_id, price_fe, source, updated_at)
@@ -621,7 +626,9 @@ class Repository:
         return row["cnt"] if row else 0
 
     def upsert_prices_batch(self, prices: list[Price]) -> None:
-        """Insert or update multiple prices."""
+        """Insert or update multiple prices. Uses context as fallback for season_id."""
+        # Default season_id from context
+        default_season = self._current_season_id if self._current_season_id is not None else 0
         self.db.executemany(
             """INSERT OR REPLACE INTO prices
                (config_base_id, season_id, price_fe, source, updated_at)
@@ -629,7 +636,7 @@ class Repository:
             [
                 (
                     price.config_base_id,
-                    price.season_id if price.season_id is not None else 0,
+                    price.season_id if price.season_id is not None else default_season,
                     price.price_fe,
                     price.source,
                     price.updated_at.isoformat(),

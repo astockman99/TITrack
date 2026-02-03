@@ -208,6 +208,16 @@ Files downloaded from the internet are marked by Windows as untrusted. This can 
 2. **Unblock after extracting**: `Get-ChildItem -Path "C:\TITrack" -Recurse | Unblock-File`
 3. **Code signing** - Signed executables bypass MOTW restrictions
 
+## Single Instance Enforcement
+
+TITrack prevents multiple instances from running simultaneously to avoid duplicate data (e.g., map costs being recorded twice).
+
+On startup, the app checks if port 8000 is already in use:
+- **If TITrack is already running**: Shows error "TITrack is already running on port 8000. Please close the existing instance first."
+- **If another app is using the port**: Shows error "Port 8000 is already in use by another application. Try running with --port <number> to use a different port."
+
+Detection works by making a quick HTTP request to `/api/status` - if it responds with TITrack's status JSON, it's identified as an existing TITrack instance.
+
 ## Logging
 
 All console output is redirected to a log file when running as a packaged EXE:

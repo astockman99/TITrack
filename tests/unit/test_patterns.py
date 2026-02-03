@@ -191,4 +191,8 @@ class TestHubZonePatterns:
 
     def test_detects_sacred_court_manor_hideout(self):
         # Sacred Court Manor hideout (also uses 04DD) should still be detected
-        assert any(p.search("/Game/Art/Maps/04DD/DD_ShengTingZhuangYuan000") for p in HUB_ZONE_PATTERNS)
+        # Note: DD_ShengTingZhuangYuan000 is a MAP (Voidlands - Mundane Palace), not the hideout
+        # The hideout path is DD_ShengTingZhuangYuan (without the 000 suffix)
+        assert any(p.search("/Game/Art/Maps/04DD/DD_ShengTingZhuangYuan/DD_ShengTingZhuangYuan") for p in HUB_ZONE_PATTERNS)
+        # The 000 variant should NOT match (it's a map)
+        assert not any(p.search("/Game/Art/Maps/04DD/DD_ShengTingZhuangYuan000") for p in HUB_ZONE_PATTERNS)

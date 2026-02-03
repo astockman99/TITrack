@@ -11,6 +11,17 @@ from titrack.core.models import ItemDelta, Run
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
+from titrack.parser.player_parser import PlayerInfo
+
+
+# Test player info for setting player context
+TEST_PLAYER_INFO = PlayerInfo(
+    name="TestPlayer",
+    level=100,
+    season_id=1,
+    hero_id=1,
+    player_id="test_player_123",
+)
 
 
 SAMPLE_LOG = """\
@@ -55,7 +66,7 @@ def test_env():
 
         # Create database
         db_path = tmpdir / "test.db"
-        db = Database(db_path)
+        db = Database(db_path, auto_seed=False)
         db.connect()
 
         yield {
@@ -86,6 +97,7 @@ class TestCollectorIntegration:
             on_delta=lambda d: deltas_received.append(d),
             on_run_start=lambda r: runs_started.append(r),
             on_run_end=lambda r: runs_ended.append(r),
+            player_info=TEST_PLAYER_INFO,
         )
         collector.initialize()
         line_count = collector.process_file(from_beginning=True)
@@ -104,8 +116,9 @@ class TestCollectorIntegration:
         db = test_env["db"]
         log_path = test_env["log_path"]
         repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
 
-        collector = Collector(db=db, log_path=log_path)
+        collector = Collector(db=db, log_path=log_path, player_info=TEST_PLAYER_INFO)
         collector.initialize()
         collector.process_file(from_beginning=True)
 
@@ -122,8 +135,9 @@ class TestCollectorIntegration:
         db = test_env["db"]
         log_path = test_env["log_path"]
         repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
 
-        collector = Collector(db=db, log_path=log_path)
+        collector = Collector(db=db, log_path=log_path, player_info=TEST_PLAYER_INFO)
         collector.initialize()
         collector.process_file(from_beginning=True)
 
@@ -148,8 +162,9 @@ class TestCollectorIntegration:
         db = test_env["db"]
         log_path = test_env["log_path"]
         repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
 
-        collector = Collector(db=db, log_path=log_path)
+        collector = Collector(db=db, log_path=log_path, player_info=TEST_PLAYER_INFO)
         collector.initialize()
         collector.process_file(from_beginning=True)
 
@@ -169,7 +184,7 @@ class TestCollectorIntegration:
         log_path = test_env["log_path"]
 
         # First run
-        collector1 = Collector(db=db, log_path=log_path)
+        collector1 = Collector(db=db, log_path=log_path, player_info=TEST_PLAYER_INFO)
         collector1.initialize()
         collector1.process_file(from_beginning=True)
 
@@ -191,6 +206,7 @@ class TestCollectorIntegration:
             db=db,
             log_path=log_path,
             on_delta=lambda d: deltas.append(d),
+            player_info=TEST_PLAYER_INFO,
         )
         collector2.initialize()
         collector2.process_file(from_beginning=False)
@@ -204,12 +220,14 @@ class TestCollectorIntegration:
         db = test_env["db"]
         log_path = test_env["log_path"]
         repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
 
         deltas = []
         collector = Collector(
             db=db,
             log_path=log_path,
             on_delta=lambda d: deltas.append(d),
+            player_info=TEST_PLAYER_INFO,
         )
         collector.initialize()
         collector.process_file(from_beginning=True)
@@ -226,6 +244,7 @@ class TestCollectorIntegration:
         db = test_env["db"]
         tmpdir = test_env["tmpdir"]
         repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
 
         # Create log file with init data
         log_path = tmpdir / "init_test.log"
@@ -236,6 +255,7 @@ class TestCollectorIntegration:
             db=db,
             log_path=log_path,
             on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
         )
         collector.initialize()
         collector.process_file(from_beginning=True)
@@ -270,6 +290,7 @@ class TestCollectorIntegration:
         db = test_env["db"]
         tmpdir = test_env["tmpdir"]
         repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
 
         # Create log file: init snapshot, then a pickup
         log_content = """\
@@ -286,6 +307,7 @@ class TestCollectorIntegration:
             db=db,
             log_path=log_path,
             on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
         )
         collector.initialize()
         collector.process_file(from_beginning=True)

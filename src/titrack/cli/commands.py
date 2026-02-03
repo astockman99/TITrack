@@ -346,10 +346,67 @@ def cmd_show_runs(args: argparse.Namespace) -> int:
     return 0
 
 
+def _check_instance_status(host: str, port: int) -> tuple[bool, bool]:
+    """Check if port is available and if TITrack is running on it.
+
+    Returns:
+        (port_available, is_titrack) - port_available=True means we can start,
+        is_titrack=True means an existing TITrack instance is using the port.
+    """
+    import socket
+    import urllib.request
+    import urllib.error
+
+    # First check if port is in use
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.bind((host, port))
+        sock.close()
+        return (True, False)  # Port available, no TITrack
+    except OSError:
+        pass  # Port in use, check if it's TITrack
+
+    # Port is in use - check if it's TITrack by hitting the status endpoint
+    try:
+        url = f"http://{host}:{port}/api/status"
+        req = urllib.request.Request(url, method='GET')
+        with urllib.request.urlopen(req, timeout=2) as response:
+            if response.status == 200:
+                data = response.read().decode('utf-8')
+                if 'titrack' in data.lower() or 'collector' in data.lower():
+                    return (False, True)  # Port in use by TITrack
+    except Exception:
+        pass  # Request failed, not TITrack or not responding
+
+    return (False, False)  # Port in use by something else
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     """Start the web server with optional background collector."""
     from titrack.config.paths import is_frozen
     from titrack.version import __version__
+
+    # Check for existing instance BEFORE starting any services
+    # This prevents duplicate collectors from processing the same log events
+    host = getattr(args, 'host', '127.0.0.1')
+    port = getattr(args, 'port', 8000)
+    port_available, is_titrack = _check_instance_status(host, port)
+
+    if not port_available:
+        if is_titrack:
+            error_msg = f"TITrack is already running on port {port}.\nPlease close the existing instance first."
+        else:
+            error_msg = f"Port {port} is already in use by another application.\nTry running with --port <number> to use a different port."
+
+        if is_frozen():
+            try:
+                import ctypes
+                ctypes.windll.user32.MessageBoxW(0, error_msg, "TITrack", 0x10)  # MB_ICONERROR
+            except Exception:
+                print(error_msg)
+        else:
+            print(f"Error: {error_msg}")
+        return 1
 
     # Set up logging early
     portable = getattr(args, 'portable', False) or is_frozen()
