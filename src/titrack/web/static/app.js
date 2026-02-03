@@ -338,6 +338,9 @@ function renderStats(stats, inventory) {
         ? stats.total_duration_seconds / stats.total_runs
         : null;
     document.getElementById('avg-run-time').textContent = formatDuration(avgRunTime);
+
+    // Display total time in maps
+    document.getElementById('total-time').textContent = formatDurationLong(stats?.total_duration_seconds);
 }
 
 function renderRuns(data, forceRender = false) {
