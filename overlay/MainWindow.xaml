@@ -107,8 +107,8 @@
                 </Grid>
             </Border>
 
-            <!-- Stats Grid -->
-            <Grid x:Name="StatsGrid" Grid.Row="1" Margin="8,6,8,0">
+            <!-- Stats Grid (click-through) -->
+            <Grid x:Name="StatsGrid" Grid.Row="1" Margin="8,6,8,0" IsHitTestVisible="False">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -168,12 +168,13 @@
                 </Border>
             </Grid>
 
-            <!-- Current Run / Loot Section -->
+            <!-- Current Run / Loot Section (click-through) -->
             <Border x:Name="LootSectionBorder"
                     Grid.Row="2"
                     Background="#c02a2a4a"
                     CornerRadius="4"
-                    Margin="8,6,8,8">
+                    Margin="8,6,8,8"
+                    IsHitTestVisible="False">
                 <Grid>
                     <!-- Active run content -->
                     <Grid x:Name="ActiveRunPanel">

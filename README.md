@@ -77,6 +77,14 @@ TITrack.exe --portable
 
 - **Auto-Update**: Checks for updates on startup, download and install with one click
 
+- **Mini-Overlay**: Compact always-on-top window for in-game stats:
+  - Launch with `TITrack.exe --overlay` or click "Overlay" button in dashboard
+  - True transparency with click-through data boxes (game clickable underneath)
+  - Shows all key stats: Net Worth, Value/Hour, Value/Map, Runs, Avg Time, Total Time
+  - Live loot tracking during active runs with zone, duration, and item drops
+  - Previous run preservation: when map ends, loot stays visible as "Previous Run"
+  - Draggable header, resizable, pin/unpin always-on-top
+
 - **Web Dashboard** at `http://localhost:8000` with:
   - Real-time stats: Total FE, Net Worth, Value/Hour, Run Count, Prices Learned
   - Interactive charts: Cumulative Value and Value/Hour over time
@@ -134,6 +142,11 @@ python -m titrack init --seed tlidb_items_seed_en.json
 
 ```bash
 pip install pyinstaller
+
+# Build WPF overlay first (requires .NET 8 SDK)
+dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish
+
+# Build main application (includes overlay automatically)
 pyinstaller ti_tracker.spec --noconfirm
 ```
 
@@ -259,6 +272,11 @@ TITrack/
 │   ├── collector/              # Main collection loop
 │   ├── config/                 # Settings
 │   └── cli/                    # CLI commands
+├── overlay/                    # WPF overlay application (.NET 8)
+│   ├── TITrackOverlay.csproj
+│   ├── MainWindow.xaml         # UI layout
+│   └── MainWindow.xaml.cs      # Overlay logic
+├── setup/                      # TITrack-Setup.exe (portable extractor)
 ├── supabase/migrations/        # Supabase schema
 ├── tests/                      # 118 tests
 ├── pyproject.toml

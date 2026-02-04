@@ -19,6 +19,10 @@ public partial class MainWindow : Window
 
     private bool _isTransparent = false;
 
+    // Track previous run to show after map ends
+    private ActiveRunResponse? _previousRun = null;
+    private int? _lastActiveRunId = null;
+
     // Colors for opaque mode
     private static readonly Color OpaqueMainBg = Color.FromArgb(0xF0, 0x1a, 0x1a, 0x2e);
     private static readonly Color OpaqueHeaderBg = Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a);
@@ -334,9 +338,9 @@ public partial class MainWindow : Window
 
     private void UpdateStats(StatsResponse? stats, ActiveRunResponse? activeRun, InventoryResponse? inventory)
     {
-        // Net Worth
+        // Net Worth (rounded to whole number)
         NetWorthText.Text = inventory != null
-            ? FormatNumber(Math.Round(inventory.net_worth_fe))
+            ? Math.Round(inventory.net_worth_fe).ToString("N0")
             : "--";
 
         if (stats == null)
@@ -350,17 +354,30 @@ public partial class MainWindow : Window
             return;
         }
 
-        // This Run (use net value if available, otherwise total value)
-        var runValue = activeRun?.net_value_fe ?? activeRun?.total_value ?? 0;
-        ThisRunText.Text = FormatNumber(Math.Round(runValue));
-        ThisRunText.Foreground = runValue >= 0
-            ? (Brush)FindResource("AccentGreenBrush")
-            : (Brush)FindResource("AccentRedBrush");
+        // This Run / Previous Run value
+        // Use active run if available, otherwise use previous run
+        var displayRun = activeRun ?? _previousRun;
+        if (displayRun != null)
+        {
+            var runValue = displayRun.net_value_fe ?? displayRun.total_value;
+            ThisRunText.Text = FormatNumber(runValue);
+            ThisRunText.Foreground = runValue >= 0
+                ? (Brush)FindResource("AccentGreenBrush")
+                : (Brush)FindResource("AccentRedBrush");
+
+            // Update label based on whether it's active or previous
+            ThisRunLabel.Text = activeRun != null ? "This Run" : "Previous Run";
+        }
+        else
+        {
+            ThisRunText.Text = "--";
+            ThisRunLabel.Text = "This Run";
+        }
 
         // Other stats
-        ValuePerHourText.Text = FormatNumber(Math.Round(stats.value_per_hour));
-        ValuePerMapText.Text = FormatNumber(Math.Round(stats.avg_value_per_run));
-        RunsText.Text = FormatNumber(stats.total_runs);
+        ValuePerHourText.Text = FormatNumber(stats.value_per_hour);
+        ValuePerMapText.Text = FormatNumber(stats.avg_value_per_run);
+        RunsText.Text = stats.total_runs.ToString("N0");
 
         // Time calculations
         if (stats.total_runs > 0)
@@ -378,7 +395,24 @@ public partial class MainWindow : Window
 
     private void UpdateActiveRun(ActiveRunResponse? activeRun)
     {
-        if (activeRun == null)
+        // Track run transitions to detect when a run ends
+        if (activeRun != null)
+        {
+            // Active run - store it and track the ID
+            _lastActiveRunId = activeRun.id;
+            _previousRun = activeRun;
+        }
+        else if (_lastActiveRunId != null)
+        {
+            // Run just ended - keep _previousRun as is, clear the active ID
+            _lastActiveRunId = null;
+        }
+
+        // Determine what to display
+        var displayRun = activeRun ?? _previousRun;
+        var isShowingPreviousRun = activeRun == null && _previousRun != null;
+
+        if (displayRun == null)
         {
             ActiveRunPanel.Visibility = Visibility.Collapsed;
             NoRunPanel.Visibility = Visibility.Visible;
@@ -389,13 +423,24 @@ public partial class MainWindow : Window
         NoRunPanel.Visibility = Visibility.Collapsed;
 
         // Zone name and duration
-        ZoneNameText.Text = activeRun.zone_name ?? "Unknown Zone";
-        RunDurationText.Text = $"({FormatDurationShort(activeRun.duration_seconds)})";
+        ZoneNameText.Text = displayRun.zone_name ?? "Unknown Zone";
+        RunDurationText.Text = $"({FormatDurationShort(displayRun.duration_seconds)})";
 
-        // Loot list
+        // Show/hide pulse indicator based on active vs previous run
+        PulseIndicator.Visibility = isShowingPreviousRun ? Visibility.Collapsed : Visibility.Visible;
+
+        // Loot list - only update if showing active run or first time showing previous
+        if (!isShowingPreviousRun || LootList.Children.Count == 0)
+        {
+            UpdateLootList(displayRun);
+        }
+    }
+
+    private void UpdateLootList(ActiveRunResponse run)
+    {
         LootList.Children.Clear();
 
-        if (activeRun.loot == null || activeRun.loot.Count == 0)
+        if (run.loot == null || run.loot.Count == 0)
         {
             var noLoot = new TextBlock
             {
@@ -413,7 +458,7 @@ public partial class MainWindow : Window
         }
 
         // Sort by value descending, take top 10
-        var sortedLoot = activeRun.loot
+        var sortedLoot = run.loot
             .OrderByDescending(l => l.total_value_fe ?? 0)
             .Take(10)
             .ToList();
@@ -441,8 +486,10 @@ public partial class MainWindow : Window
                 : new SolidColorBrush(Colors.White);
             qtyBrush = isNegative
                 ? new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x8A))
+                : new SolidColorBrush(Color.FromRgb(0xDD, 0xDD, 0xDD));
+            valueBrush = isNegative
+                ? new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x8A))
                 : new SolidColorBrush(Color.FromRgb(0x6F, 0xFF, 0xCE));
-            valueBrush = new SolidColorBrush(Color.FromRgb(0xDD, 0xDD, 0xDD));
         }
         else
         {
@@ -452,8 +499,10 @@ public partial class MainWindow : Window
                 : (Brush)FindResource("TextBrush");
             qtyBrush = isNegative
                 ? (Brush)FindResource("AccentRedBrush")
+                : (Brush)FindResource("SecondaryTextBrush");
+            valueBrush = isNegative
+                ? (Brush)FindResource("AccentRedBrush")
                 : (Brush)FindResource("AccentGreenBrush");
-            valueBrush = (Brush)FindResource("SecondaryTextBrush");
         }
 
         var grid = new Grid();
@@ -504,7 +553,7 @@ public partial class MainWindow : Window
         var valueText = new TextBlock
         {
             Text = item.total_value_fe.HasValue
-                ? FormatNumber(Math.Round(item.total_value_fe.Value))
+                ? FormatNumber(item.total_value_fe.Value)
                 : "--",
             Foreground = valueBrush,
             FontSize = 10,
@@ -580,7 +629,7 @@ public partial class MainWindow : Window
 
     private static string FormatNumber(double value)
     {
-        return value.ToString("N0");
+        return value.ToString("N2");
     }
 
     private static string FormatDuration(double seconds)

@@ -5,6 +5,37 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-02-04
+
+### Added
+
+#### WPF Overlay Enhancements
+- **Previous Run Preservation**: When a map ends, the overlay now keeps showing the loot and "This Run" value instead of clearing. The label changes to "Previous Run" and the timer stops at the final duration.
+- **Click-Through Data Boxes**: Stats grid and loot section are now click-through, allowing interaction with the game underneath. Header (drag), buttons, and resize grip remain interactive.
+
+#### New Zone Translations
+- **Rusted Abyss**: Boss zone (`YJ_XiuShiShenYuan`)
+- **Cloud Oasis**: Season 10 hub zone (`YunDuanLvZhou`) - now properly detected as hub
+- **Ruins of Aeterna: Boundless**: Season 10 content (`CC1_SiWangMiCheng`)
+- **The Frozen Canvas**: Season 10 content (`XueYuRongLu`)
+
+### Changed
+
+#### Overlay Display Improvements
+- **FE Values**: Now display with 2 decimal places (e.g., "1,234.56") to match main app precision
+- **Net Worth**: Rounded to whole number for cleaner display
+- **Color Swap**: FE value column is now green, quantity column is gray (swapped for better visual hierarchy)
+
+#### Zone Detection Fixes
+- **Demiman Village**: Fixed suffix from 36 to 02, now correctly shows "Glacial Abyss - Demiman Village" at all Timemark levels
+
+### Fixed
+
+- **Trade Tax Calculation Bug**: Individual loot item values now include trade tax when enabled, matching the gross total. Previously items showed pre-tax values but the total was post-tax, causing apparent math errors.
+- **Database Locking Crash**: Fixed race condition where concurrent database access from overlay polling and collector writes could cause "database locked" errors. All transactions now properly coordinate through a single threading lock.
+
+---
+
 ## [Unreleased]
 
 ### Added

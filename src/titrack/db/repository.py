@@ -780,23 +780,15 @@ class Repository:
         row = self.db.fetchone("SELECT COUNT(*) as cnt FROM runs")
         run_count = row["cnt"] if row else 0
 
-        # Get raw connection for direct control
-        conn = self.db.connection
-
-        # Use explicit transaction for deletion
-        conn.execute("BEGIN IMMEDIATE")
-        try:
+        # Use thread-safe transaction
+        with self.db.transaction() as cursor:
             # Delete item_deltas first (foreign key reference)
-            conn.execute("DELETE FROM item_deltas")
+            cursor.execute("DELETE FROM item_deltas")
             # Delete runs
-            conn.execute("DELETE FROM runs")
-            conn.execute("COMMIT")
-        except Exception:
-            conn.execute("ROLLBACK")
-            raise
+            cursor.execute("DELETE FROM runs")
 
         # Force WAL checkpoint to ensure changes are written to main database
-        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        self.db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
         return run_count
 
@@ -812,21 +804,17 @@ class Repository:
             position = min(position, MAX_SQLITE_INT)
             file_size = min(file_size, MAX_SQLITE_INT)
 
-        conn = self.db.connection
-        conn.execute("BEGIN IMMEDIATE")
-        try:
-            conn.execute(
+        # Use thread-safe transaction
+        with self.db.transaction() as cursor:
+            cursor.execute(
                 """INSERT OR REPLACE INTO log_position
                    (id, file_path, position, file_size, updated_at)
                    VALUES (1, ?, ?, ?, ?)""",
                 (str(file_path), position, file_size, datetime.now().isoformat()),
             )
-            conn.execute("COMMIT")
-        except Exception:
-            conn.execute("ROLLBACK")
-            raise
-        # Force checkpoint
-        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+
+        # Force checkpoint (also uses lock via execute)
+        self.db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
     def get_log_position(self) -> Optional[tuple[Path, int, int]]:
         """

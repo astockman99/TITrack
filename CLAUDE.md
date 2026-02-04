@@ -63,28 +63,33 @@ Each release includes two files:
    dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish
    ```
 
-3. **Build main application** (includes overlay automatically):
+3. **Build main application**:
    ```bash
    python -m PyInstaller ti_tracker.spec --noconfirm
    ```
 
-4. **Create ZIP**:
+4. **Copy overlay to dist** (PyInstaller may not include large files reliably):
+   ```bash
+   cp overlay/publish/TITrackOverlay.exe dist/TITrack/
+   ```
+
+5. **Create ZIP**:
    ```powershell
    Compress-Archive -Path dist\TITrack -DestinationPath dist\TITrack-x.x.x-windows.zip -Force
    ```
 
-5. **Build Setup.exe**:
+6. **Build Setup.exe**:
    ```bash
    dotnet publish setup/TITrackSetup.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o setup/publish
    ```
 
-6. **Commit, tag, and push**:
+7. **Commit, tag, and push**:
    ```bash
    git add -A && git commit -m "Release vx.x.x"
    git tag vx.x.x && git push origin master && git push origin vx.x.x
    ```
 
-7. **Create GitHub release** with both files:
+8. **Create GitHub release** with both files:
    ```bash
    gh release create vx.x.x setup/publish/TITrack-Setup.exe dist/TITrack-x.x.x-windows.zip --title "vx.x.x" --notes "Release notes here"
    ```
@@ -230,11 +235,13 @@ The overlay is a **separate native WPF application** (`TITrackOverlay.exe`) that
 - **True transparency**: Full background transparency with text drop shadows for visibility
 - **Compact layout**: ~320x500px showing essential stats
 - **Frameless window**: Clean look without title bar, draggable via header
+- **Click-through**: Stats and loot areas pass clicks to the game; header/buttons/resize remain interactive
 - **Fast refresh**: Updates every 2 seconds
+- **Previous run preservation**: When a map ends, loot and value are preserved with "Previous Run" label
 - **Displays**:
-  - All 6 header stats (Net Worth, Value/Hour, Value/Map, Runs, Avg Time, Total Time)
-  - Current run zone, duration, and value
-  - Top 10 loot drops by value during active run
+  - All 6 header stats (Net Worth as whole number, others with 2 decimal places)
+  - Current/previous run zone, duration, and value
+  - Top 10 loot drops by value (FE value in green, quantity in gray)
 
 ### Launch Methods
 
@@ -276,6 +283,7 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 - **Header area**: Drag to move window
 - **Double-click header**: Reset window position
 - **Corner grip**: Resize window
+- **Stats/Loot areas**: Click-through (passes clicks to game underneath)
 
 ## Single Instance Enforcement
 
@@ -479,7 +487,7 @@ These are differentiated using `LevelId` from the game logs:
 | Grimwind Woods | 54 | Voidlands |
 | Elemental Mine | 12 | Blistering Lava Sea |
 | Elemental Mine | 55 | Voidlands |
-| Demiman Village | 36 | Glacial Abyss |
+| Demiman Village | 02 | Glacial Abyss |
 
 To add a new ambiguous zone:
 1. Run the zone and check the log for `LevelMgr@ LevelUid, LevelType, LevelId = X Y ZZZZ`

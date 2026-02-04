@@ -235,15 +235,17 @@ class Database:
                 cursor.execute(...)
 
         Automatically commits on success, rolls back on exception.
+        Thread-safe: holds the lock for the entire transaction duration.
         """
-        cursor = self.connection.cursor()
-        cursor.execute("BEGIN")
-        try:
-            yield cursor
-            cursor.execute("COMMIT")
-        except Exception:
-            cursor.execute("ROLLBACK")
-            raise
+        with self._lock:
+            cursor = self.connection.cursor()
+            cursor.execute("BEGIN IMMEDIATE")
+            try:
+                yield cursor
+                cursor.execute("COMMIT")
+            except Exception:
+                cursor.execute("ROLLBACK")
+                raise
 
     def execute(self, sql: str, params: tuple = ()) -> sqlite3.Cursor:
         """Execute a single SQL statement."""

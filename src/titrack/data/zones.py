@@ -6,6 +6,7 @@ ZONE_NAMES = {
     # Hideouts / Hubs
     "XZ_YuJinZhiXiBiNanSuo": "Hideout - Ember's Rest",
     "DD_ShengTingZhuangYuan": "Hideout - Sacred Court Manor",
+    "YunDuanLvZhou": "Hideout - Cloud Oasis",
 
     # Voidlands (entries with number suffixes must come before generic ones)
     # KD_YuanSuKuangDong000 differentiated by LevelId suffix
@@ -43,6 +44,13 @@ ZONE_NAMES = {
     "SD_ZhongXiGaoQiang": "Glacial Abyss - Wall of the Last Breath",
     "SD_GeBuLinYingDi": "Glacial Abyss - Blustery Canyon",
     "YongShuangBingPo": "Glacial Abyss - Throne of Winter",
+
+    # Boss zones
+    "YJ_XiuShiShenYuan": "Rusted Abyss",
+
+    # Ruins of Aeterna (Season 10 content)
+    "CC1_SiWangMiCheng": "Ruins of Aeterna: Boundless",
+    "XueYuRongLu": "The Frozen Canvas",
 
     # Vorax
     "DiXiaZhenSuo": "Vorax - Shelly's Operating Theater",
@@ -112,8 +120,8 @@ AMBIGUOUS_ZONES = {
         55: "Voidlands - Elemental Mine",
     },
     "GeBuLinCunLuo": {  # Demiman Village / Grove of Calamity
-        36: "Glacial Abyss - Demiman Village",
-        # TODO: Find suffix for Thunder Wastes - Grove of Calamity
+        2: "Glacial Abyss - Demiman Village",
+        # TODO: Find suffix for Thunder Wastes - Grove of Calamity (if different path)
     },
 }
 
