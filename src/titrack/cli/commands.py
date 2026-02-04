@@ -3,6 +3,7 @@
 import argparse
 import json
 import signal
+import subprocess
 import sys
 import threading
 import webbrowser
@@ -464,10 +465,10 @@ def cmd_serve(args: argparse.Namespace) -> int:
         return _serve_with_window(args, settings, logger, show_overlay=show_overlay, overlay_only=overlay_only)
     else:
         args.browser_mode = False
-        return _serve_browser_mode(args, settings, logger)
+        return _serve_browser_mode(args, settings, logger, show_overlay=show_overlay)
 
 
-def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) -> int:
+def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False) -> int:
     """Run server in browser mode (original behavior)."""
     import uvicorn
     from titrack.api.app import create_app
@@ -478,6 +479,7 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
     player_info = None
     sync_manager = None
     api_db = None
+    overlay_process = None
 
     try:
         # Start collector in background if log file is available
@@ -586,6 +588,10 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
             logger.info(f"Opening browser at {url}")
             webbrowser.open(url)
 
+        # Launch overlay if requested
+        if show_overlay:
+            overlay_process = _launch_overlay_process(url, logger)
+
         logger.info(f"Starting server on port {args.port}")
 
         # Run server (log_config=None to avoid frozen mode logging issues)
@@ -597,6 +603,14 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
             log_config=None,
         )
     finally:
+        # Clean up overlay subprocess
+        if overlay_process is not None and overlay_process.poll() is None:
+            logger.info("Terminating overlay subprocess...")
+            overlay_process.terminate()
+            try:
+                overlay_process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                overlay_process.kill()
         # Ensure proper cleanup of all resources
         if sync_manager:
             try:
@@ -786,6 +800,58 @@ def _apply_chroma_key(window, logger=None) -> bool:
         return False
 
 
+def _find_overlay_executable() -> Optional[Path]:
+    """Find the TITrackOverlay.exe relative to the main executable."""
+    from titrack.config.paths import is_frozen
+
+    if is_frozen():
+        # When packaged, look beside the main exe or in overlay subfolder
+        import sys
+        exe_dir = Path(sys.executable).parent
+        candidates = [
+            exe_dir / "TITrackOverlay.exe",
+            exe_dir / "overlay" / "TITrackOverlay.exe",
+        ]
+    else:
+        # Development mode - look in the overlay/publish folder
+        project_root = Path(__file__).parent.parent.parent.parent
+        candidates = [
+            project_root / "overlay" / "publish" / "TITrackOverlay.exe",
+            project_root / "overlay" / "bin" / "Release" / "net8.0-windows" / "win-x64" / "TITrackOverlay.exe",
+        ]
+
+    for path in candidates:
+        if path.exists():
+            return path
+
+    return None
+
+
+def _launch_overlay_process(url: str, logger) -> Optional[subprocess.Popen]:
+    """Launch the WPF overlay as a subprocess.
+
+    Returns the subprocess.Popen object if successful, None otherwise.
+    """
+    overlay_exe = _find_overlay_executable()
+
+    if overlay_exe is None:
+        logger.warning("TITrackOverlay.exe not found - overlay unavailable")
+        return None
+
+    try:
+        logger.info(f"Launching overlay: {overlay_exe}")
+        # Pass the API URL so the overlay knows where to connect
+        process = subprocess.Popen(
+            [str(overlay_exe), f"--url={url}"],
+            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+        )
+        logger.info(f"Overlay launched (PID: {process.pid})")
+        return process
+    except Exception as e:
+        logger.error(f"Failed to launch overlay: {e}")
+        return None
+
+
 def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False, overlay_only: bool = False) -> int:
     """Run server with native window using pywebview."""
     # Test pywebview/pythonnet availability early, before starting any resources
@@ -965,6 +1031,17 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
         # Create and run the native window
         def on_closing():
             logger.info("Window closed, initiating shutdown...")
+            # Close overlay subprocess if running
+            if overlay_ref[0] is not None:
+                process = overlay_ref[0]
+                if process.poll() is None:  # Still running
+                    logger.info("Terminating overlay subprocess...")
+                    process.terminate()
+                    try:
+                        process.wait(timeout=3)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                overlay_ref[0] = None
             server.should_exit = True
             cleanup()
 
@@ -1006,60 +1083,46 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                     return None
 
             def launch_overlay(self):
-                """Launch the mini-overlay window."""
+                """Launch the WPF overlay as a subprocess."""
                 try:
+                    # Check if overlay process is already running
                     if self._overlay[0] is not None:
-                        # Overlay already exists, bring to front
-                        logger.info("Overlay already open")
+                        # Check if process is still alive
+                        if self._overlay[0].poll() is None:
+                            logger.info("Overlay already running")
+                            return True
+                        else:
+                            # Process ended, clear the reference
+                            self._overlay[0] = None
+
+                    # Launch the WPF overlay
+                    process = _launch_overlay_process(url, logger)
+                    if process is not None:
+                        self._overlay[0] = process
                         return True
-
-                    overlay_url = f"{url}/overlay.html"
-                    overlay = webview.create_window(
-                        "TITrack Overlay",
-                        overlay_url,
-                        width=320,
-                        height=500,
-                        min_size=(280, 300),
-                        on_top=True,
-                        frameless=True,
-                        js_api=self,
-                    )
-                    self._overlay[0] = overlay
-                    # Chroma key is applied via toggle_overlay_transparency(), not on creation
-
-                    def on_overlay_closing():
-                        logger.info("Overlay window closed")
-                        self._overlay[0] = None
-
-                    overlay.events.closing += on_overlay_closing
-                    logger.info("Overlay window launched")
-                    return True
+                    return False
                 except Exception as e:
                     logger.error(f"Error launching overlay: {e}")
                     return False
 
             def close_overlay(self):
-                """Close the overlay window."""
+                """Close the overlay subprocess."""
                 try:
                     if self._overlay[0] is not None:
-                        self._overlay[0].destroy()
+                        process = self._overlay[0]
+                        if process.poll() is None:  # Still running
+                            process.terminate()
+                            try:
+                                process.wait(timeout=3)
+                            except subprocess.TimeoutExpired:
+                                process.kill()
                         self._overlay[0] = None
+                        logger.info("Overlay closed")
                         return True
                     return False
                 except Exception as e:
                     logger.error(f"Error closing overlay: {e}")
                     return False
-
-            def toggle_overlay_transparency(self, enabled: bool):
-                """Toggle overlay transparency (currently non-functional).
-
-                Note: Transparent overlays are not supported on Windows with WebView2.
-                The T button toggles the CSS class for visual feedback only.
-                True transparency would require a different rendering backend.
-                """
-                # Transparency not supported - just acknowledge the request
-                logger.info(f"toggle_overlay_transparency: enabled={enabled} (transparency not supported)")
-                return True
 
         # Use lists to allow the API to reference windows after creation
         window_ref = [None]
@@ -1081,34 +1144,29 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 window_ref[0] = window
                 window.events.closing += on_closing
 
-            # Create overlay window if requested
+            # Launch WPF overlay subprocess if requested
             if show_overlay:
-                overlay_url = f"{url}/overlay.html"
-                overlay = webview.create_window(
-                    "TITrack Overlay",
-                    overlay_url,
-                    width=320,
-                    height=500,
-                    min_size=(280, 300),
-                    on_top=True,
-                    frameless=True,
-                    js_api=api,
-                )
-                # Chroma key is applied via toggle_overlay_transparency(), not on creation
-                overlay_ref[0] = overlay
+                overlay_process = _launch_overlay_process(url, logger)
+                overlay_ref[0] = overlay_process
 
-                def on_overlay_closing():
-                    logger.info("Overlay window closed")
-                    overlay_ref[0] = None
-                    # If overlay-only mode, trigger shutdown when overlay closes
-                    if overlay_only:
-                        on_closing()
-
-                overlay.events.closing += on_overlay_closing
-                logger.info("Overlay window created")
-
-            # This blocks until all windows are closed
-            webview.start()
+            # If overlay-only mode, wait for overlay to exit instead of starting pywebview
+            if overlay_only:
+                if overlay_ref[0] is not None:
+                    logger.info("Running in overlay-only mode. Waiting for overlay to close...")
+                    try:
+                        overlay_ref[0].wait()
+                    except KeyboardInterrupt:
+                        if overlay_ref[0].poll() is None:
+                            overlay_ref[0].terminate()
+                    logger.info("Overlay closed, shutting down...")
+                    on_closing()
+                else:
+                    logger.error("Overlay failed to launch - no window to display")
+                    on_closing()
+                    return 1
+            else:
+                # This blocks until main window is closed
+                webview.start()
 
             logger.info("Application shutdown complete")
             return 0

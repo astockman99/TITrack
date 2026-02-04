@@ -21,6 +21,13 @@ datas = [
     ('src/titrack/data/README.txt', '.'),
 ]
 
+# Check if overlay executable exists and add it
+overlay_exe = Path(SPECPATH) / 'overlay' / 'publish' / 'TITrackOverlay.exe'
+if overlay_exe.exists():
+    datas.append((str(overlay_exe), '.'))
+else:
+    print("Warning: TITrackOverlay.exe not found. Build it with: dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish")
+
 # Hidden imports that PyInstaller might miss
 hiddenimports = [
     'uvicorn.logging',

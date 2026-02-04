@@ -32,7 +32,10 @@ pytest tests/ -v                # Verbose output
 black .
 ruff check .
 
-# Build main application (PyInstaller)
+# Build WPF Overlay (must be built before main app)
+dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish
+
+# Build main application (PyInstaller) - includes overlay if built
 python -m PyInstaller ti_tracker.spec --noconfirm
 
 # Build TITrack-Setup.exe (C# portable extractor)
@@ -55,28 +58,33 @@ Each release includes two files:
    - `pyproject.toml` → `version = "x.x.x"`
    - `src/titrack/version.py` → `__version__ = "x.x.x"`
 
-2. **Build main application**:
+2. **Build WPF overlay** (self-contained, ~154 MB):
+   ```bash
+   dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish
+   ```
+
+3. **Build main application** (includes overlay automatically):
    ```bash
    python -m PyInstaller ti_tracker.spec --noconfirm
    ```
 
-3. **Create ZIP**:
+4. **Create ZIP**:
    ```powershell
    Compress-Archive -Path dist\TITrack -DestinationPath dist\TITrack-x.x.x-windows.zip -Force
    ```
 
-4. **Build Setup.exe**:
+5. **Build Setup.exe**:
    ```bash
    dotnet publish setup/TITrackSetup.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o setup/publish
    ```
 
-5. **Commit, tag, and push**:
+6. **Commit, tag, and push**:
    ```bash
    git add -A && git commit -m "Release vx.x.x"
    git tag vx.x.x && git push origin master && git push origin vx.x.x
    ```
 
-6. **Create GitHub release** with both files:
+7. **Create GitHub release** with both files:
    ```bash
    gh release create vx.x.x setup/publish/TITrack-Setup.exe dist/TITrack-x.x.x-windows.zip --title "vx.x.x" --notes "Release notes here"
    ```
@@ -212,9 +220,14 @@ Files downloaded from the internet are marked by Windows as untrusted. This can 
 
 TITrack includes a compact always-on-top overlay window designed for users without multiple monitors who want to see stats while playing.
 
+### Implementation
+
+The overlay is a **separate native WPF application** (`TITrackOverlay.exe`) that communicates with the main TITrack backend via HTTP API. This architecture was chosen because pywebview/WebView2 cannot support true window transparency on Windows.
+
 ### Features
 
-- **Always-on-top**: Stays above the game window
+- **Always-on-top**: Stays above the game window (toggleable via pin button)
+- **True transparency**: Full background transparency with text drop shadows for visibility
 - **Compact layout**: ~320x500px showing essential stats
 - **Frameless window**: Clean look without title bar, draggable via header
 - **Fast refresh**: Updates every 2 seconds
@@ -233,30 +246,36 @@ TITrack.exe --overlay-only   # Just the overlay (no main dashboard)
 
 **From UI**: Click the "Overlay" button in the dashboard header (only visible in native window mode).
 
-### Transparency (Not Supported)
+### Technical Details
 
-The overlay operates in **opaque mode only**. Transparent overlays are not supported due to fundamental limitations with pywebview backends on Windows 11.
+| Component | Details |
+|-----------|---------|
+| Technology | WPF (.NET 8) |
+| Build | Self-contained single-file (~154 MB) |
+| Communication | HTTP polling to `http://127.0.0.1:8000/api/*` |
+| Endpoints used | `/api/runs/stats`, `/api/runs/active`, `/api/inventory` |
+| Refresh interval | 2 seconds |
 
-**Investigation summary** (February 2026):
+### Building the Overlay
 
-| Backend | Result |
-|---------|--------|
-| WebView2 (EdgeChromium) | D3D/DirectComposition rendering bypasses GDI TransparencyKey; window becomes unresponsive |
-| MSHTML (Internet Explorer) | Also causes window to become unresponsive when TransparencyKey is applied |
-| CEF (cefpython3) | Not compatible with Python 3.13 (only supports up to Python 3.9) |
+```bash
+# Self-contained (no .NET runtime required, ~154 MB)
+dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish
 
-**Attempted approaches**:
-- Win32 `SetLayeredWindowAttributes` with `LWA_COLORKEY`
-- WinForms `TransparencyKey` + `BackColor` with chroma key colors (green #00ff00, magenta #ff00ff)
-- Setting `WebView2.DefaultBackgroundColor`
-- MSHTML backend for GDI-based rendering
+# Framework-dependent (requires .NET 8 runtime, ~200 KB)
+dotnet publish overlay/TITrackOverlay.csproj -c Release -o overlay/publish -p:SelfContained=false
+```
 
-All approaches resulted in the window becoming unresponsive when transparency was enabled.
+The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe` if it exists.
 
-**Potential future solutions**:
-- Use a native WinForms/WPF overlay without web rendering (significant rework)
-- Wait for pywebview or WebView2 to add native transparency support
-- Use Python 3.9 with CEF backend (requires downgrading Python version)
+### Overlay Controls
+
+- **◐ button**: Toggle transparency (fully transparent background with white text and drop shadows)
+- **📌 button**: Toggle always-on-top (pinned/unpinned)
+- **✕ button**: Close overlay
+- **Header area**: Drag to move window
+- **Double-click header**: Reset window position
+- **Corner grip**: Resize window
 
 ## Single Instance Enforcement
 

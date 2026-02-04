@@ -1,0 +1,271 @@
+<Window x:Class="TITrackOverlay.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TITrack Overlay"
+        Width="320" Height="500"
+        MinWidth="280" MinHeight="300"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True"
+        ResizeMode="CanResizeWithGrip"
+        ShowInTaskbar="True"
+        Background="Transparent">
+
+    <Window.Resources>
+        <!-- Drop shadow effect for text visibility in transparent mode -->
+        <DropShadowEffect x:Key="TextShadow" ShadowDepth="1" BlurRadius="3" Color="Black" Opacity="0.8" />
+
+        <!-- Stat box style -->
+        <Style x:Key="StatBox" TargetType="Border">
+            <Setter Property="Background" Value="#e02a2a4a" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="6" />
+        </Style>
+
+        <!-- Loot item style -->
+        <Style x:Key="LootItem" TargetType="Border">
+            <Setter Property="Padding" Value="4,3" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2a2a4a" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main container with rounded corners -->
+    <Border x:Name="MainBorder"
+            Background="#f01a1a2e"
+            CornerRadius="8"
+            BorderBrush="#3a3a5a"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header (draggable) -->
+            <Border x:Name="HeaderBorder"
+                    Grid.Row="0"
+                    Background="#e02a2a4a"
+                    CornerRadius="8,8,0,0"
+                    MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <Grid Margin="10,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Net Worth -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock x:Name="NetWorthLabel"
+                                   Text="Net Worth"
+                                   Foreground="#a0a0a0"
+                                   FontSize="10" />
+                        <TextBlock x:Name="NetWorthText"
+                                   Text="--"
+                                   Foreground="#e94560"
+                                   FontSize="16"
+                                   FontWeight="Bold" />
+                    </StackPanel>
+
+                    <!-- Transparency toggle -->
+                    <Button x:Name="TransparencyButton"
+                            Grid.Column="1"
+                            Style="{StaticResource OverlayButton}"
+                            Click="TransparencyButton_Click"
+                            ToolTip="Toggle transparency"
+                            Padding="6,4"
+                            Margin="0,0,4,0">
+                        <TextBlock x:Name="TransparencyIcon" Text="◐" FontSize="14" />
+                    </Button>
+
+                    <!-- Pin toggle -->
+                    <Button x:Name="PinButton"
+                            Grid.Column="2"
+                            Style="{StaticResource OverlayButton}"
+                            Click="PinButton_Click"
+                            ToolTip="Toggle always-on-top"
+                            Padding="6,4"
+                            Margin="0,0,4,0">
+                        <TextBlock x:Name="PinIcon" Text="📌" FontSize="12" />
+                    </Button>
+
+                    <!-- Close button -->
+                    <Button Grid.Column="3"
+                            Style="{StaticResource OverlayButton}"
+                            Click="CloseButton_Click"
+                            ToolTip="Close overlay"
+                            Padding="6,4">
+                        <TextBlock Text="✕" FontSize="12" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Stats Grid -->
+            <Grid x:Name="StatsGrid" Grid.Row="1" Margin="8,6,8,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- This Run -->
+                <Border x:Name="ThisRunBox" Grid.Row="0" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
+                    <StackPanel>
+                        <TextBlock x:Name="ThisRunLabel" Text="This Run" Foreground="#a0a0a0" FontSize="9" />
+                        <TextBlock x:Name="ThisRunText" Text="--" Foreground="#4ecca3" FontSize="13" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Value/Hour -->
+                <Border x:Name="ValuePerHourBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
+                    <StackPanel>
+                        <TextBlock x:Name="ValuePerHourLabel" Text="Value/Hour" Foreground="#a0a0a0" FontSize="9" />
+                        <TextBlock x:Name="ValuePerHourText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Value/Map -->
+                <Border x:Name="ValuePerMapBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
+                    <StackPanel>
+                        <TextBlock x:Name="ValuePerMapLabel" Text="Value/Map" Foreground="#a0a0a0" FontSize="9" />
+                        <TextBlock x:Name="ValuePerMapText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Runs -->
+                <Border x:Name="RunsBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
+                    <StackPanel>
+                        <TextBlock x:Name="RunsLabel" Text="Runs" Foreground="#a0a0a0" FontSize="9" />
+                        <TextBlock x:Name="RunsText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Avg Time -->
+                <Border x:Name="AvgTimeBox" Grid.Row="2" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,0">
+                    <StackPanel>
+                        <TextBlock x:Name="AvgTimeLabel" Text="Avg Time" Foreground="#a0a0a0" FontSize="9" />
+                        <TextBlock x:Name="AvgTimeText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Total Time -->
+                <Border x:Name="TotalTimeBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,0">
+                    <StackPanel>
+                        <TextBlock x:Name="TotalTimeLabel" Text="Total Time" Foreground="#a0a0a0" FontSize="9" />
+                        <TextBlock x:Name="TotalTimeText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Current Run / Loot Section -->
+            <Border x:Name="LootSectionBorder"
+                    Grid.Row="2"
+                    Background="#c02a2a4a"
+                    CornerRadius="4"
+                    Margin="8,6,8,8">
+                <Grid>
+                    <!-- Active run content -->
+                    <Grid x:Name="ActiveRunPanel">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Zone header -->
+                        <Border x:Name="ZoneHeaderBorder"
+                                Grid.Row="0"
+                                Background="#a02a2a4a"
+                                CornerRadius="4,4,0,0"
+                                Padding="8,6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Pulsing indicator -->
+                                <Ellipse x:Name="PulseIndicator"
+                                         Grid.Column="0"
+                                         Width="8" Height="8"
+                                         Fill="#4ecca3"
+                                         Margin="0,0,6,0"
+                                         VerticalAlignment="Center">
+                                    <Ellipse.Triggers>
+                                        <EventTrigger RoutedEvent="Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        From="0.4" To="1.0"
+                                                        Duration="0:0:0.6"
+                                                        AutoReverse="True" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Ellipse.Triggers>
+                                </Ellipse>
+
+                                <TextBlock x:Name="ZoneNameText"
+                                           Grid.Column="1"
+                                           Text="Zone Name"
+                                           Foreground="#eaeaea"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+
+                                <TextBlock x:Name="RunDurationText"
+                                           Grid.Column="2"
+                                           Text="(0:00)"
+                                           Foreground="#a0a0a0"
+                                           FontSize="11"
+                                           Margin="6,0,0,0"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Loot list -->
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel x:Name="LootList" Margin="4,4,4,4" />
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- No active run message -->
+                    <Grid x:Name="NoRunPanel" Visibility="Collapsed">
+                        <TextBlock x:Name="NoRunText"
+                                   Text="No active run"
+                                   Foreground="#a0a0a0"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Resize grip visual hint -->
+            <Path x:Name="ResizeGrip"
+                  Grid.Row="2"
+                  Data="M 0,12 L 12,0 M 0,8 L 8,0 M 0,4 L 4,0"
+                  Stroke="#3a3a5a"
+                  StrokeThickness="1"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="0,0,4,4"
+                  IsHitTestVisible="False" />
+        </Grid>
+    </Border>
+</Window>

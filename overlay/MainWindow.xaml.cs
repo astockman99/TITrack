@@ -1,0 +1,607 @@
+using System.Net.Http;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+
+namespace TITrackOverlay;
+
+public partial class MainWindow : Window
+{
+    private readonly HttpClient _httpClient;
+    private readonly DispatcherTimer _refreshTimer;
+    private readonly Dictionary<int, BitmapImage?> _iconCache = new();
+    private readonly HashSet<int> _failedIcons = new();
+
+    private bool _isTransparent = false;
+
+    // Colors for opaque mode
+    private static readonly Color OpaqueMainBg = Color.FromArgb(0xF0, 0x1a, 0x1a, 0x2e);
+    private static readonly Color OpaqueHeaderBg = Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueStatBoxBg = Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueLootSectionBg = Color.FromArgb(0xC0, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueZoneHeaderBg = Color.FromArgb(0xA0, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueBorderColor = Color.FromArgb(0xFF, 0x3a, 0x3a, 0x5a);
+
+    // Drop shadow effect for transparent mode
+    private static readonly DropShadowEffect TextShadow = new()
+    {
+        ShadowDepth = 1,
+        BlurRadius = 3,
+        Color = Colors.Black,
+        Opacity = 0.9
+    };
+
+    // API response models
+    private record StatsResponse(
+        int total_runs,
+        double total_value,
+        double avg_value_per_run,
+        double total_duration_seconds,
+        double value_per_hour
+    );
+
+    private record LootItem(
+        int config_base_id,
+        string name,
+        int quantity,
+        string? icon_url,
+        double? price_fe,
+        double? total_value_fe
+    );
+
+    private record ActiveRunResponse(
+        int id,
+        string zone_name,
+        string? zone_signature,
+        double duration_seconds,
+        double total_value,
+        List<LootItem> loot,
+        double? map_cost_fe,
+        double? net_value_fe
+    );
+
+    private record InventoryResponse(
+        double net_worth_fe
+    );
+
+    public MainWindow()
+    {
+        InitializeComponent();
+
+        _httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(5)
+        };
+
+        _refreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(2)
+        };
+        _refreshTimer.Tick += async (s, e) => await RefreshDataAsync();
+
+        Loaded += async (s, e) =>
+        {
+            await RefreshDataAsync();
+            _refreshTimer.Start();
+        };
+
+        Closed += (s, e) =>
+        {
+            _refreshTimer.Stop();
+            _httpClient.Dispose();
+        };
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            // Double-click to reset position
+            Left = 100;
+            Top = 100;
+        }
+        else
+        {
+            DragMove();
+        }
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void PinButton_Click(object sender, RoutedEventArgs e)
+    {
+        Topmost = !Topmost;
+        PinIcon.Text = Topmost ? "📌" : "📍";
+        PinIcon.Opacity = Topmost ? 1.0 : 0.5;
+    }
+
+    private void TransparencyButton_Click(object sender, RoutedEventArgs e)
+    {
+        _isTransparent = !_isTransparent;
+        ApplyTransparency();
+    }
+
+    private void ApplyTransparency()
+    {
+        if (_isTransparent)
+        {
+            // Transparent mode - everything transparent, text with shadows
+            MainBorder.Background = Brushes.Transparent;
+            MainBorder.BorderBrush = Brushes.Transparent;
+            HeaderBorder.Background = Brushes.Transparent;
+            LootSectionBorder.Background = Brushes.Transparent;
+            ZoneHeaderBorder.Background = Brushes.Transparent;
+            ResizeGrip.Stroke = Brushes.Transparent;
+
+            // Make stat boxes transparent too
+            ThisRunBox.Background = Brushes.Transparent;
+            ValuePerHourBox.Background = Brushes.Transparent;
+            ValuePerMapBox.Background = Brushes.Transparent;
+            RunsBox.Background = Brushes.Transparent;
+            AvgTimeBox.Background = Brushes.Transparent;
+            TotalTimeBox.Background = Brushes.Transparent;
+
+            // Brighten text colors for visibility
+            ApplyTransparentTextColors();
+
+            // Add text shadows for visibility
+            ApplyTextShadows(true);
+
+            // Update icon
+            TransparencyIcon.Text = "◑";
+            TransparencyIcon.Opacity = 0.7;
+        }
+        else
+        {
+            // Opaque mode - show backgrounds
+            MainBorder.Background = new SolidColorBrush(OpaqueMainBg);
+            MainBorder.BorderBrush = new SolidColorBrush(OpaqueBorderColor);
+            HeaderBorder.Background = new SolidColorBrush(OpaqueHeaderBg);
+            LootSectionBorder.Background = new SolidColorBrush(OpaqueLootSectionBg);
+            ZoneHeaderBorder.Background = new SolidColorBrush(OpaqueZoneHeaderBg);
+            ResizeGrip.Stroke = new SolidColorBrush(OpaqueBorderColor);
+
+            // Restore stat box backgrounds
+            var statBoxBg = new SolidColorBrush(OpaqueStatBoxBg);
+            ThisRunBox.Background = statBoxBg;
+            ValuePerHourBox.Background = statBoxBg;
+            ValuePerMapBox.Background = statBoxBg;
+            RunsBox.Background = statBoxBg;
+            AvgTimeBox.Background = statBoxBg;
+            TotalTimeBox.Background = statBoxBg;
+
+            // Restore normal text colors
+            ApplyOpaqueTextColors();
+
+            // Remove text shadows
+            ApplyTextShadows(false);
+
+            // Update icon
+            TransparencyIcon.Text = "◐";
+            TransparencyIcon.Opacity = 1.0;
+        }
+    }
+
+    private void ApplyTransparentTextColors()
+    {
+        // Pure white for labels
+        var brightLabel = new SolidColorBrush(Colors.White);
+        // Pure white for values
+        var brightValue = new SolidColorBrush(Colors.White);
+        // Bright green for accents
+        var brightGreen = new SolidColorBrush(Color.FromRgb(0x6F, 0xFF, 0xCE));
+        // Bright red for net worth
+        var brightRed = new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x8A));
+
+        // Header
+        NetWorthLabel.Foreground = brightLabel;
+        NetWorthText.Foreground = brightRed;
+
+        // Stat labels
+        ThisRunLabel.Foreground = brightLabel;
+        ValuePerHourLabel.Foreground = brightLabel;
+        ValuePerMapLabel.Foreground = brightLabel;
+        RunsLabel.Foreground = brightLabel;
+        AvgTimeLabel.Foreground = brightLabel;
+        TotalTimeLabel.Foreground = brightLabel;
+
+        // Stat values
+        ThisRunText.Foreground = brightGreen;
+        ValuePerHourText.Foreground = brightValue;
+        ValuePerMapText.Foreground = brightValue;
+        RunsText.Foreground = brightValue;
+        AvgTimeText.Foreground = brightValue;
+        TotalTimeText.Foreground = brightValue;
+
+        // Zone text
+        ZoneNameText.Foreground = brightValue;
+        RunDurationText.Foreground = brightLabel;
+        NoRunText.Foreground = brightLabel;
+    }
+
+    private void ApplyOpaqueTextColors()
+    {
+        // Original muted colors
+        var mutedLabel = new SolidColorBrush(Color.FromRgb(0xa0, 0xa0, 0xa0));
+        var normalValue = new SolidColorBrush(Color.FromRgb(0xea, 0xea, 0xea));
+        var accentGreen = (Brush)FindResource("AccentGreenBrush");
+        var accentRed = (Brush)FindResource("AccentRedBrush");
+
+        // Header
+        NetWorthLabel.Foreground = mutedLabel;
+        NetWorthText.Foreground = accentRed;
+
+        // Stat labels
+        ThisRunLabel.Foreground = mutedLabel;
+        ValuePerHourLabel.Foreground = mutedLabel;
+        ValuePerMapLabel.Foreground = mutedLabel;
+        RunsLabel.Foreground = mutedLabel;
+        AvgTimeLabel.Foreground = mutedLabel;
+        TotalTimeLabel.Foreground = mutedLabel;
+
+        // Stat values
+        ThisRunText.Foreground = accentGreen;
+        ValuePerHourText.Foreground = normalValue;
+        ValuePerMapText.Foreground = normalValue;
+        RunsText.Foreground = normalValue;
+        AvgTimeText.Foreground = normalValue;
+        TotalTimeText.Foreground = normalValue;
+
+        // Zone text
+        ZoneNameText.Foreground = normalValue;
+        RunDurationText.Foreground = mutedLabel;
+        NoRunText.Foreground = mutedLabel;
+    }
+
+    private void ApplyTextShadows(bool enabled)
+    {
+        var effect = enabled ? TextShadow : null;
+
+        // Header text
+        NetWorthLabel.Effect = effect;
+        NetWorthText.Effect = effect;
+
+        // Stat labels and values
+        ThisRunLabel.Effect = effect;
+        ThisRunText.Effect = effect;
+        ValuePerHourLabel.Effect = effect;
+        ValuePerHourText.Effect = effect;
+        ValuePerMapLabel.Effect = effect;
+        ValuePerMapText.Effect = effect;
+        RunsLabel.Effect = effect;
+        RunsText.Effect = effect;
+        AvgTimeLabel.Effect = effect;
+        AvgTimeText.Effect = effect;
+        TotalTimeLabel.Effect = effect;
+        TotalTimeText.Effect = effect;
+
+        // Zone/run text
+        ZoneNameText.Effect = effect;
+        RunDurationText.Effect = effect;
+        NoRunText.Effect = effect;
+    }
+
+    private async Task RefreshDataAsync()
+    {
+        try
+        {
+            var statsTask = FetchAsync<StatsResponse>("/api/runs/stats");
+            var activeRunTask = FetchAsync<ActiveRunResponse?>("/api/runs/active");
+            var inventoryTask = FetchAsync<InventoryResponse>("/api/inventory");
+
+            await Task.WhenAll(statsTask, activeRunTask, inventoryTask);
+
+            var stats = await statsTask;
+            var activeRun = await activeRunTask;
+            var inventory = await inventoryTask;
+
+            UpdateStats(stats, activeRun, inventory);
+            UpdateActiveRun(activeRun);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Refresh error: {ex.Message}");
+        }
+    }
+
+    private async Task<T?> FetchAsync<T>(string endpoint)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}{endpoint}");
+            if (!response.IsSuccessStatusCode)
+                return default;
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch
+        {
+            return default;
+        }
+    }
+
+    private void UpdateStats(StatsResponse? stats, ActiveRunResponse? activeRun, InventoryResponse? inventory)
+    {
+        // Net Worth
+        NetWorthText.Text = inventory != null
+            ? FormatNumber(Math.Round(inventory.net_worth_fe))
+            : "--";
+
+        if (stats == null)
+        {
+            ThisRunText.Text = "--";
+            ValuePerHourText.Text = "--";
+            ValuePerMapText.Text = "--";
+            RunsText.Text = "--";
+            AvgTimeText.Text = "--";
+            TotalTimeText.Text = "--";
+            return;
+        }
+
+        // This Run (use net value if available, otherwise total value)
+        var runValue = activeRun?.net_value_fe ?? activeRun?.total_value ?? 0;
+        ThisRunText.Text = FormatNumber(Math.Round(runValue));
+        ThisRunText.Foreground = runValue >= 0
+            ? (Brush)FindResource("AccentGreenBrush")
+            : (Brush)FindResource("AccentRedBrush");
+
+        // Other stats
+        ValuePerHourText.Text = FormatNumber(Math.Round(stats.value_per_hour));
+        ValuePerMapText.Text = FormatNumber(Math.Round(stats.avg_value_per_run));
+        RunsText.Text = FormatNumber(stats.total_runs);
+
+        // Time calculations
+        if (stats.total_runs > 0)
+        {
+            var avgSeconds = stats.total_duration_seconds / stats.total_runs;
+            AvgTimeText.Text = FormatDuration(avgSeconds);
+        }
+        else
+        {
+            AvgTimeText.Text = "--";
+        }
+
+        TotalTimeText.Text = FormatDurationLong(stats.total_duration_seconds);
+    }
+
+    private void UpdateActiveRun(ActiveRunResponse? activeRun)
+    {
+        if (activeRun == null)
+        {
+            ActiveRunPanel.Visibility = Visibility.Collapsed;
+            NoRunPanel.Visibility = Visibility.Visible;
+            return;
+        }
+
+        ActiveRunPanel.Visibility = Visibility.Visible;
+        NoRunPanel.Visibility = Visibility.Collapsed;
+
+        // Zone name and duration
+        ZoneNameText.Text = activeRun.zone_name ?? "Unknown Zone";
+        RunDurationText.Text = $"({FormatDurationShort(activeRun.duration_seconds)})";
+
+        // Loot list
+        LootList.Children.Clear();
+
+        if (activeRun.loot == null || activeRun.loot.Count == 0)
+        {
+            var noLoot = new TextBlock
+            {
+                Text = "No loot yet",
+                Foreground = _isTransparent
+                    ? new SolidColorBrush(Color.FromRgb(0xDD, 0xDD, 0xDD))
+                    : (Brush)FindResource("SecondaryTextBrush"),
+                FontSize = 11,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 10, 0, 0),
+                Effect = _isTransparent ? TextShadow : null
+            };
+            LootList.Children.Add(noLoot);
+            return;
+        }
+
+        // Sort by value descending, take top 10
+        var sortedLoot = activeRun.loot
+            .OrderByDescending(l => l.total_value_fe ?? 0)
+            .Take(10)
+            .ToList();
+
+        foreach (var item in sortedLoot)
+        {
+            var lootItem = CreateLootItemElement(item);
+            LootList.Children.Add(lootItem);
+        }
+    }
+
+    private Border CreateLootItemElement(LootItem item)
+    {
+        var isNegative = item.quantity < 0;
+        var qtyPrefix = item.quantity > 0 ? "+" : "";
+        var effect = _isTransparent ? TextShadow : null;
+
+        // Colors based on transparency mode
+        Brush nameBrush, qtyBrush, valueBrush;
+        if (_isTransparent)
+        {
+            // Bright colors for transparent mode
+            nameBrush = isNegative
+                ? new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x8A))
+                : new SolidColorBrush(Colors.White);
+            qtyBrush = isNegative
+                ? new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x8A))
+                : new SolidColorBrush(Color.FromRgb(0x6F, 0xFF, 0xCE));
+            valueBrush = new SolidColorBrush(Color.FromRgb(0xDD, 0xDD, 0xDD));
+        }
+        else
+        {
+            // Normal colors for opaque mode
+            nameBrush = isNegative
+                ? (Brush)FindResource("AccentRedBrush")
+                : (Brush)FindResource("TextBrush");
+            qtyBrush = isNegative
+                ? (Brush)FindResource("AccentRedBrush")
+                : (Brush)FindResource("AccentGreenBrush");
+            valueBrush = (Brush)FindResource("SecondaryTextBrush");
+        }
+
+        var grid = new Grid();
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(22) });  // Icon
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });  // Name
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });  // Qty
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(55) });  // Value
+
+        // Icon
+        var iconImage = new Image
+        {
+            Width = 18,
+            Height = 18,
+            Margin = new Thickness(0, 0, 4, 0)
+        };
+        LoadIconAsync(item.config_base_id, iconImage);
+        Grid.SetColumn(iconImage, 0);
+        grid.Children.Add(iconImage);
+
+        // Name
+        var nameText = new TextBlock
+        {
+            Text = item.name ?? $"Unknown ({item.config_base_id})",
+            Foreground = nameBrush,
+            FontSize = 11,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            VerticalAlignment = VerticalAlignment.Center,
+            Effect = effect
+        };
+        Grid.SetColumn(nameText, 1);
+        grid.Children.Add(nameText);
+
+        // Quantity
+        var qtyText = new TextBlock
+        {
+            Text = $"{qtyPrefix}{item.quantity}",
+            Foreground = qtyBrush,
+            FontSize = 10,
+            Margin = new Thickness(6, 0, 6, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Effect = effect
+        };
+        Grid.SetColumn(qtyText, 2);
+        grid.Children.Add(qtyText);
+
+        // Value
+        var valueText = new TextBlock
+        {
+            Text = item.total_value_fe.HasValue
+                ? FormatNumber(Math.Round(item.total_value_fe.Value))
+                : "--",
+            Foreground = valueBrush,
+            FontSize = 10,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Effect = effect
+        };
+        Grid.SetColumn(valueText, 3);
+        grid.Children.Add(valueText);
+
+        var border = new Border
+        {
+            Child = grid,
+            Padding = new Thickness(4, 3, 4, 3),
+            CornerRadius = new CornerRadius(2)
+        };
+
+        // Hover effect (only in opaque mode)
+        if (!_isTransparent)
+        {
+            border.MouseEnter += (s, e) => border.Background = new SolidColorBrush(Color.FromArgb(0x40, 0x2a, 0x2a, 0x4a));
+            border.MouseLeave += (s, e) => border.Background = Brushes.Transparent;
+        }
+
+        return border;
+    }
+
+    private async void LoadIconAsync(int configBaseId, Image imageControl)
+    {
+        // Check cache
+        if (_iconCache.TryGetValue(configBaseId, out var cached))
+        {
+            if (cached != null)
+                imageControl.Source = cached;
+            return;
+        }
+
+        // Check failed list
+        if (_failedIcons.Contains(configBaseId))
+            return;
+
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/icons/{configBaseId}");
+            if (!response.IsSuccessStatusCode)
+            {
+                _failedIcons.Add(configBaseId);
+                return;
+            }
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.StreamSource = new System.IO.MemoryStream(bytes);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+
+            _iconCache[configBaseId] = bitmap;
+
+            // Update on UI thread
+            await Dispatcher.InvokeAsync(() =>
+            {
+                imageControl.Source = bitmap;
+            });
+        }
+        catch
+        {
+            _failedIcons.Add(configBaseId);
+            _iconCache[configBaseId] = null;
+        }
+    }
+
+    private static string FormatNumber(double value)
+    {
+        return value.ToString("N0");
+    }
+
+    private static string FormatDuration(double seconds)
+    {
+        var ts = TimeSpan.FromSeconds(seconds);
+        if (ts.TotalHours >= 1)
+            return $"{(int)ts.TotalHours}h {ts.Minutes}m";
+        return $"{ts.Minutes}m {ts.Seconds}s";
+    }
+
+    private static string FormatDurationShort(double seconds)
+    {
+        var ts = TimeSpan.FromSeconds(seconds);
+        return $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}";
+    }
+
+    private static string FormatDurationLong(double seconds)
+    {
+        var ts = TimeSpan.FromSeconds(seconds);
+        if (ts.TotalHours >= 1)
+            return $"{(int)ts.TotalHours}h {ts.Minutes}m";
+        return $"{ts.Minutes}m {ts.Seconds}s";
+    }
+}
