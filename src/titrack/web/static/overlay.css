@@ -24,41 +24,27 @@ body.opaque .overlay-container {
     background: #1a1a2e;
 }
 
-/* Transparent mode - uses chroma key (magenta #00ff00 becomes transparent) */
+/* Transparent mode - uses chroma key with MSHTML backend */
+/* MSHTML uses GDI-based rendering which works with WinForms TransparencyKey.
+   Only the body should be chroma-key color. UI elements use transparent backgrounds
+   so they show content while letting the chroma key show through empty areas. */
 body.transparent {
-    background: #00ff00 !important;
+    background: #ff00ff !important;  /* Magenta chroma key - must match commands.py */
 }
 
-body.transparent .overlay-container {
-    background: #00ff00 !important;
-}
-
-body.transparent .overlay-header {
-    background: #00ff00 !important;
-}
-
-body.transparent .stats-grid {
-    background: #00ff00 !important;
-}
-
-body.transparent .stats-grid .stat-item {
-    background: #00ff00 !important;
-}
-
-body.transparent .current-run-section {
-    background: #00ff00 !important;
-}
-
-body.transparent .active-run {
-    background: #00ff00 !important;
-}
-
+/* UI containers must NOT be chroma-key color - use transparent instead */
+body.transparent .overlay-container,
+body.transparent .overlay-header,
+body.transparent .stats-grid,
+body.transparent .stats-grid .stat-item,
+body.transparent .current-run-section,
+body.transparent .active-run,
 body.transparent .no-run {
-    background: #00ff00 !important;
+    background: rgba(0, 0, 0, 0) !important;
 }
 
 body.transparent .loot-item {
-    border-bottom-color: #00ff00;
+    border-bottom-color: rgba(0, 0, 0, 0);
 }
 
 /* Text shadows for readability in transparent mode */

@@ -622,9 +622,12 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger) ->
     return 0
 
 
-# Chroma key color for transparent overlay (green #00ff00)
-# Used by CSS and WinForms TransparencyKey
-CHROMA_KEY_COLOR_RGB = (0, 255, 0)  # RGB tuple for green
+# Chroma key color for transparent overlay
+# Used by CSS, WinForms TransparencyKey, and pywebview background_color
+# Options: green (#00ff00) or magenta (#ff00ff) - magenta may work better with WebView2
+# CHROMA_KEY_COLOR_RGB = (0, 255, 0)  # RGB tuple for green (#00ff00)
+CHROMA_KEY_COLOR_RGB = (255, 0, 255)  # RGB tuple for magenta (#ff00ff) - try if green fails
+CHROMA_KEY_COLOR_HEX = "#{:02x}{:02x}{:02x}".format(*CHROMA_KEY_COLOR_RGB)
 
 
 def _find_webview2_control(root):
@@ -703,8 +706,12 @@ def _remove_chroma_key(window, logger=None) -> bool:
             return False
 
         # Marshal to UI thread using Invoke
+        # Default dark background color for opaque mode
+        default_bg = Color.FromArgb(255, 26, 26, 46)  # #1a1a2e from overlay.css
+
         def do_remove():
-            # Only reset TransparencyKey
+            # Reset both BackColor and TransparencyKey
+            form.BackColor = default_bg
             form.TransparencyKey = Color.Empty
 
         if form.InvokeRequired:
@@ -712,7 +719,7 @@ def _remove_chroma_key(window, logger=None) -> bool:
         else:
             do_remove()
 
-        log("Remove chroma key: Reset TransparencyKey to Empty")
+        log("Remove chroma key: Reset BackColor and TransparencyKey")
         return True
 
     except Exception as e:
@@ -757,7 +764,10 @@ def _apply_chroma_key(window, logger=None) -> bool:
 
         # Marshal to UI thread using Invoke
         def do_apply():
-            # Only set TransparencyKey - CSS handles the green background
+            # Set both BackColor and TransparencyKey for proper chroma key transparency
+            # BackColor ensures the form paints the key color where WebView2 doesn't render
+            # TransparencyKey tells Windows to make that color transparent
+            form.BackColor = key_color
             form.TransparencyKey = key_color
 
         if form.InvokeRequired:
@@ -766,7 +776,7 @@ def _apply_chroma_key(window, logger=None) -> bool:
         else:
             do_apply()
 
-        log(f"Chroma key: Set form.TransparencyKey to green ({r}, {g}, {b})")
+        log(f"Chroma key: Set form.BackColor and TransparencyKey to ({r}, {g}, {b})")
         return True
 
     except Exception as e:
@@ -1041,22 +1051,15 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                     return False
 
             def toggle_overlay_transparency(self, enabled: bool):
-                """Enable or disable chroma key transparency on the overlay window."""
-                try:
-                    overlay = self._overlay[0]
-                    if overlay is None:
-                        logger.warning("toggle_overlay_transparency: No overlay window")
-                        return False
+                """Toggle overlay transparency (currently non-functional).
 
-                    if enabled:
-                        # Apply chroma key
-                        return _apply_chroma_key(overlay, logger)
-                    else:
-                        # Remove chroma key by resetting TransparencyKey
-                        return _remove_chroma_key(overlay, logger)
-                except Exception as e:
-                    logger.error(f"Error toggling overlay transparency: {e}")
-                    return False
+                Note: Transparent overlays are not supported on Windows with WebView2.
+                The T button toggles the CSS class for visual feedback only.
+                True transparency would require a different rendering backend.
+                """
+                # Transparency not supported - just acknowledge the request
+                logger.info(f"toggle_overlay_transparency: enabled={enabled} (transparency not supported)")
+                return True
 
         # Use lists to allow the API to reference windows after creation
         window_ref = [None]
@@ -1153,6 +1156,22 @@ def create_parser() -> argparse.ArgumentParser:
         "--portable",
         action="store_true",
         help="Use portable mode (data beside exe)",
+    )
+    # Top-level flags for frozen exe mode (no subcommand needed)
+    parser.add_argument(
+        "--overlay",
+        action="store_true",
+        help="Open mini-overlay window alongside main window",
+    )
+    parser.add_argument(
+        "--overlay-only",
+        action="store_true",
+        help="Open only the mini-overlay window (no main dashboard)",
+    )
+    parser.add_argument(
+        "--no-window",
+        action="store_true",
+        help="Run in browser mode instead of native window",
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Commands")
@@ -1269,13 +1288,14 @@ def main() -> int:
             # Running as packaged EXE - default to serve with portable mode and native window
             args.command = "serve"
             args.file = None
-            args.port = 8000
-            args.host = "127.0.0.1"
+            args.port = getattr(args, 'port', 8000) or 8000
+            args.host = getattr(args, 'host', '127.0.0.1') or '127.0.0.1'
             args.no_browser = True  # Window mode handles its own display
-            args.no_window = False  # Use native window by default
+            args.no_window = getattr(args, 'no_window', False)
             args.portable = True  # Force portable mode for frozen exe
-            args.overlay = False  # No overlay by default
-            args.overlay_only = False
+            # Preserve --overlay and --overlay-only flags from command line
+            args.overlay = getattr(args, 'overlay', False)
+            args.overlay_only = getattr(args, 'overlay_only', False)
         else:
             parser.print_help()
             return 0

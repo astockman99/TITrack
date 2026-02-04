@@ -233,24 +233,30 @@ TITrack.exe --overlay-only   # Just the overlay (no main dashboard)
 
 **From UI**: Click the "Overlay" button in the dashboard header (only visible in native window mode).
 
-### Transparency Toggle (Not Yet Working)
+### Transparency (Not Supported)
 
-The overlay includes a "T" button intended to toggle between opaque and transparent modes. **However, transparency is not yet functional** due to WebView2 rendering limitations on Windows.
+The overlay operates in **opaque mode only**. Transparent overlays are not supported due to fundamental limitations with pywebview backends on Windows 11.
 
-**Current status**: Clicking "T" changes the CSS background to the chroma key color (green), but WinForms `TransparencyKey` does not work with WebView2's DirectComposition/Direct3D rendering pipeline. The overlay becomes unresponsive when transparency is toggled.
+**Investigation summary** (February 2026):
+
+| Backend | Result |
+|---------|--------|
+| WebView2 (EdgeChromium) | D3D/DirectComposition rendering bypasses GDI TransparencyKey; window becomes unresponsive |
+| MSHTML (Internet Explorer) | Also causes window to become unresponsive when TransparencyKey is applied |
+| CEF (cefpython3) | Not compatible with Python 3.13 (only supports up to Python 3.9) |
 
 **Attempted approaches**:
-- Win32 `SetLayeredWindowAttributes` with `LWA_COLORKEY` - doesn't work with WebView2's hardware-accelerated rendering
-- WinForms `TransparencyKey` + `BackColor` - causes WebView2 to become unresponsive
-- Setting `WebView2.DefaultBackgroundColor` - also causes rendering issues
+- Win32 `SetLayeredWindowAttributes` with `LWA_COLORKEY`
+- WinForms `TransparencyKey` + `BackColor` with chroma key colors (green #00ff00, magenta #ff00ff)
+- Setting `WebView2.DefaultBackgroundColor`
+- MSHTML backend for GDI-based rendering
 
-**Potential solutions to explore**:
-- Use MSHTML backend instead of EdgeChromium (older IE renderer supports TransparencyKey)
-- Disable WebView2 hardware acceleration
-- Use a different windowing framework entirely
-- Accept opaque-only mode as a limitation
+All approaches resulted in the window becoming unresponsive when transparency was enabled.
 
-For now, the overlay works in **opaque mode only**. The transparency toggle button is present but non-functional.
+**Potential future solutions**:
+- Use a native WinForms/WPF overlay without web rendering (significant rework)
+- Wait for pywebview or WebView2 to add native transparency support
+- Use Python 3.9 with CEF backend (requires downgrading Python version)
 
 ## Single Instance Enforcement
 

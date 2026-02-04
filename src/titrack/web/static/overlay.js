@@ -271,14 +271,26 @@ function stopAutoRefresh() {
 // --- Initialization ---
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load transparency preference and apply it
-    isTransparent = await fetchTransparencySetting();
+    // Check for ?transparent=1 query parameter (used by MSHTML backend)
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceTransparent = urlParams.get('transparent') === '1';
 
-    // Wait a moment for pywebview API to be ready, then apply transparency
-    // pywebview injects the API after DOM ready, so we need a small delay
-    setTimeout(async () => {
-        await applyTransparency(isTransparent);
-    }, 100);
+    if (forceTransparent) {
+        // MSHTML mode: apply transparent CSS immediately, chroma key applied by Python
+        isTransparent = true;
+        document.body.classList.remove('opaque');
+        document.body.classList.add('transparent');
+        document.getElementById('transparency-icon').textContent = 'O';
+    } else {
+        // Normal mode: load transparency preference and apply it
+        isTransparent = await fetchTransparencySetting();
+
+        // Wait a moment for pywebview API to be ready, then apply transparency
+        // pywebview injects the API after DOM ready, so we need a small delay
+        setTimeout(async () => {
+            await applyTransparency(isTransparent);
+        }, 100);
+    }
 
     // Initial data load
     await refreshAll();
