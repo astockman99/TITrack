@@ -11,7 +11,7 @@
   "items": [
     {
       "id": "6002",
-      "name_en": "Memory_6002",
+      "name_en": "Secret of the Glacial Abyss",
       "name_cn": "寒渊的秘密",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6002_Icon_128.webp",
@@ -22,7 +22,7 @@
     },
     {
       "id": "6007",
-      "name_en": "Memory_6007",
+      "name_en": "Lost Secrets",
       "name_cn": "遗落的秘藏",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6007_Icon_128.webp",
@@ -33,7 +33,7 @@
     },
     {
       "id": "6008",
-      "name_en": "Memory_6008",
+      "name_en": "A Terrible Price",
       "name_cn": "残酷的代价",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6008_Icon_128.webp",
@@ -44,7 +44,7 @@
     },
     {
       "id": "6003",
-      "name_en": "Memory_6003",
+      "name_en": "Crow's Wail",
       "name_cn": "乌鸦的悲鸣",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6003_Icon_128.webp",
@@ -66,7 +66,7 @@
     },
     {
       "id": "6026",
-      "name_en": "Memory_6026",
+      "name_en": "Antonius's Help",
       "name_cn": "安东尼奥之助",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6026_Icon_128.webp",
@@ -77,7 +77,7 @@
     },
     {
       "id": "6006",
-      "name_en": "Memory_6006",
+      "name_en": "Portent Moon",
       "name_cn": "征兆之月",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6006_Icon_128.webp",
@@ -99,7 +99,7 @@
     },
     {
       "id": "6027",
-      "name_en": "Memory_6027",
+      "name_en": "Aureole Rock",
       "name_cn": "日冕的奇石",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6027_Icon_128.webp",
@@ -110,7 +110,7 @@
     },
     {
       "id": "6054",
-      "name_en": "Memory_6054",
+      "name_en": "Clergy's Thinking",
       "name_cn": "学者的奇思",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6054_Icon_128.webp",
@@ -121,7 +121,7 @@
     },
     {
       "id": "6055",
-      "name_en": "Memory_6055",
+      "name_en": "Antonius' Research",
       "name_cn": "安东尼奥的研究",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6055_Icon_128.webp",
@@ -143,7 +143,7 @@
     },
     {
       "id": "6119",
-      "name_en": "Memory_6119",
+      "name_en": "Stray Fireflies",
       "name_cn": "离群的萤火",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6119_Icon_128.webp",
@@ -154,7 +154,7 @@
     },
     {
       "id": "6118",
-      "name_en": "Memory_6118",
+      "name_en": "Echo of the Gods",
       "name_cn": "万神的回声",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6118_Icon_128.webp",
@@ -165,7 +165,7 @@
     },
     {
       "id": "6127",
-      "name_en": "Memory_6127",
+      "name_en": "Immolating Flame",
       "name_cn": "众火俱焚",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6127_Icon_128.webp",
@@ -198,7 +198,7 @@
     },
     {
       "id": "6141",
-      "name_en": "Memory_6141",
+      "name_en": "The Kiss of the Heartless",
       "name_cn": "空心人之吻",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6141_Icon_128.webp",
@@ -209,7 +209,7 @@
     },
     {
       "id": "6143",
-      "name_en": "Memory_6143",
+      "name_en": "Second Divinity",
       "name_cn": "第二重神格",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6143_Icon_128.webp",
@@ -220,7 +220,7 @@
     },
     {
       "id": "6147",
-      "name_en": "Memory_6147",
+      "name_en": "Gaze Upon the Reflection",
       "name_cn": "窥伺着倒影的双瞳",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6147_Icon_128.webp",
@@ -231,7 +231,7 @@
     },
     {
       "id": "6148",
-      "name_en": "Memory_6148",
+      "name_en": "Unhatched Shadow",
       "name_cn": "未孵化的雏影",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6148_Icon_128.webp",
@@ -253,7 +253,7 @@
     },
     {
       "id": "6139",
-      "name_en": "Memory_6139",
+      "name_en": "Divine Supernova",
       "name_cn": "神抉超新星",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6139_Icon_128.webp",
@@ -264,7 +264,7 @@
     },
     {
       "id": "6216",
-      "name_en": "Memory_6216",
+      "name_en": "Disappearing Shadow",
       "name_cn": "只影的绝迹",
       "type_cn": "记忆荧光",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/FateCard/128/UI_Memory_6216_Icon_128.webp",

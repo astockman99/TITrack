@@ -147,6 +147,7 @@ class Database:
         # Auto-seed items if table is empty (first run experience)
         if self._auto_seed:
             self._auto_seed_items(cursor)
+            self._fix_placeholder_item_names(cursor)
 
     def _run_migrations(self, cursor: sqlite3.Cursor) -> None:
         """Run database migrations for schema changes."""
@@ -291,6 +292,53 @@ class Database:
 
         except Exception as e:
             print(f"Failed to auto-seed items: {e}")
+
+    def _fix_placeholder_item_names(self, cursor: sqlite3.Cursor) -> None:
+        """
+        Fix items with placeholder names (e.g. Memory_6143) by updating
+        from the seed file. Runs on every startup to catch name corrections.
+        """
+        import re
+
+        rows = cursor.execute(
+            "SELECT config_base_id, name_en FROM items WHERE name_en LIKE 'Memory\\_%' ESCAPE '\\'"
+        ).fetchall()
+
+        placeholder_ids = {
+            row[0] for row in rows
+            if re.fullmatch(r"Memory_\d+", row[1])
+        }
+
+        if not placeholder_ids:
+            return
+
+        try:
+            from titrack.config.paths import get_items_seed_path
+
+            seed_path = get_items_seed_path()
+            if not seed_path.exists():
+                return
+
+            with open(seed_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            updated = 0
+            for item in data.get("items", []):
+                item_id = int(item["id"])
+                if item_id in placeholder_ids:
+                    name_en = item.get("name_en", "")
+                    if name_en and not re.fullmatch(r"Memory_\d+", name_en):
+                        cursor.execute(
+                            "UPDATE items SET name_en = ? WHERE config_base_id = ?",
+                            (name_en, item_id),
+                        )
+                        updated += 1
+
+            if updated:
+                print(f"Fixed {updated} placeholder item names from seed file")
+
+        except Exception as e:
+            print(f"Failed to fix placeholder item names: {e}")
 
     def close(self) -> None:
         """Close database connection."""
