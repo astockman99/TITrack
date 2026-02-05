@@ -207,6 +207,14 @@ public class SetupForm : Form
 
     private void SetDefaultPath()
     {
+        // Check for existing TITrack installations first
+        var existingPath = FindExistingInstallation();
+        if (!string.IsNullOrEmpty(existingPath))
+        {
+            _pathTextBox.Text = existingPath;
+            return;
+        }
+
         // Default to same directory as setup exe, or C:\TITrack
         string exePath = Application.ExecutablePath;
         string exeDir = Path.GetDirectoryName(exePath) ?? "";
@@ -221,6 +229,89 @@ public class SetupForm : Form
         {
             _pathTextBox.Text = Path.Combine(exeDir, "TITrack");
         }
+    }
+
+    private string? FindExistingInstallation()
+    {
+        // Check common installation locations for existing TITrack with data
+        var candidatePaths = new[]
+        {
+            @"C:\TITrack",
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TITrack"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "TITrack"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "TITrack"),
+        };
+
+        foreach (var path in candidatePaths)
+        {
+            // Check if this location has a TITrack installation with user data
+            var exePath = Path.Combine(path, "TITrack.exe");
+            var dataPath = Path.Combine(path, "data", "tracker.db");
+
+            if (File.Exists(exePath) || File.Exists(dataPath))
+            {
+                return path;
+            }
+        }
+
+        // Also check if there's a desktop shortcut pointing to an installation
+        try
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var shortcutPath = Path.Combine(desktopPath, "TITrack.lnk");
+
+            if (File.Exists(shortcutPath))
+            {
+                var targetPath = GetShortcutTarget(shortcutPath);
+                if (!string.IsNullOrEmpty(targetPath))
+                {
+                    var installDir = Path.GetDirectoryName(targetPath);
+                    if (!string.IsNullOrEmpty(installDir) && Directory.Exists(installDir))
+                    {
+                        return installDir;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Ignore shortcut reading errors
+        }
+
+        return null;
+    }
+
+    private string? GetShortcutTarget(string shortcutPath)
+    {
+        try
+        {
+            // Use PowerShell to read shortcut target
+            var psi = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-NoProfile -Command \"(New-Object -ComObject WScript.Shell).CreateShortcut('{shortcutPath}').TargetPath\"",
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process != null)
+            {
+                var output = process.StandardOutput.ReadToEnd().Trim();
+                process.WaitForExit(3000);
+                if (!string.IsNullOrEmpty(output) && File.Exists(output))
+                {
+                    return output;
+                }
+            }
+        }
+        catch
+        {
+            // Ignore errors
+        }
+
+        return null;
     }
 
     private async Task FetchLatestReleaseInfo()
