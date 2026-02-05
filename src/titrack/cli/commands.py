@@ -434,24 +434,26 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     logger.info(f"Database: {settings.db_path}")
 
-    # If log file not found via auto-detect, check for saved log_directory setting
-    if not settings.log_path or not settings.log_path.exists():
-        # Connect to DB to check for saved setting
-        temp_db = Database(settings.db_path)
-        temp_db.connect()
-        try:
-            temp_repo = Repository(temp_db)
-            saved_log_dir = temp_repo.get_setting("log_directory")
-        finally:
-            temp_db.close()
+    # Check for saved log_directory setting FIRST (user's explicit choice takes priority)
+    # Only fall back to auto-detection if no saved setting exists
+    temp_db = Database(settings.db_path)
+    temp_db.connect()
+    try:
+        temp_repo = Repository(temp_db)
+        saved_log_dir = temp_repo.get_setting("log_directory")
+    finally:
+        temp_db.close()
 
-        if saved_log_dir:
-            # Try using saved directory
-            from titrack.config.settings import find_log_file
-            found_path = find_log_file(custom_game_dir=saved_log_dir)
-            if found_path and found_path.exists():
-                settings.log_path = found_path
-                logger.info(f"Using saved log directory: {saved_log_dir}")
+    if saved_log_dir:
+        # User has explicitly configured a log directory - use it
+        from titrack.config.settings import find_log_file
+        found_path = find_log_file(custom_game_dir=saved_log_dir)
+        if found_path and found_path.exists():
+            settings.log_path = found_path
+            logger.info(f"Using saved log directory: {saved_log_dir}")
+        else:
+            logger.warning(f"Saved log directory not found: {saved_log_dir}")
+    # If no saved setting or saved path invalid, keep auto-detected path (if any)
 
     # Check if we should use native window mode
     use_window = is_frozen() and not getattr(args, 'no_window', False)
