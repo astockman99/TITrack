@@ -753,13 +753,13 @@ class Repository:
 
         total_cost = 0.0
         unpriced: list[int] = []
-        tax_multiplier = self.get_trade_tax_multiplier()
 
         for config_id, quantity in summary.items():
             price_fe = self.get_effective_price(config_id)
             if price_fe and price_fe > 0:
                 # Use absolute value since quantity is negative (consumption)
-                total_cost += abs(quantity) * price_fe * tax_multiplier
+                # No tax on consumed items - you paid full price when buying them
+                total_cost += abs(quantity) * price_fe
             else:
                 unpriced.append(config_id)
 
@@ -1003,7 +1003,6 @@ class Repository:
             )
 
         total_cost = 0.0
-        tax_multiplier = self.get_trade_tax_multiplier()
 
         for row in rows:
             config_id = row["config_base_id"]
@@ -1011,6 +1010,7 @@ class Repository:
             price_fe = self.get_effective_price(config_id)
             if price_fe and price_fe > 0:
                 # Use absolute value since quantity is negative
-                total_cost += abs(quantity) * price_fe * tax_multiplier
+                # No tax on consumed items - you paid full price when buying them
+                total_cost += abs(quantity) * price_fe
 
         return total_cost

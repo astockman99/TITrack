@@ -31,8 +31,10 @@ STEAM_PATHS = GAME_PATHS
 
 # Relative paths to log file within game directory
 # Steam version uses UE_Game directly, standalone client has Game/UE_game
+# Note: Windows is case-insensitive, but we include variations for clarity
 LOG_RELATIVE_PATHS = [
-    Path("UE_Game/Torchlight/Saved/Logs/UE_game.log"),  # Steam
+    Path("UE_Game/Torchlight/Saved/Logs/UE_game.log"),  # Steam (common)
+    Path("UE_game/TorchLight/Saved/Logs/UE_game.log"),  # Steam (alternate capitalization)
     Path("Game/UE_game/Torchlight/Saved/Logs/UE_game.log"),  # Standalone client
 ]
 
@@ -168,9 +170,10 @@ def get_portable_db_path() -> Path:
     Get the portable database path (beside executable).
 
     Returns:
-        Path to data/tracker.db in current directory
+        Path to data/tracker.db beside the executable
     """
-    return Path.cwd() / "data" / "tracker.db"
+    from titrack.config.paths import get_app_dir
+    return get_app_dir() / "data" / "tracker.db"
 
 
 @dataclass

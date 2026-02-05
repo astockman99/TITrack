@@ -277,6 +277,8 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 
 ### Overlay Controls
 
+- **A (small)**: Decrease text size (scales from 70% to 160%)
+- **A (large)**: Increase text size
 - **◐ button**: Toggle transparency (fully transparent background with white text and drop shadows)
 - **📌 button**: Toggle always-on-top (pinned/unpinned)
 - **✕ button**: Close overlay
@@ -284,6 +286,8 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 - **Double-click header**: Reset window position
 - **Corner grip**: Resize window
 - **Stats/Loot areas**: Click-through (passes clicks to game underneath)
+
+Font scale setting is persisted and restored when the overlay reopens.
 
 ## Single Instance Enforcement
 

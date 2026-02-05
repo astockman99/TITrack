@@ -18,6 +18,10 @@ public partial class MainWindow : Window
     private readonly HashSet<int> _failedIcons = new();
 
     private bool _isTransparent = false;
+    private double _fontScale = 1.0;
+    private const double MinFontScale = 0.7;
+    private const double MaxFontScale = 1.6;
+    private const double FontScaleStep = 0.1;
 
     // Track previous run to show after map ends
     private ActiveRunResponse? _previousRun = null;
@@ -90,6 +94,7 @@ public partial class MainWindow : Window
 
         Loaded += async (s, e) =>
         {
+            await LoadFontScaleAsync();
             await RefreshDataAsync();
             _refreshTimer.Start();
         };
@@ -125,6 +130,82 @@ public partial class MainWindow : Window
         Topmost = !Topmost;
         PinIcon.Text = Topmost ? "📌" : "📍";
         PinIcon.Opacity = Topmost ? 1.0 : 0.5;
+    }
+
+    private void FontDecreaseButton_Click(object sender, RoutedEventArgs e)
+    {
+        SetFontScale(_fontScale - FontScaleStep);
+    }
+
+    private void FontIncreaseButton_Click(object sender, RoutedEventArgs e)
+    {
+        SetFontScale(_fontScale + FontScaleStep);
+    }
+
+    private void SetFontScale(double scale)
+    {
+        _fontScale = Math.Clamp(scale, MinFontScale, MaxFontScale);
+        ApplyFontScale();
+        _ = SaveFontScaleAsync();
+    }
+
+    private void ApplyFontScale()
+    {
+        StatsScaleTransform.ScaleX = _fontScale;
+        StatsScaleTransform.ScaleY = _fontScale;
+        LootScaleTransform.ScaleX = _fontScale;
+        LootScaleTransform.ScaleY = _fontScale;
+
+        // Update button states
+        FontDecreaseButton.IsEnabled = _fontScale > MinFontScale;
+        FontIncreaseButton.IsEnabled = _fontScale < MaxFontScale;
+        FontDecreaseButton.Opacity = _fontScale > MinFontScale ? 1.0 : 0.4;
+        FontIncreaseButton.Opacity = _fontScale < MaxFontScale ? 1.0 : 0.4;
+    }
+
+    private async Task LoadFontScaleAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_font_scale");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    var valueStr = valueElement.GetString();
+                    if (double.TryParse(valueStr, System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var savedScale))
+                    {
+                        _fontScale = Math.Clamp(savedScale, MinFontScale, MaxFontScale);
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Use default scale on error
+        }
+
+        ApplyFontScale();
+    }
+
+    private async Task SaveFontScaleAsync()
+    {
+        try
+        {
+            var content = new StringContent(
+                JsonSerializer.Serialize(new { value = _fontScale.ToString(System.Globalization.CultureInfo.InvariantCulture) }),
+                System.Text.Encoding.UTF8,
+                "application/json");
+            await _httpClient.PutAsync($"{App.BaseUrl}/api/settings/overlay_font_scale", content);
+        }
+        catch
+        {
+            // Silently ignore save errors
+        }
     }
 
     private void TransparencyButton_Click(object sender, RoutedEventArgs e)
@@ -511,13 +592,14 @@ public partial class MainWindow : Window
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });  // Qty
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(55) });  // Value
 
-        // Icon
+        // Icon - use high quality scaling for crisp display at small sizes
         var iconImage = new Image
         {
             Width = 18,
             Height = 18,
             Margin = new Thickness(0, 0, 4, 0)
         };
+        RenderOptions.SetBitmapScalingMode(iconImage, BitmapScalingMode.HighQuality);
         LoadIconAsync(item.config_base_id, iconImage);
         Grid.SetColumn(iconImage, 0);
         grid.Children.Add(iconImage);
@@ -609,6 +691,9 @@ public partial class MainWindow : Window
             bitmap.BeginInit();
             bitmap.StreamSource = new System.IO.MemoryStream(bytes);
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            // Decode at 2x display size for crisp rendering on high-DPI displays
+            bitmap.DecodePixelWidth = 36;
+            bitmap.DecodePixelHeight = 36;
             bitmap.EndInit();
             bitmap.Freeze();
 

@@ -78,7 +78,6 @@ def _build_loot(summary: dict[int, int], repo: Repository) -> list[LootItem]:
 def _build_cost_items(cost_summary: dict[int, int], repo: Repository) -> list[LootItem]:
     """Build cost items from a run's map cost summary."""
     cost_items = []
-    tax_multiplier = repo.get_trade_tax_multiplier()
 
     for config_id, quantity in cost_summary.items():
         if quantity != 0:
@@ -86,8 +85,8 @@ def _build_cost_items(cost_summary: dict[int, int], repo: Repository) -> list[Lo
             item_price_fe = repo.get_effective_price(config_id)
             # Use absolute quantity for display (costs are negative)
             abs_qty = abs(quantity)
-            # Apply trade tax (consistent with get_run_cost)
-            item_total = item_price_fe * abs_qty * tax_multiplier if item_price_fe else None
+            # No tax on consumed items - you paid full price when buying them
+            item_total = item_price_fe * abs_qty if item_price_fe else None
             cost_items.append(
                 LootItem(
                     config_base_id=config_id,

@@ -23,6 +23,7 @@ ALLOWED_SETTINGS = {
     "trade_tax_enabled",
     "map_costs_enabled",
     "overlay_transparent",
+    "overlay_font_scale",
 }
 
 # Settings that are read-only via API (can be read but not written)

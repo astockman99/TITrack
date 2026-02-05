@@ -15,6 +15,65 @@
         <!-- Drop shadow effect for text visibility in transparent mode -->
         <DropShadowEffect x:Key="TextShadow" ShadowDepth="1" BlurRadius="3" Color="Black" Opacity="0.8" />
 
+        <!-- Minimal scrollbar thumb style -->
+        <Style x:Key="SlimScrollBarThumb" TargetType="Thumb">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Background="#50ffffff"
+                                CornerRadius="3"
+                                Margin="1" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Minimal vertical scrollbar style -->
+        <Style x:Key="SlimScrollBar" TargetType="ScrollBar">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid>
+                            <Border Background="#10ffffff" CornerRadius="4" />
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource SlimScrollBarThumb}" />
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ScrollViewer style with slim scrollbar -->
+        <Style x:Key="SlimScrollViewer" TargetType="ScrollViewer">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollViewer">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ScrollContentPresenter Grid.Column="0" />
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                       Grid.Column="1"
+                                       Style="{StaticResource SlimScrollBar}"
+                                       Value="{TemplateBinding VerticalOffset}"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Stat box style -->
         <Style x:Key="StatBox" TargetType="Border">
             <Setter Property="Background" Value="#e02a2a4a" />
@@ -59,6 +118,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Net Worth -->
@@ -74,9 +135,31 @@
                                    FontWeight="Bold" />
                     </StackPanel>
 
+                    <!-- Font scale decrease -->
+                    <Button x:Name="FontDecreaseButton"
+                            Grid.Column="1"
+                            Style="{StaticResource OverlayButton}"
+                            Click="FontDecreaseButton_Click"
+                            ToolTip="Decrease text size"
+                            Padding="4,4"
+                            Margin="0,0,0,0">
+                        <TextBlock Text="A" FontSize="10" FontWeight="Bold" />
+                    </Button>
+
+                    <!-- Font scale increase -->
+                    <Button x:Name="FontIncreaseButton"
+                            Grid.Column="2"
+                            Style="{StaticResource OverlayButton}"
+                            Click="FontIncreaseButton_Click"
+                            ToolTip="Increase text size"
+                            Padding="4,4"
+                            Margin="0,0,4,0">
+                        <TextBlock Text="A" FontSize="14" FontWeight="Bold" />
+                    </Button>
+
                     <!-- Transparency toggle -->
                     <Button x:Name="TransparencyButton"
-                            Grid.Column="1"
+                            Grid.Column="3"
                             Style="{StaticResource OverlayButton}"
                             Click="TransparencyButton_Click"
                             ToolTip="Toggle transparency"
@@ -87,7 +170,7 @@
 
                     <!-- Pin toggle -->
                     <Button x:Name="PinButton"
-                            Grid.Column="2"
+                            Grid.Column="4"
                             Style="{StaticResource OverlayButton}"
                             Click="PinButton_Click"
                             ToolTip="Toggle always-on-top"
@@ -97,7 +180,7 @@
                     </Button>
 
                     <!-- Close button -->
-                    <Button Grid.Column="3"
+                    <Button Grid.Column="5"
                             Style="{StaticResource OverlayButton}"
                             Click="CloseButton_Click"
                             ToolTip="Close overlay"
@@ -109,6 +192,9 @@
 
             <!-- Stats Grid (click-through) -->
             <Grid x:Name="StatsGrid" Grid.Row="1" Margin="8,6,8,0" IsHitTestVisible="False">
+                <Grid.LayoutTransform>
+                    <ScaleTransform x:Name="StatsScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                </Grid.LayoutTransform>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -175,6 +261,9 @@
                     CornerRadius="4"
                     Margin="8,6,8,8"
                     IsHitTestVisible="False">
+                <Border.LayoutTransform>
+                    <ScaleTransform x:Name="LootScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                </Border.LayoutTransform>
                 <Grid>
                     <!-- Active run content -->
                     <Grid x:Name="ActiveRunPanel">
@@ -239,6 +328,7 @@
 
                         <!-- Loot list -->
                         <ScrollViewer Grid.Row="1"
+                                      Style="{StaticResource SlimScrollViewer}"
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                             <StackPanel x:Name="LootList" Margin="4,4,4,4" />
