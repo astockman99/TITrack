@@ -1,6 +1,7 @@
 """SQLite connection management with WAL mode."""
 
 import json
+import shutil
 import sqlite3
 import threading
 from contextlib import contextmanager
@@ -8,6 +9,82 @@ from pathlib import Path
 from typing import Generator
 
 from titrack.db.schema import ALL_CREATE_STATEMENTS, SCHEMA_VERSION
+
+
+def migrate_legacy_database(target_path: Path) -> bool:
+    """
+    Migrate database from legacy locations to the correct location.
+
+    Prior to the fix, get_portable_db_path() used Path.cwd() instead of
+    get_app_dir(), which could cause the database to be created in wrong
+    locations depending on how the app was launched.
+
+    This function checks common legacy locations and copies the database
+    if found, preserving user data during updates.
+
+    Args:
+        target_path: The correct database path to migrate to
+
+    Returns:
+        True if migration was performed, False otherwise
+    """
+    # If target already exists with data, no migration needed
+    if target_path.exists() and target_path.stat().st_size > 0:
+        return False
+
+    # Import here to avoid circular imports
+    from titrack.config.paths import is_frozen
+
+    # Only run migration in frozen mode (packaged app)
+    if not is_frozen():
+        return False
+
+    # Common legacy locations to check
+    # These are places the database might have been created due to the
+    # Path.cwd() bug depending on how the user launched the app
+    legacy_locations = [
+        # User's home directory (common shortcut "Start in" location)
+        Path.home() / "data" / "tracker.db",
+        # Windows default working directory (sometimes System32)
+        Path("C:/Windows/System32/data/tracker.db"),
+        # User profile root
+        Path.home() / "tracker.db",
+        # Common user directories
+        Path.home() / "Documents" / "data" / "tracker.db",
+        Path.home() / "Desktop" / "data" / "tracker.db",
+    ]
+
+    # Also check the non-portable location (in case of mode confusion)
+    import os
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if local_app_data:
+        legacy_locations.append(Path(local_app_data) / "TITracker" / "tracker.db")
+
+    # Check each legacy location
+    for legacy_path in legacy_locations:
+        if legacy_path.exists() and legacy_path.stat().st_size > 0:
+            try:
+                # Ensure target directory exists
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Copy the legacy database (don't move, in case something goes wrong)
+                shutil.copy2(legacy_path, target_path)
+
+                # Also copy WAL files if they exist
+                wal_file = legacy_path.with_suffix(".db-wal")
+                shm_file = legacy_path.with_suffix(".db-shm")
+                if wal_file.exists():
+                    shutil.copy2(wal_file, target_path.with_suffix(".db-wal"))
+                if shm_file.exists():
+                    shutil.copy2(shm_file, target_path.with_suffix(".db-shm"))
+
+                print(f"Migrated database from legacy location: {legacy_path}")
+                return True
+            except Exception as e:
+                print(f"Failed to migrate database from {legacy_path}: {e}")
+                continue
+
+    return False
 
 
 class Database:
@@ -28,6 +105,9 @@ class Database:
 
     def connect(self) -> None:
         """Open database connection and initialize schema."""
+        # Attempt to migrate database from legacy locations before connecting
+        migrate_legacy_database(self.db_path)
+
         # Ensure parent directory exists
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 

@@ -174,7 +174,8 @@ if errorlevel 1 (
 echo Update complete!
 echo Starting TITrack...
 
-REM Start the updated app
+REM Start the updated app from its own directory
+cd /d "{app_dir}"
 start "" "{exe_path}"
 
 REM Clean up temp files
