@@ -51,6 +51,7 @@
         </Style>
 
         <!-- ScrollViewer style with slim scrollbar -->
+        <!-- Content is click-through but scrollbar remains interactive -->
         <Style x:Key="SlimScrollViewer" TargetType="ScrollViewer">
             <Setter Property="Template">
                 <Setter.Value>
@@ -60,7 +61,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <ScrollContentPresenter Grid.Column="0" />
+                            <ScrollContentPresenter Grid.Column="0" IsHitTestVisible="False" />
                             <ScrollBar x:Name="PART_VerticalScrollBar"
                                        Grid.Column="1"
                                        Style="{StaticResource SlimScrollBar}"
@@ -254,13 +255,12 @@
                 </Border>
             </Grid>
 
-            <!-- Current Run / Loot Section (click-through) -->
+            <!-- Current Run / Loot Section (content click-through, scrollbar interactive) -->
             <Border x:Name="LootSectionBorder"
                     Grid.Row="2"
                     Background="#c02a2a4a"
                     CornerRadius="4"
-                    Margin="8,6,8,8"
-                    IsHitTestVisible="False">
+                    Margin="8,6,8,8">
                 <Border.LayoutTransform>
                     <ScaleTransform x:Name="LootScaleTransform" ScaleX="1.0" ScaleY="1.0" />
                 </Border.LayoutTransform>
@@ -272,12 +272,13 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <!-- Zone header -->
+                        <!-- Zone header (click-through) -->
                         <Border x:Name="ZoneHeaderBorder"
                                 Grid.Row="0"
                                 Background="#a02a2a4a"
                                 CornerRadius="4,4,0,0"
-                                Padding="8,6">
+                                Padding="8,6"
+                                IsHitTestVisible="False">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -335,8 +336,8 @@
                         </ScrollViewer>
                     </Grid>
 
-                    <!-- No active run message -->
-                    <Grid x:Name="NoRunPanel" Visibility="Collapsed">
+                    <!-- No active run message (click-through) -->
+                    <Grid x:Name="NoRunPanel" Visibility="Collapsed" IsHitTestVisible="False">
                         <TextBlock x:Name="NoRunText"
                                    Text="No active run"
                                    Foreground="#a0a0a0"
