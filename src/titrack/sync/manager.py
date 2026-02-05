@@ -96,8 +96,13 @@ class SyncManager:
 
     def set_season_context(self, season_id: Optional[int]) -> None:
         """Set the current season for filtering data."""
+        was_unset = self._season_id is None
         self._season_id = season_id
         self.repo.set_player_context(season_id, None)
+
+        # Trigger immediate download when season is first set
+        if was_unset and season_id is not None:
+            self._trigger_initial_download()
 
     @property
     def is_enabled(self) -> bool:
@@ -149,6 +154,11 @@ class SyncManager:
 
         self._set_status(SyncStatus.CONNECTED)
         self.start_background_sync()
+
+        # Trigger immediate download if season context already set
+        if self._season_id:
+            self._trigger_initial_download()
+
         return True
 
     def disable(self) -> None:
@@ -520,6 +530,15 @@ class SyncManager:
             self._last_upload = datetime.now()
 
         return uploaded
+
+    def _trigger_initial_download(self) -> None:
+        """Trigger an immediate price download if conditions are met."""
+        if not self.is_enabled or not self.is_download_enabled:
+            return
+        if not self.client.is_connected:
+            return
+        self._download_prices()
+        self._maybe_download_history()
 
     def _download_prices(self) -> int:
         """
