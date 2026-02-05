@@ -6,7 +6,9 @@ ZONE_NAMES = {
     # Hideouts / Hubs
     "XZ_YuJinZhiXiBiNanSuo": "Hideout - Ember's Rest",
     "DD_ShengTingZhuangYuan": "Hideout - Sacred Court Manor",
-    "YunDuanLvZhou": "Hideout - Cloud Oasis",
+
+    # Sandlord zone (trackable - players earn FE here)
+    "YunDuanLvZhou": "Cloud Oasis",
 
     # Voidlands (entries with number suffixes must come before generic ones)
     # KD_YuanSuKuangDong000 differentiated by LevelId suffix

@@ -61,7 +61,6 @@ HUB_ZONE_PATTERNS = [
     re.compile(r"YuJinZhiXiBiNanSuo", re.IGNORECASE),  # Ember's Rest (Chinese name)
     re.compile(r"ShengTingZhuangYuan(?!000)", re.IGNORECASE),  # Sacred Court Manor (hideout, but not 000 map)
     re.compile(r"ZhuCheng", re.IGNORECASE),  # Main city
-    re.compile(r"YunDuanLvZhou", re.IGNORECASE),  # Cloud Oasis (Season 10 hub)
     re.compile(r"/UI/", re.IGNORECASE),  # UI screens (login, etc.)
     re.compile(r"LoginScene", re.IGNORECASE),  # Login screen
 ]
