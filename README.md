@@ -82,7 +82,9 @@ TITrack.exe --portable
   - True transparency with click-through data boxes (game clickable underneath)
   - Shows all key stats: Net Worth, Value/Hour, Value/Map, Runs, Avg Time, Total Time
   - Live loot tracking during active runs with zone, duration, and item drops
+  - Scrollable loot list with slim dark scrollbar (scrollbar remains interactive)
   - Previous run preservation: when map ends, loot stays visible as "Previous Run"
+  - Adjustable font size (A-/A+ buttons, 70%-160% range, setting persisted)
   - Draggable header, resizable, pin/unpin always-on-top
 
 - **Web Dashboard** at `http://localhost:8000` with:

@@ -5,6 +5,32 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-02-05
+
+### Added
+
+#### Overlay Improvements
+- **Font Scaling**: A-/A+ buttons to adjust text size (70%-160% range)
+  - Setting is persisted and restored when overlay reopens
+- **Scrollable Loot List**: Slim dark-themed scrollbar for long loot lists
+  - Scrollbar remains interactive while loot content is click-through
+- **High-Quality Icons**: Improved bitmap scaling for sharper item icons
+
+#### Setup.exe Improvements
+- **Auto-Detect Existing Installation**: When updating via Setup.exe, it now checks common locations and desktop shortcuts for existing TITrack installations and defaults to that path to preserve user data
+
+### Changed
+- **Cloud Oasis**: Changed from hub zone back to normal trackable zone (Sandlord content where players earn FE)
+
+### Fixed
+- **Settings Persistence After Auto-Update**: Fixed database path resolution using `cwd()` instead of app directory, which caused settings (trade tax, map costs) to be lost after updates
+- **Database Migration**: Added migration logic to find and recover databases from legacy locations when updating from older versions
+- **Log Directory Priority**: Saved log directory setting now takes priority over auto-detection (fixes F: drive and non-standard install locations)
+- **Log Path Capitalization**: Added alternate path pattern for different folder capitalizations (TorchLight vs Torchlight)
+- **Trade Tax on Map Costs**: Fixed trade tax being incorrectly applied to consumed items (compass/beacon costs)
+
+---
+
 ## [0.4.0] - 2026-02-04
 
 ### Added
