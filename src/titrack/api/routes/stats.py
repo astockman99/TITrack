@@ -79,6 +79,9 @@ def get_stats_history(
             TimeSeriesPoint(timestamp=run.end_ts, value=cumulative_fe)
         )
 
+    # Check realtime tracking mode
+    realtime_enabled = repo.get_setting("realtime_tracking_enabled") == "true"
+
     # Calculate rolling value/hour (using 1-hour windows)
     value_per_hour_points = []
     window_minutes = 60
@@ -102,7 +105,14 @@ def get_stats_history(
                     window_duration += wr.duration_seconds
 
             # Calculate rate (value per hour)
-            if window_duration > 0:
+            if realtime_enabled and len(window_runs) >= 2:
+                # Use wall-clock window duration instead of summed run durations
+                wall_duration = (run.end_ts - window_runs[0].start_ts).total_seconds()
+                if wall_duration > 0:
+                    value_rate = (window_value / wall_duration) * 3600
+                else:
+                    value_rate = 0
+            elif window_duration > 0:
                 value_rate = (window_value / window_duration) * 3600
             else:
                 value_rate = 0

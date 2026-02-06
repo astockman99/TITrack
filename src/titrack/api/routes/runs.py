@@ -330,6 +330,8 @@ def get_stats(
     repo: Repository = Depends(get_repository),
 ) -> RunStatsResponse:
     """Get summary statistics for all runs."""
+    from datetime import datetime
+
     # Check if map costs are enabled
     map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
 
@@ -358,6 +360,38 @@ def get_stats(
     # Use net value if costs are enabled
     net_value = total_value - total_cost if map_costs_enabled else total_value
 
+    # Keep map_duration as the sum of in-map time (always)
+    map_duration = total_duration
+
+    # Check realtime tracking mode
+    realtime_enabled = repo.get_setting("realtime_tracking_enabled") == "true"
+    realtime_paused = repo.get_setting("realtime_paused") == "true"
+
+    if realtime_enabled and all_runs:
+        # Compute wall-clock elapsed time from first run start to now
+        first_run_start = min(r.start_ts for r in all_runs)
+        now = datetime.now()
+        elapsed = (now - first_run_start).total_seconds()
+
+        # Subtract accumulated paused time
+        paused_seconds_str = repo.get_setting("realtime_total_paused_seconds") or "0"
+        try:
+            paused_seconds = float(paused_seconds_str)
+        except (ValueError, TypeError):
+            paused_seconds = 0.0
+
+        # If currently paused, also subtract time since pause started
+        if realtime_paused:
+            pause_start_str = repo.get_setting("realtime_pause_start") or ""
+            if pause_start_str:
+                try:
+                    pause_start = datetime.fromisoformat(pause_start_str)
+                    paused_seconds += (now - pause_start).total_seconds()
+                except (ValueError, TypeError):
+                    pass
+
+        total_duration = max(elapsed - paused_seconds, 0.0)
+
     total_runs = len(all_runs)
     avg_fe = total_fe / total_runs if total_runs > 0 else 0
     avg_value = net_value / total_runs if total_runs > 0 else 0
@@ -373,6 +407,9 @@ def get_stats(
         total_duration_seconds=round(total_duration, 2),
         fe_per_hour=round(fe_per_hour, 2),
         value_per_hour=round(value_per_hour, 2),
+        realtime_tracking=realtime_enabled,
+        realtime_paused=realtime_paused,
+        map_duration_seconds=round(map_duration, 2),
     )
 
 
@@ -434,6 +471,57 @@ def get_active_run(
     )
 
 
+class PauseResponse(BaseModel):
+    """Response model for pause endpoint."""
+
+    paused: bool
+
+
+@router.post("/pause", response_model=PauseResponse)
+def toggle_pause(
+    repo: Repository = Depends(get_repository),
+) -> PauseResponse:
+    """Toggle realtime tracking pause on/off."""
+    from datetime import datetime
+
+    # Only effective when realtime tracking is enabled
+    realtime_enabled = repo.get_setting("realtime_tracking_enabled") == "true"
+    if not realtime_enabled:
+        raise HTTPException(status_code=400, detail="Realtime tracking is not enabled")
+
+    currently_paused = repo.get_setting("realtime_paused") == "true"
+
+    if not currently_paused:
+        # Pause: record the pause start time
+        repo.set_setting("realtime_paused", "true")
+        repo.set_setting("realtime_pause_start", datetime.now().isoformat())
+        return PauseResponse(paused=True)
+    else:
+        # Unpause: compute elapsed pause and add to total
+        now = datetime.now()
+        pause_start_str = repo.get_setting("realtime_pause_start") or ""
+        elapsed_pause = 0.0
+        if pause_start_str:
+            try:
+                pause_start = datetime.fromisoformat(pause_start_str)
+                elapsed_pause = (now - pause_start).total_seconds()
+            except (ValueError, TypeError):
+                pass
+
+        # Add to accumulated paused seconds
+        total_paused_str = repo.get_setting("realtime_total_paused_seconds") or "0"
+        try:
+            total_paused = float(total_paused_str)
+        except (ValueError, TypeError):
+            total_paused = 0.0
+        total_paused += elapsed_pause
+
+        repo.set_setting("realtime_total_paused_seconds", str(total_paused))
+        repo.set_setting("realtime_paused", "false")
+        repo.set_setting("realtime_pause_start", "")
+        return PauseResponse(paused=False)
+
+
 @router.post("/reset", response_model=ResetResponse)
 def reset_stats(
     request: Request,
@@ -447,6 +535,11 @@ def reset_stats(
     else:
         # Fallback to API's repository
         runs_deleted = repo.clear_run_data()
+
+    # Clear pause state
+    repo.set_setting("realtime_paused", "false")
+    repo.set_setting("realtime_total_paused_seconds", "0")
+    repo.set_setting("realtime_pause_start", "")
 
     return ResetResponse(
         success=True,

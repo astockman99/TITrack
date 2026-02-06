@@ -50,7 +50,10 @@ public partial class MainWindow : Window
         double total_value,
         double avg_value_per_run,
         double total_duration_seconds,
-        double value_per_hour
+        double value_per_hour,
+        bool realtime_tracking = false,
+        bool realtime_paused = false,
+        double map_duration_seconds = 0.0
     );
 
     private record LootItem(
@@ -130,6 +133,23 @@ public partial class MainWindow : Window
         Topmost = !Topmost;
         PinIcon.Text = Topmost ? "📌" : "📍";
         PinIcon.Opacity = Topmost ? 1.0 : 0.5;
+    }
+
+    private async void PauseButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"{App.BaseUrl}/api/runs/pause", null);
+            if (response.IsSuccessStatusCode)
+            {
+                // Trigger an immediate refresh to update the UI
+                await RefreshDataAsync();
+            }
+        }
+        catch
+        {
+            // Silently ignore errors
+        }
     }
 
     private void FontDecreaseButton_Click(object sender, RoutedEventArgs e)
@@ -460,10 +480,11 @@ public partial class MainWindow : Window
         ValuePerMapText.Text = FormatNumber(stats.avg_value_per_run);
         RunsText.Text = stats.total_runs.ToString("N0");
 
-        // Time calculations
-        if (stats.total_runs > 0)
+        // Time calculations - always use map_duration for Avg Time
+        var mapDuration = stats.map_duration_seconds > 0 ? stats.map_duration_seconds : stats.total_duration_seconds;
+        if (stats.total_runs > 0 && mapDuration > 0)
         {
-            var avgSeconds = stats.total_duration_seconds / stats.total_runs;
+            var avgSeconds = mapDuration / stats.total_runs;
             AvgTimeText.Text = FormatDuration(avgSeconds);
         }
         else
@@ -472,6 +493,10 @@ public partial class MainWindow : Window
         }
 
         TotalTimeText.Text = FormatDurationLong(stats.total_duration_seconds);
+
+        // Show/hide pause button based on realtime tracking
+        PauseButton.Visibility = stats.realtime_tracking ? Visibility.Visible : Visibility.Collapsed;
+        PauseIcon.Text = stats.realtime_paused ? "\u25B6" : "\u23F8";
     }
 
     private void UpdateActiveRun(ActiveRunResponse? activeRun)

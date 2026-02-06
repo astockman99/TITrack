@@ -30,6 +30,13 @@ let sparklineFetchInProgress = new Set(); // Track in-flight fetches
 // Map costs state
 let mapCostsEnabled = false;
 
+// Realtime tracking state
+let realtimeTrackingEnabled = false;
+let realtimePaused = false;
+let realtimeTickerInterval = null;
+let realtimeBaseSeconds = 0;
+let realtimeBaseTimestamp = 0;
+
 // Update state
 let updateStatus = null;
 let updateCheckInterval = null;
@@ -224,6 +231,74 @@ async function handleMapCostsToggle(event) {
     toggle.disabled = false;
 }
 
+// Realtime tracking setting functions
+async function fetchRealtimeTrackingSetting() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/realtime_tracking_enabled`);
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.value === 'true';
+    } catch (error) {
+        console.error('Error fetching realtime tracking setting:', error);
+        return false;
+    }
+}
+
+async function updateRealtimeTrackingSetting(enabled) {
+    try {
+        const response = await fetch(`${API_BASE}/settings/realtime_tracking_enabled`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: enabled ? 'true' : 'false' })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error updating realtime tracking setting:', error);
+        return false;
+    }
+}
+
+async function handleRealtimeTrackingToggle(event) {
+    const enabled = event.target.checked;
+    const toggle = event.target;
+
+    // Disable toggle while processing
+    toggle.disabled = true;
+
+    const success = await updateRealtimeTrackingSetting(enabled);
+
+    if (success) {
+        realtimeTrackingEnabled = enabled;
+        // Refresh all data to reflect new values
+        await refreshAll(true);
+    } else {
+        // Revert toggle on failure
+        toggle.checked = !enabled;
+        alert('Failed to update realtime tracking setting');
+    }
+
+    toggle.disabled = false;
+}
+
+async function togglePause() {
+    try {
+        const response = await fetch(`${API_BASE}/runs/pause`, {
+            method: 'POST'
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            console.error('Pause toggle failed:', data.detail);
+            return;
+        }
+        const data = await response.json();
+        realtimePaused = data.paused;
+        // Refresh to get updated stats
+        await refreshAll(true);
+    } catch (error) {
+        console.error('Error toggling pause:', error);
+    }
+}
+
 async function fetchCloudPriceHistory(configBaseId) {
     return fetchJson(`/cloud/prices/${configBaseId}/history`);
 }
@@ -333,14 +408,68 @@ function renderStats(stats, inventory) {
     document.getElementById('value-per-map').textContent = formatNumber(Math.round(stats?.avg_value_per_run || 0));
     document.getElementById('total-runs').textContent = formatNumber(stats?.total_runs || 0);
 
-    // Calculate and display average run time
-    const avgRunTime = (stats?.total_runs > 0 && stats?.total_duration_seconds > 0)
-        ? stats.total_duration_seconds / stats.total_runs
+    // Read realtime tracking state from server response
+    const isRealtime = stats?.realtime_tracking || false;
+    const isPaused = stats?.realtime_paused || false;
+    realtimeTrackingEnabled = isRealtime;
+    realtimePaused = isPaused;
+
+    // Calculate and display average run time (always uses map duration)
+    const mapDuration = stats?.map_duration_seconds || stats?.total_duration_seconds || 0;
+    const avgRunTime = (stats?.total_runs > 0 && mapDuration > 0)
+        ? mapDuration / stats.total_runs
         : null;
     document.getElementById('avg-run-time').textContent = formatDuration(avgRunTime);
 
-    // Display total time in maps
-    document.getElementById('total-time').textContent = formatDurationLong(stats?.total_duration_seconds);
+    // Show/hide pause button
+    const pauseBtn = document.getElementById('pause-btn');
+    if (isRealtime) {
+        pauseBtn.classList.remove('hidden');
+        if (isPaused) {
+            pauseBtn.textContent = '\u25B6';
+            pauseBtn.title = 'Resume tracking';
+            pauseBtn.classList.add('paused');
+        } else {
+            pauseBtn.textContent = '\u23F8';
+            pauseBtn.title = 'Pause tracking';
+            pauseBtn.classList.remove('paused');
+        }
+    } else {
+        pauseBtn.classList.add('hidden');
+    }
+
+    // Update Value/Hour tooltip based on mode
+    const valueHourTooltip = isRealtime
+        ? 'Calculated from wall-clock time (real elapsed time minus pauses). Includes time in town, hideout, and between runs.'
+        : 'Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.';
+    document.querySelectorAll('.info-icon').forEach(icon => {
+        // Only update info icons that are about Value/Hour (in stat header and chart)
+        if (icon.closest('.stat-label') || icon.closest('h2')) {
+            icon.title = valueHourTooltip;
+        }
+    });
+
+    // Display total time - with local ticker for smooth realtime updates
+    clearRealtimeTicker();
+    if (isRealtime && !isPaused && stats?.total_duration_seconds > 0) {
+        // Start a local ticker that increments the displayed time smoothly
+        realtimeBaseSeconds = stats.total_duration_seconds;
+        realtimeBaseTimestamp = Date.now();
+        document.getElementById('total-time').textContent = formatDurationLong(realtimeBaseSeconds);
+        realtimeTickerInterval = setInterval(() => {
+            const elapsed = (Date.now() - realtimeBaseTimestamp) / 1000;
+            document.getElementById('total-time').textContent = formatDurationLong(realtimeBaseSeconds + elapsed);
+        }, 1000);
+    } else {
+        document.getElementById('total-time').textContent = formatDurationLong(stats?.total_duration_seconds);
+    }
+}
+
+function clearRealtimeTicker() {
+    if (realtimeTickerInterval) {
+        clearInterval(realtimeTickerInterval);
+        realtimeTickerInterval = null;
+    }
 }
 
 function renderRuns(data, forceRender = false) {
@@ -878,10 +1007,14 @@ async function openSettingsModal() {
     saveBtn.textContent = 'Save & Restart';
     validatedLogPath = null;
 
+    const realtimeToggle = document.getElementById('settings-realtime-tracking');
+
     // Load current settings
     tradeTaxToggle.checked = await fetchTradeTaxSetting();
     mapCostsToggle.checked = await fetchMapCostsSetting();
     mapCostsEnabled = mapCostsToggle.checked;
+    realtimeToggle.checked = await fetchRealtimeTrackingSetting();
+    realtimeTrackingEnabled = realtimeToggle.checked;
 
     // Fetch current log path from status
     try {
@@ -2054,6 +2187,24 @@ function stopUpdateStatusPolling() {
     }
 }
 
+function startSilentUpdateCheck() {
+    triggerUpdateCheck();
+
+    let silentInterval = setInterval(async () => {
+        const status = await fetchUpdateStatus();
+        updateStatus = status;
+
+        if (status && status.status !== 'checking') {
+            clearInterval(silentInterval);
+            renderVersion(status);
+
+            if (status.status === 'available') {
+                showUpdateModal(status);
+            }
+        }
+    }, 1000);
+}
+
 function showUpdateModal(status) {
     const modal = document.getElementById('update-modal');
     const currentVersionEl = document.getElementById('update-current-version');
@@ -2223,6 +2374,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateStatus = versionStatus;
     renderVersion(versionStatus);
 
+    // Auto-check for updates on startup (only in packaged mode)
+    if (versionStatus && versionStatus.status === 'idle' && versionStatus.can_update) {
+        startSilentUpdateCheck();
+    }
+
     // Fetch player info initially
     const player = await fetchPlayer();
     renderPlayer(player);
@@ -2239,6 +2395,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const settingsMapCostsToggle = document.getElementById('settings-map-costs');
     settingsMapCostsToggle.addEventListener('change', handleMapCostsToggle);
+
+    const settingsRealtimeToggle = document.getElementById('settings-realtime-tracking');
+    settingsRealtimeToggle.addEventListener('change', handleRealtimeTrackingToggle);
 
     // Load initial map costs state
     mapCostsEnabled = await fetchMapCostsSetting();

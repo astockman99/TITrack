@@ -121,6 +121,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Net Worth -->
@@ -169,9 +170,21 @@
                         <TextBlock x:Name="TransparencyIcon" Text="◐" FontSize="14" />
                     </Button>
 
+                    <!-- Pause button (realtime tracking) -->
+                    <Button x:Name="PauseButton"
+                            Grid.Column="4"
+                            Style="{StaticResource OverlayButton}"
+                            Click="PauseButton_Click"
+                            ToolTip="Pause/resume tracking"
+                            Visibility="Collapsed"
+                            Padding="6,4"
+                            Margin="0,0,4,0">
+                        <TextBlock x:Name="PauseIcon" Text="⏸" FontSize="12" />
+                    </Button>
+
                     <!-- Pin toggle -->
                     <Button x:Name="PinButton"
-                            Grid.Column="4"
+                            Grid.Column="5"
                             Style="{StaticResource OverlayButton}"
                             Click="PinButton_Click"
                             ToolTip="Toggle always-on-top"
@@ -181,7 +194,7 @@
                     </Button>
 
                     <!-- Close button -->
-                    <Button Grid.Column="5"
+                    <Button Grid.Column="6"
                             Style="{StaticResource OverlayButton}"
                             Click="CloseButton_Click"
                             ToolTip="Close overlay"

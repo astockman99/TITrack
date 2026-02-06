@@ -24,6 +24,7 @@ ALLOWED_SETTINGS = {
     "map_costs_enabled",
     "overlay_transparent",
     "overlay_font_scale",
+    "realtime_tracking_enabled",
 }
 
 # Settings that are read-only via API (can be read but not written)

@@ -77,6 +77,9 @@ class RunStatsResponse(BaseModel):
     total_duration_seconds: float
     fe_per_hour: float  # Raw FE per hour
     value_per_hour: float  # Total value per hour
+    realtime_tracking: bool = False  # Is realtime tracking mode on?
+    realtime_paused: bool = False  # Is the timer currently paused?
+    map_duration_seconds: float = 0.0  # Always the sum of in-map time
 
 
 class InventoryItem(BaseModel):

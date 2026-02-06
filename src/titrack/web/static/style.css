@@ -137,6 +137,39 @@ header h1 {
     color: var(--text-primary);
 }
 
+.total-time-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.pause-btn {
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.pause-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+}
+
+.pause-btn.paused {
+    color: var(--positive);
+    border-color: var(--positive);
+}
+
+.pause-btn.hidden {
+    display: none;
+}
+
 .header-controls {
     display: flex;
     align-items: center;
@@ -919,6 +952,20 @@ tr.nightmare .zone-name {
 #app-version {
     color: var(--text-secondary);
     font-family: monospace;
+}
+
+.discord-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+}
+
+.discord-link:hover {
+    color: #5865F2;
 }
 
 .update-btn {
