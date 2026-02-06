@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 
 @dataclass
@@ -135,6 +135,47 @@ def parse_player_line(line: str) -> dict[str, any]:
     return result
 
 
+def detect_log_encoding(log_path: Path) -> Tuple[str, str]:
+    """
+    Detect the encoding of a game log file.
+
+    Unreal Engine normally writes UTF-8 logs, but switches to UTF-16 LE
+    when log content contains characters outside the ANSI range (e.g., emoji
+    character names). Detects encoding by checking the first bytes for BOM
+    or null byte patterns.
+
+    Returns:
+        Tuple of (encoding, errors) for use with open()
+    """
+    try:
+        with open(log_path, "rb") as f:
+            header = f.read(4)
+
+        if not header:
+            return ("utf-8", "replace")
+
+        # UTF-16 LE BOM: FF FE
+        if header[:2] == b"\xff\xfe":
+            return ("utf-16-le", "replace")
+
+        # UTF-16 BE BOM: FE FF
+        if header[:2] == b"\xfe\xff":
+            return ("utf-16-be", "replace")
+
+        # UTF-8 BOM: EF BB BF
+        if header[:3] == b"\xef\xbb\xbf":
+            return ("utf-8-sig", "replace")
+
+        # No BOM: check for null bytes (UTF-16 LE without BOM has \x00 after ASCII chars)
+        if len(header) >= 4 and header[1] == 0 and header[3] == 0:
+            return ("utf-16-le", "replace")
+
+        return ("utf-8", "replace")
+
+    except Exception:
+        return ("utf-8", "replace")
+
+
 def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo]:
     """
     Parse player info from the main game log file.
@@ -164,8 +205,11 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
 
     try:
         file_size = log_path.stat().st_size
+        encoding, errors = detect_log_encoding(log_path)
+        if encoding != "utf-8":
+            logger.info(f"Game log encoding detected as {encoding}")
 
-        with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(log_path, "r", encoding=encoding, errors=errors) as f:
             if from_end:
                 if file_size > MAX_TAIL_BYTES:
                     # Seek to near the end to avoid reading entire large file

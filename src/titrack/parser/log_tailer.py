@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 from typing import Generator, Optional
 
+from titrack.parser.player_parser import detect_log_encoding
+
 
 class LogTailer:
     """
@@ -26,6 +28,8 @@ class LogTailer:
         self._position: int = 0
         self._file_size: int = 0
         self._partial_line: str = ""
+        self._encoding: str = "utf-8"
+        self._errors: str = "replace"
 
     @property
     def position(self) -> int:
@@ -116,12 +120,18 @@ class LogTailer:
         if current_size < self._position:
             self._position = 0
             self._partial_line = ""
+            # Re-detect encoding on rotation (new file may have different encoding)
+            self._encoding, self._errors = detect_log_encoding(self.file_path)
 
         if current_size <= self._position:
             return
 
+        # Detect encoding on first read
+        if self._position == 0 and self._encoding == "utf-8":
+            self._encoding, self._errors = detect_log_encoding(self.file_path)
+
         try:
-            with open(self.file_path, "r", encoding="utf-8", errors="replace") as f:
+            with open(self.file_path, "r", encoding=self._encoding, errors=self._errors) as f:
                 f.seek(self._position)
                 content = f.read(current_size - self._position)
                 new_position = f.tell()
