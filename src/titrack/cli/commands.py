@@ -506,6 +506,11 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
             sync_manager = SyncManager(collector_db)
             sync_manager.initialize()
 
+            # Set season context from pre-seeded player info so cloud sync
+            # works even if the live log detects the same player (no callback fired)
+            if player_info:
+                sync_manager.set_season_context(player_info.season_id)
+
             def on_price_update(price):
                 item_name = collector_repo.get_item_name(price.config_base_id)
                 logger.info(f"[Price] {item_name}: {price.price_fe:.6f} FE")
@@ -941,6 +946,11 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
 
             sync_manager = SyncManager(collector_db)
             sync_manager.initialize()
+
+            # Set season context from pre-seeded player info so cloud sync
+            # works even if the live log detects the same player (no callback fired)
+            if player_info:
+                sync_manager.set_season_context(player_info.season_id)
 
             def on_price_update(price):
                 item_name = collector_repo.get_item_name(price.config_base_id)

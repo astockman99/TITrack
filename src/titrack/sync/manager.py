@@ -1,11 +1,14 @@
 """Sync manager - orchestrates cloud sync operations."""
 
 import json
+import logging
 import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+
+logger = logging.getLogger("titrack")
 from typing import Callable, Optional
 
 from titrack.db.connection import Database
@@ -416,6 +419,13 @@ class SyncManager:
         max_consecutive_errors = 5
         error_backoff_seconds = 60
 
+        # Wait before first cycle - initial download is handled by
+        # _trigger_initial_download() in enable()/set_season_context()
+        for _ in range(self.PRICE_DOWNLOAD_INTERVAL):
+            if not self._running:
+                return
+            time.sleep(1)
+
         while self._running:
             try:
                 if self.is_enabled and self.is_download_enabled:
@@ -609,8 +619,26 @@ class SyncManager:
             if elapsed < self.HISTORY_DOWNLOAD_INTERVAL_MIN:
                 return 0
 
-        # Fetch history
-        history = self.client.fetch_price_history(self._season_id, hours=72)
+        # Only fetch history for items in the user's inventory that have cloud prices.
+        # This is much smaller than all cloud-priced items (~100-200 vs ~1500+).
+        rows = self.db.fetchall(
+            """
+            SELECT DISTINCT ss.config_base_id
+            FROM slot_state ss
+            INNER JOIN cloud_price_cache cpc
+                ON ss.config_base_id = cpc.config_base_id
+                AND cpc.season_id = ?
+            WHERE ss.page_id != 100
+            """,
+            (self._season_id,),
+        )
+        item_ids = [r["config_base_id"] for r in rows] if rows else None
+        logger.info(f"Cloud sync: {len(item_ids) if item_ids else 0} inventory items need history download")
+
+        # Fetch history (uses server-side RPC if item IDs available)
+        history = self.client.fetch_price_history(
+            self._season_id, hours=72, config_base_ids=item_ids
+        )
 
         if not history:
             return 0

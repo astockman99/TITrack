@@ -1,10 +1,13 @@
 """Supabase client wrapper for cloud sync."""
 
 import json
+import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+
+logger = logging.getLogger("titrack")
 
 # Supabase is optional - only required when cloud sync is enabled
 try:
@@ -200,19 +203,32 @@ class CloudClient:
             return []
 
         try:
-            query = (
-                self._client.table("aggregated_prices")
-                .select("*")
-                .eq("season_id", season_id)
-            )
+            # Paginate to avoid Supabase's default 1000-row limit
+            PAGE_SIZE = 1000
+            all_rows = []
+            offset = 0
 
-            if since:
-                query = query.gt("updated_at", since.isoformat())
+            while True:
+                query = (
+                    self._client.table("aggregated_prices")
+                    .select("*")
+                    .eq("season_id", season_id)
+                )
 
-            result = query.execute()
+                if since:
+                    query = query.gt("updated_at", since.isoformat())
+
+                result = query.range(offset, offset + PAGE_SIZE - 1).execute()
+
+                page = result.data or []
+                all_rows.extend(page)
+
+                if len(page) < PAGE_SIZE:
+                    break
+                offset += PAGE_SIZE
 
             prices = []
-            for row in result.data or []:
+            for row in all_rows:
                 prices.append(
                     CloudPrice(
                         config_base_id=row["config_base_id"],
@@ -237,14 +253,21 @@ class CloudClient:
             return []
 
     def fetch_price_history(
-        self, season_id: int, hours: int = 72
+        self,
+        season_id: int,
+        hours: int = 72,
+        config_base_ids: list[int] | None = None,
     ) -> list[CloudPriceHistory]:
         """
         Fetch price history for sparklines.
 
+        Uses server-side RPC function when item IDs are provided (efficient),
+        falls back to paginated table query otherwise.
+
         Args:
             season_id: Season to fetch history for
             hours: Number of hours of history to fetch
+            config_base_ids: Item IDs to fetch history for (uses RPC)
 
         Returns:
             List of CloudPriceHistory objects
@@ -252,41 +275,98 @@ class CloudClient:
         if not self.is_connected:
             return []
 
+        # Use RPC when we have specific items (server-side filtering)
+        if config_base_ids:
+            try:
+                logger.info(f"Cloud sync: Fetching history via RPC for {len(config_base_ids)} items")
+                PAGE_SIZE = 1000
+                all_rows = []
+                offset = 0
+
+                while True:
+                    result = (
+                        self._client.rpc(
+                            "get_price_history_for_items",
+                            {
+                                "p_season_id": season_id,
+                                "p_config_base_ids": config_base_ids,
+                                "p_hours": hours,
+                            },
+                        )
+                        .range(offset, offset + PAGE_SIZE - 1)
+                        .execute()
+                    )
+
+                    page = result.data or []
+                    all_rows.extend(page)
+
+                    if len(page) < PAGE_SIZE:
+                        break
+                    offset += PAGE_SIZE
+
+                logger.info(f"Cloud sync: RPC returned {len(all_rows)} history rows")
+                if all_rows:
+                    return self._parse_history_rows(all_rows)
+                else:
+                    logger.info("Cloud sync: RPC returned empty, falling back to table query")
+                    # Fall through to paginated table query
+
+            except Exception as e:
+                logger.warning(f"Cloud sync: RPC fetch failed, falling back to table query: {e}")
+                # Fall through to paginated table query
+
+        # Fallback: paginated table query (for backwards compatibility or no item filter)
         try:
-            # Calculate cutoff time
             from datetime import timedelta
+
             cutoff = datetime.utcnow() - timedelta(hours=hours)
 
-            result = (
-                self._client.table("price_history")
-                .select("*")
-                .eq("season_id", season_id)
-                .gt("hour_bucket", cutoff.isoformat())
-                .order("hour_bucket", desc=False)
-                .execute()
-            )
+            PAGE_SIZE = 1000
+            all_rows = []
+            offset = 0
 
-            history = []
-            for row in result.data or []:
-                history.append(
-                    CloudPriceHistory(
-                        config_base_id=row["config_base_id"],
-                        season_id=row["season_id"],
-                        hour_bucket=datetime.fromisoformat(
-                            row["hour_bucket"].replace("Z", "+00:00")
-                        ),
-                        price_fe_median=row["price_fe_median"],
-                        price_fe_p10=row.get("price_fe_p10"),
-                        price_fe_p90=row.get("price_fe_p90"),
-                        submission_count=row.get("submission_count"),
-                    )
+            while True:
+                result = (
+                    self._client.table("price_history")
+                    .select("*")
+                    .eq("season_id", season_id)
+                    .gt("hour_bucket", cutoff.isoformat())
+                    .order("hour_bucket", desc=False)
+                    .range(offset, offset + PAGE_SIZE - 1)
+                    .execute()
                 )
 
-            return history
+                page = result.data or []
+                all_rows.extend(page)
+
+                if len(page) < PAGE_SIZE:
+                    break
+                offset += PAGE_SIZE
+
+            return self._parse_history_rows(all_rows)
 
         except Exception as e:
             print(f"Cloud sync: Failed to fetch price history: {e}")
             return []
+
+    def _parse_history_rows(self, rows: list[dict]) -> list[CloudPriceHistory]:
+        """Parse raw rows into CloudPriceHistory objects."""
+        history = []
+        for row in rows:
+            history.append(
+                CloudPriceHistory(
+                    config_base_id=row["config_base_id"],
+                    season_id=row["season_id"],
+                    hour_bucket=datetime.fromisoformat(
+                        row["hour_bucket"].replace("Z", "+00:00")
+                    ),
+                    price_fe_median=row["price_fe_median"],
+                    price_fe_p10=row.get("price_fe_p10"),
+                    price_fe_p90=row.get("price_fe_p90"),
+                    submission_count=row.get("submission_count"),
+                )
+            )
+        return history
 
     def fetch_item_history(
         self, config_base_id: int, season_id: int, hours: int = 72

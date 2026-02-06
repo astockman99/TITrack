@@ -146,6 +146,10 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
     Returns:
         PlayerInfo if found, None otherwise
     """
+    import logging
+
+    logger = logging.getLogger("titrack")
+
     if not log_path.exists():
         return None
 
@@ -155,10 +159,18 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
     hero_id: Optional[int] = None
     player_id: Optional[str] = None
 
+    # Max bytes to read from end of file (5 MB) to avoid loading huge logs into memory
+    MAX_TAIL_BYTES = 5 * 1024 * 1024
+
     try:
+        file_size = log_path.stat().st_size
+
         with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
             if from_end:
-                # Read all lines and search backwards for most recent player data
+                if file_size > MAX_TAIL_BYTES:
+                    # Seek to near the end to avoid reading entire large file
+                    f.seek(file_size - MAX_TAIL_BYTES)
+                    f.readline()  # Skip partial line after seek
                 lines = f.readlines()
                 for line in reversed(lines):
                     parsed = parse_player_line(line)
@@ -177,6 +189,27 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
                     # Stop once we have essential data
                     if name and season_id:
                         break
+
+                # If not found in tail, try reading from the beginning
+                if not (name and season_id) and file_size > MAX_TAIL_BYTES:
+                    logger.info("Player data not in last 5MB, scanning from start...")
+                    f.seek(0)
+                    for line in f:
+                        parsed = parse_player_line(line)
+
+                        if name is None and "name" in parsed:
+                            name = parsed["name"]
+                        if season_id is None and "season_id" in parsed:
+                            season_id = parsed["season_id"]
+                        if level is None and "level" in parsed:
+                            level = parsed["level"]
+                        if hero_id is None and "hero_id" in parsed:
+                            hero_id = parsed["hero_id"]
+                        if player_id is None and "player_id" in parsed:
+                            player_id = parsed["player_id"]
+
+                        if name and season_id:
+                            break
             else:
                 # Read forward (for initial parse)
                 for line in f:
@@ -197,7 +230,8 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
                     if all([name, level, season_id, hero_id, player_id]):
                         break
 
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Failed to parse player data from game log: {e}")
         return None
 
     # Return only if we got the essential data

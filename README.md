@@ -15,7 +15,7 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 3. Run it, choose where to extract (e.g., `C:\TITrack`)
 4. Click **Extract**, then **Open Folder**
 5. Run `TITrack.exe` from the extracted folder
-6. Log in to your character in Torchlight Infinite
+6. If this is your first time, log in to your character in Torchlight Infinite
 
 The Setup downloads and extracts TITrack without Windows security restrictions that can cause issues with manual ZIP extraction.
 
@@ -49,7 +49,7 @@ If the app still won't start, check the log file at `data\titrack.log` (beside t
 ### First Time Setup
 
 1. **Game Location**: TITrack auto-detects Steam and standalone client installations. If needed, it will prompt you to select the game folder
-2. **Character Detection**: Log in (or relog) your character after starting TITrack
+2. **Character Detection**: If you've played before with logging enabled, your character is detected automatically. Otherwise, log in with your character
 3. **Inventory Sync**: Click the **Sort** button in your bag to capture your full inventory
 4. **Learn Prices**: Search items on the in-game Exchange - prices are captured automatically
 
@@ -174,7 +174,7 @@ python -m titrack serve --port 8080        # Custom port
 python -m titrack serve --no-browser       # Don't open browser
 ```
 
-**Important**: After starting the tracker, you must **log in (or relog) your character** in-game for tracking to begin. The dashboard will show "Waiting for character login..." until a character is detected.
+**Note**: If you've played before with logging enabled, TITrack detects your character automatically on startup. Otherwise, log in with your character for detection to begin.
 
 **Custom Install Location**: TITrack auto-detects common Steam and standalone client installation paths. If your game is installed elsewhere, TITrack will prompt you to enter the game directory. The setting is saved and persists across restarts.
 

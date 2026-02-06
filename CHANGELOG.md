@@ -5,6 +5,25 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-02-06
+
+### Added
+- **Cloud Sync RPC Function**: Server-side function for efficient price history downloads, reducing bandwidth from ~38MB to ~1-2MB per sync
+- **Cloud Sync Logging**: Sync operations now log to titrack.log for easier debugging
+
+### Fixed
+- **Character Detection on Startup**: Fixed race condition where collector thread started before player change callback was wired up, causing character detection to fail until app restart
+- **Character Pre-Seeding**: App now detects character from existing log on startup instead of always waiting for a fresh login
+- **Cloud Sync Price Download**: Fixed cloud prices not downloading when toggling sync on, caused by season context not being set from pre-seeded player info
+- **Cloud Sync Data Truncation**: Fixed Supabase's 1000-row default limit silently truncating price and history downloads, causing missing prices and empty sparklines
+- **Cloud Sync History Efficiency**: History downloads now only fetch data for items in the user's inventory instead of all community-priced items (~124 items vs ~1500+)
+- **Large Log File Handling**: Fixed character detection failing on large game logs by reading last 5MB first with fallback to full scan
+
+### Changed
+- **Updated Instructions**: Help text and README updated to reflect automatic character detection from existing game logs (no relog required for returning users)
+
+---
+
 ## [0.4.2] - 2026-02-06
 
 ### Added

@@ -18,7 +18,7 @@
                     <span id="player-details" class="player-details"></span>
                 </div>
                 <div id="awaiting-player-message" class="awaiting-message hidden">
-                    Waiting for character login... (relog in-game without closing)
+                    Waiting for character detection... (log in or sort your inventory)
                 </div>
             </div>
             <div class="header-stats">
@@ -185,15 +185,14 @@
                 </section>
 
                 <section class="help-section">
-                    <h4>2. Log In With Your Character</h4>
-                    <p>TITrack needs to detect your character login to start tracking:</p>
-                    <ol>
-                        <li>If you're already in-game, <strong>log out</strong> to the character select screen</li>
-                        <li><strong>Log back in</strong> with the character you want to track</li>
-                        <li>TITrack will detect the login and the "Waiting for character login..." message will disappear</li>
-                    </ol>
-                    <p class="help-note"><strong>Important:</strong> Do NOT close the game when relogging - just log out to character select and back in. Closing the game stops the log file from updating.</p>
-                    <p class="help-note">TITrack tracks data separately for each character. You must relog after starting TITrack for it to detect your character.</p>
+                    <h4>2. Character Detection</h4>
+                    <p>TITrack automatically detects your character from the game log:</p>
+                    <ul>
+                        <li>If you've played before with logging enabled, your character is detected <strong>automatically</strong> on startup</li>
+                        <li>If this is your first time, log in with your character and TITrack will detect it</li>
+                        <li>To switch characters, just log out and back in (do NOT close the game)</li>
+                    </ul>
+                    <p class="help-note">TITrack tracks data separately for each character and league.</p>
                 </section>
 
                 <section class="help-section">
@@ -265,11 +264,9 @@
                         <li>Open Torchlight Infinite</li>
                         <li>Go to <strong>Settings</strong></li>
                         <li>Click <strong>"Enable Log"</strong></li>
-                        <li>Log out to the character select screen (do NOT close the game)</li>
-                        <li>Log back in with your character</li>
+                        <li>Log in with your character (or sort your inventory if already in-game)</li>
                     </ol>
-                    <p class="help-note"><strong>Important:</strong> Do NOT close the game when relogging - just log out to character select and back in. Closing the game stops the log file from updating.</p>
-                    <p class="help-note">TITrack will automatically detect your character when you log in.</p>
+                    <p class="help-note">If you've already played with logging enabled, TITrack detects your character automatically on startup.</p>
                 </section>
                 <section class="help-section">
                     <p class="help-note">TITrack tracks data separately for each character and league. Without character detection, data may not be properly isolated.</p>

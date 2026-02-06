@@ -561,15 +561,14 @@ The dashboard displays the character name and season name in the header.
 
 ### Automatic Character Detection
 
-TITrack detects characters by monitoring player data lines in the **live** log stream. On startup, the app shows "Waiting for character login..." until a character is detected.
+TITrack detects characters in two ways:
 
-**Important**: You must log in (or relog) your character **after** starting TITrack for it to detect your character. Historical player data from before TITrack started is not read.
+1. **On startup**: Reads backwards through the existing game log to find the most recently logged-in character. If found, the character is detected immediately without requiring a relog.
+2. **Live monitoring**: Watches the live log stream for player data lines as they appear. When a different character is detected, the collector switches context.
 
-When you switch characters in-game, TITrack automatically detects the change:
+If no player data exists in the log (first time use, or log was deleted), the app shows "Waiting for character detection..." until the user logs in.
 
-1. Player data lines (`+player+Name`, `+player+SeasonId`, etc.) are parsed as they appear
-2. When a different character is detected, the collector switches context
-3. Inventories, runs, and prices are isolated per character/season
+Inventories, runs, and prices are isolated per character/season.
 
 ### Data Isolation
 
