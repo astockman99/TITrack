@@ -539,8 +539,7 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
                     logger.error(f"Collector error: {e}")
 
             collector_thread = threading.Thread(target=run_collector, daemon=True)
-            collector_thread.start()
-            logger.info("Collector started in background")
+            # Don't start yet - wait until callback is wired up
         else:
             logger.warning("No log file found - collector not started")
             if settings.log_path:
@@ -576,6 +575,10 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
                 if hasattr(app.state, 'sync_manager') and app.state.sync_manager:
                     app.state.sync_manager.set_season_context(new_player_info.season_id)
             player_change_callback[0] = update_app_player
+
+            # Start collector AFTER callback is wired up to avoid race condition
+            collector_thread.start()
+            logger.info("Collector started in background")
 
         # Set up graceful shutdown
         def signal_handler(sig, frame):
@@ -970,8 +973,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                     logger.error(f"Collector error: {e}")
 
             collector_thread = threading.Thread(target=run_collector, daemon=True)
-            collector_thread.start()
-            logger.info("Collector started in background")
+            # Don't start yet - wait until callback is wired up
         else:
             logger.warning("No log file found - collector not started")
             if settings.log_path:
@@ -1005,6 +1007,10 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 if hasattr(app.state, 'sync_manager') and app.state.sync_manager:
                     app.state.sync_manager.set_season_context(new_player_info.season_id)
             player_change_callback[0] = update_app_player
+
+            # Start collector AFTER callback is wired up to avoid race condition
+            collector_thread.start()
+            logger.info("Collector started in background")
 
         # Start uvicorn in a background thread
         url = f"http://127.0.0.1:{args.port}"
