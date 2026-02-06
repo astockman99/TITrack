@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Overlay Settings Section**: New section in Settings modal for overlay-specific options
   - **Hide Loot Pickups**: Toggle to hide the loot section in the overlay for a compact stats-only view
   - Overlay auto-resizes to fit when loot is hidden
+- **Auto-Update Check on Startup**: Silently checks for updates when the app launches and shows a notification modal if a new version is available
+- **Discord Link**: Added Discord invite link in the dashboard footer
 
 ### Changed
 - **Total Time Display**: Now shows seconds (e.g., "2h 15m 30s" instead of "2h 15m") in dashboard and overlay
