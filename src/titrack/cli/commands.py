@@ -19,7 +19,7 @@ from titrack.data.zones import get_zone_display_name
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
-from titrack.parser.player_parser import get_enter_log_path, get_effective_player_id, parse_enter_log, PlayerInfo
+from titrack.parser.player_parser import get_enter_log_path, get_effective_player_id, parse_enter_log, parse_game_log, PlayerInfo
 from titrack.sync.manager import SyncManager
 
 
@@ -488,10 +488,12 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
         if settings.log_path and settings.log_path.exists():
             logger.info(f"Log file: {settings.log_path}")
 
-            # Don't parse player info on startup - wait for live log detection
-            # This prevents showing stale data from a previously logged-in character
-            player_info = None
-            logger.info("Waiting for character login...")
+            # Try to detect player from existing log (reads backwards for most recent)
+            player_info = parse_game_log(settings.log_path, from_end=True)
+            if player_info:
+                logger.info(f"Detected character from log: {player_info.name} ({player_info.season_name})")
+            else:
+                logger.info("Waiting for character login...")
 
             # Collector gets its own database connection
             collector_db = Database(settings.db_path)
@@ -921,8 +923,13 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
         # Start collector in background if log file is available
         if settings.log_path and settings.log_path.exists():
             logger.info(f"Log file: {settings.log_path}")
-            player_info = None
-            logger.info("Waiting for character login...")
+
+            # Try to detect player from existing log (reads backwards for most recent)
+            player_info = parse_game_log(settings.log_path, from_end=True)
+            if player_info:
+                logger.info(f"Detected character from log: {player_info.name} ({player_info.season_name})")
+            else:
+                logger.info("Waiting for character login...")
 
             collector_db = Database(settings.db_path)
             collector_db.connect()
