@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Total Time Display**: Now shows seconds (e.g., "2h 15m 30s" instead of "2h 15m") in dashboard and overlay
 - **Smooth Time Ticking**: Both dashboard and overlay count Total Time second-by-second locally without extra backend requests
 
+### Fixed
+- **Fluorescent Memory Items**: Fixed 17 items showing untranslated placeholder names
+- **Cloud Price Downloads**: Fixed cloud prices not downloading immediately on fresh install
+
 ---
 
 ## [0.4.1] - 2026-02-05
