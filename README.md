@@ -109,6 +109,12 @@ TITrack.exe --portable
   - Works offline with local caching
   - Only Exchange prices are shared (never manual edits)
 
+- **Real-Time Tracking** (Optional):
+  - Toggle in Settings to use wall-clock time for Value/Hour and Total Time
+  - Includes downtime between maps for realistic session productivity
+  - Pause button to exclude breaks from calculations
+  - Avg Run Time always uses in-map duration regardless of mode
+
 - **Value Calculations**:
   - Run value = FE gained + (item quantity × item price) for all priced items
   - Value/Hour calculated from rolling 1-hour windows
@@ -229,6 +235,7 @@ python -m titrack show-state
 | `GET /api/runs` | List runs with values and loot |
 | `GET /api/runs/{id}` | Single run details |
 | `GET /api/runs/stats` | Aggregated statistics |
+| `POST /api/runs/pause` | Toggle realtime tracking pause |
 | `GET /api/inventory` | Current inventory (sortable) |
 | `GET /api/items` | Item database |
 | `GET /api/prices` | Learned prices |

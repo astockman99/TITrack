@@ -280,6 +280,7 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 - **A (small)**: Decrease text size (scales from 70% to 160%)
 - **A (large)**: Increase text size
 - **◐ button**: Toggle transparency (fully transparent background with white text and drop shadows)
+- **⏸/▶ button**: Pause/resume realtime tracking (only visible when Real-Time Tracking is enabled)
 - **📌 button**: Toggle always-on-top (pinned/unpinned)
 - **✕ button**: Close overlay
 - **Header area**: Drag to move window
@@ -331,6 +332,7 @@ In development mode (non-frozen), logs also output to console.
 - `GET /api/runs/report` - Cumulative loot statistics across all runs
 - `GET /api/runs/report/csv` - Export loot report as CSV file
 - `GET /api/runs/{run_id}` - Get single run details
+- `POST /api/runs/pause` - Toggle realtime tracking pause on/off
 - `POST /api/runs/reset` - Clear all run tracking data (preserves prices, items, settings)
 
 ### Items
@@ -367,7 +369,7 @@ In development mode (non-frozen), logs also output to console.
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
 - **Current Inventory**: Sortable by quantity or value
 - **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
-- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Game Directory configuration (with Browse button in native window mode)
+- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Game Directory configuration (with Browse button in native window mode)
 
 ## Loot Report
 
@@ -453,6 +455,40 @@ If a consumed item doesn't have a known price:
 
 - Setting stored in database as `map_costs_enabled`
 - Default: disabled (gross values shown)
+
+## Real-Time Tracking
+
+By default, TITrack calculates Value/Hour and Total Time using only in-map time (summed run durations). Real-Time Tracking mode uses wall-clock elapsed time instead, giving a more realistic view of session productivity including town/hideout time.
+
+### Enabling Real-Time Tracking
+
+Click the gear icon (Settings) in the header and enable "Real-Time Tracking" toggle.
+
+### How It Works
+
+When enabled:
+- **Total Time** = wall-clock time from first run start to now, minus paused time (ticks continuously)
+- **Value/Hour** = total value / real elapsed time (includes downtime between maps)
+- **Avg Run Time** = unchanged (always uses in-map duration)
+- **Value/Hour chart** = rolling window uses wall-clock duration instead of summed run durations
+
+### Pause Button
+
+When Real-Time Tracking is enabled, a pause button (⏸) appears next to Total Time in the dashboard header and in the overlay. Click to pause the timer during breaks; click again (▶) to resume. Paused time is excluded from calculations.
+
+### Pause State
+
+Pause state is stored via settings:
+- `realtime_paused` — whether the timer is currently paused
+- `realtime_total_paused_seconds` — accumulated paused time
+- `realtime_pause_start` — timestamp when current pause began
+
+Resetting stats clears all pause state.
+
+### Settings
+
+- Setting stored in database as `realtime_tracking_enabled`
+- Default: disabled (in-map time only)
 
 ## Zone Translation
 

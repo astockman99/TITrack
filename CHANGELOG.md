@@ -5,6 +5,24 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Real-Time Tracking Mode**: Optional wall-clock time tracking for Value/Hour and Total Time
+  - Toggle in Settings → "Real-Time Tracking"
+  - When enabled, Total Time counts wall-clock elapsed time from first run start instead of summed in-map durations
+  - Value/Hour reflects actual session productivity including town/hideout downtime
+  - Avg Run Time always uses in-map duration regardless of mode
+  - Value/Hour chart uses wall-clock window duration when enabled
+- **Pause Button**: Pause/resume tracking during breaks (appears when Real-Time Tracking is enabled)
+  - Shows next to Total Time in the dashboard header
+  - Also available in the WPF overlay header
+  - Paused time is excluded from all calculations
+  - Pause state is cleared on stats reset
+- **New API Endpoint**: `POST /api/runs/pause` - Toggle realtime tracking pause on/off
+
+---
+
 ## [0.4.1] - 2026-02-05
 
 ### Added
