@@ -24,6 +24,7 @@ ALLOWED_SETTINGS = {
     "map_costs_enabled",
     "overlay_transparent",
     "overlay_font_scale",
+    "overlay_hide_loot",
     "realtime_tracking_enabled",
 }
 

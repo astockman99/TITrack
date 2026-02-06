@@ -85,6 +85,7 @@ TITrack.exe --portable
   - Scrollable loot list with slim dark scrollbar (scrollbar remains interactive)
   - Previous run preservation: when map ends, loot stays visible as "Previous Run"
   - Adjustable font size (A-/A+ buttons, 70%-160% range, setting persisted)
+  - Hide loot pickups option in Settings for compact stats-only view
   - Draggable header, resizable, pin/unpin always-on-top
 
 - **Web Dashboard** at `http://localhost:8000` with:

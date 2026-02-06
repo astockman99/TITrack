@@ -287,6 +287,7 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 - **Double-click header**: Reset window position
 - **Corner grip**: Resize window
 - **Stats/Loot areas**: Click-through (passes clicks to game underneath)
+- **Hide Loot Pickups**: Toggle in Settings → Overlay to hide loot section for compact stats-only mode (overlay auto-resizes)
 
 Font scale setting is persisted and restored when the overlay reopens.
 
@@ -369,7 +370,7 @@ In development mode (non-frozen), logs also output to console.
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
 - **Current Inventory**: Sortable by quantity or value
 - **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
-- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Game Directory configuration (with Browse button in native window mode)
+- **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Overlay settings (Hide Loot Pickups), Game Directory configuration (with Browse button in native window mode)
 
 ## Loot Report
 

@@ -280,6 +280,48 @@ async function handleRealtimeTrackingToggle(event) {
     toggle.disabled = false;
 }
 
+// --- Overlay Hide Loot Setting ---
+
+async function fetchOverlayHideLootSetting() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_hide_loot`);
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.value === 'true';
+    } catch (error) {
+        console.error('Error fetching overlay hide loot setting:', error);
+        return false;
+    }
+}
+
+async function updateOverlayHideLootSetting(enabled) {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_hide_loot`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: enabled ? 'true' : 'false' })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error updating overlay hide loot setting:', error);
+        return false;
+    }
+}
+
+async function handleOverlayHideLootToggle(event) {
+    const enabled = event.target.checked;
+    const toggle = event.target;
+    toggle.disabled = true;
+
+    const success = await updateOverlayHideLootSetting(enabled);
+    if (!success) {
+        toggle.checked = !enabled;
+        alert('Failed to update overlay hide loot setting');
+    }
+
+    toggle.disabled = false;
+}
+
 async function togglePause() {
     try {
         const response = await fetch(`${API_BASE}/runs/pause`, {
@@ -1008,6 +1050,7 @@ async function openSettingsModal() {
     validatedLogPath = null;
 
     const realtimeToggle = document.getElementById('settings-realtime-tracking');
+    const overlayHideLootToggle = document.getElementById('settings-overlay-hide-loot');
 
     // Load current settings
     tradeTaxToggle.checked = await fetchTradeTaxSetting();
@@ -1015,6 +1058,7 @@ async function openSettingsModal() {
     mapCostsEnabled = mapCostsToggle.checked;
     realtimeToggle.checked = await fetchRealtimeTrackingSetting();
     realtimeTrackingEnabled = realtimeToggle.checked;
+    overlayHideLootToggle.checked = await fetchOverlayHideLootSetting();
 
     // Fetch current log path from status
     try {
@@ -1597,10 +1641,11 @@ function formatDurationLong(seconds) {
     if (!seconds) return '--';
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
     if (hours > 0) {
-        return `${hours}h ${mins}m`;
+        return `${hours}h ${mins}m ${secs}s`;
     }
-    return `${mins}m`;
+    return `${mins}m ${secs}s`;
 }
 
 async function showLootReport() {
@@ -2398,6 +2443,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const settingsRealtimeToggle = document.getElementById('settings-realtime-tracking');
     settingsRealtimeToggle.addEventListener('change', handleRealtimeTrackingToggle);
+
+    const settingsOverlayHideLootToggle = document.getElementById('settings-overlay-hide-loot');
+    settingsOverlayHideLootToggle.addEventListener('change', handleOverlayHideLootToggle);
 
     // Load initial map costs state
     mapCostsEnabled = await fetchMapCostsSetting();

@@ -23,9 +23,20 @@ public partial class MainWindow : Window
     private const double MaxFontScale = 1.6;
     private const double FontScaleStep = 0.1;
 
+    // Overlay settings
+    private bool _hideLoot = false;
+    private double _savedHeight = 500;
+    private const double CompactMinHeight = 120;
+
     // Track previous run to show after map ends
     private ActiveRunResponse? _previousRun = null;
     private int? _lastActiveRunId = null;
+
+    // Local ticker for smooth Total Time counting
+    private readonly DispatcherTimer _tickTimer;
+    private double _tickBaseSeconds = 0;
+    private DateTime _tickBaseTimestamp;
+    private bool _tickRunning = false;
 
     // Colors for opaque mode
     private static readonly Color OpaqueMainBg = Color.FromArgb(0xF0, 0x1a, 0x1a, 0x2e);
@@ -95,9 +106,23 @@ public partial class MainWindow : Window
         };
         _refreshTimer.Tick += async (s, e) => await RefreshDataAsync();
 
+        _tickTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _tickTimer.Tick += (s, e) =>
+        {
+            if (_tickRunning)
+            {
+                var elapsed = (DateTime.UtcNow - _tickBaseTimestamp).TotalSeconds;
+                TotalTimeText.Text = FormatDurationLong(_tickBaseSeconds + elapsed);
+            }
+        };
+
         Loaded += async (s, e) =>
         {
             await LoadFontScaleAsync();
+            await LoadHideLootAsync();
             await RefreshDataAsync();
             _refreshTimer.Start();
         };
@@ -210,6 +235,46 @@ public partial class MainWindow : Window
         }
 
         ApplyFontScale();
+    }
+
+    private async Task LoadHideLootAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_hide_loot");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    _hideLoot = valueElement.GetString() == "true";
+                }
+            }
+        }
+        catch
+        {
+            // Use default on error
+        }
+
+        LootSectionBorder.Visibility = _hideLoot ? Visibility.Collapsed : Visibility.Visible;
+        ResizeGrip.Visibility = _hideLoot ? Visibility.Collapsed : Visibility.Visible;
+
+        if (_hideLoot)
+        {
+            // Save current height before shrinking
+            if (SizeToContent != SizeToContent.Height)
+                _savedHeight = Height;
+            MinHeight = CompactMinHeight;
+            SizeToContent = SizeToContent.Height;
+        }
+        else
+        {
+            SizeToContent = SizeToContent.Manual;
+            MinHeight = 300;
+            Height = _savedHeight;
+        }
     }
 
     private async Task SaveFontScaleAsync()
@@ -410,6 +475,7 @@ public partial class MainWindow : Window
 
             UpdateStats(stats, activeRun, inventory);
             UpdateActiveRun(activeRun);
+            await LoadHideLootAsync();
         }
         catch (Exception ex)
         {
@@ -492,7 +558,21 @@ public partial class MainWindow : Window
             AvgTimeText.Text = "--";
         }
 
-        TotalTimeText.Text = FormatDurationLong(stats.total_duration_seconds);
+        // Total Time - with local ticker for smooth realtime updates
+        if (stats.realtime_tracking && !stats.realtime_paused && stats.total_duration_seconds > 0)
+        {
+            _tickBaseSeconds = stats.total_duration_seconds;
+            _tickBaseTimestamp = DateTime.UtcNow;
+            _tickRunning = true;
+            _tickTimer.Start();
+            TotalTimeText.Text = FormatDurationLong(_tickBaseSeconds);
+        }
+        else
+        {
+            _tickRunning = false;
+            _tickTimer.Stop();
+            TotalTimeText.Text = FormatDurationLong(stats.total_duration_seconds);
+        }
 
         // Show/hide pause button based on realtime tracking
         PauseButton.Visibility = stats.realtime_tracking ? Visibility.Visible : Visibility.Collapsed;
@@ -760,7 +840,7 @@ public partial class MainWindow : Window
     {
         var ts = TimeSpan.FromSeconds(seconds);
         if (ts.TotalHours >= 1)
-            return $"{(int)ts.TotalHours}h {ts.Minutes}m";
+            return $"{(int)ts.TotalHours}h {ts.Minutes}m {ts.Seconds}s";
         return $"{ts.Minutes}m {ts.Seconds}s";
     }
 }

@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Paused time is excluded from all calculations
   - Pause state is cleared on stats reset
 - **New API Endpoint**: `POST /api/runs/pause` - Toggle realtime tracking pause on/off
+- **Overlay Settings Section**: New section in Settings modal for overlay-specific options
+  - **Hide Loot Pickups**: Toggle to hide the loot section in the overlay for a compact stats-only view
+  - Overlay auto-resizes to fit when loot is hidden
+
+### Changed
+- **Total Time Display**: Now shows seconds (e.g., "2h 15m 30s" instead of "2h 15m") in dashboard and overlay
+- **Smooth Time Ticking**: Both dashboard and overlay count Total Time second-by-second locally without extra backend requests
 
 ---
 
