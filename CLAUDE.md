@@ -155,6 +155,9 @@ GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
 # Inventory snapshot (triggered by sorting inventory in-game)
 GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609
 
+# Slot removal (last item in stack consumed - no ConfigBaseId/Num in this line)
+GameLog: Display: [Game] BagMgr@:RemoveBagItem PageId = 103 SlotId = 39
+
 # Map boundaries
 LevelMgr@ EnterLevel ...
 LevelMgr@ OpenLevel ...
@@ -166,6 +169,7 @@ LevelMgr@ OpenLevel ...
 - Tag changes inside PickItems block as "pickup-related"
 - Handle unknown ConfigBaseIds gracefully (show as "Unknown <id>")
 - `InitBagData` events update slot state but don't create deltas (used for inventory sync)
+- `RemoveBagItem` events fire when a slot is fully emptied (last item consumed). Has no ConfigBaseId/Num — lookup existing slot state to determine what was removed, then treat as Num=0.
 
 ## Database Schema (Core Tables)
 

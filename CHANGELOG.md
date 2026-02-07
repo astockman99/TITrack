@@ -5,6 +5,16 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-02-07
+
+### Fixed
+- **Emoji Character Names**: Fixed game log switching to UTF-16 encoding when player names contain emoji characters, which broke log parsing entirely
+- **Auto-Updater Skipping Overlay**: Fixed auto-updater failing to update TITrackOverlay.exe when the overlay was still running during update (Windows file lock). The updater now kills the overlay process before applying the update, with a fallback taskkill in the batch script.
+- **Blank White Window on Startup**: Fixed native window sometimes showing all-white with no functional buttons, caused by pywebview opening before the server was ready. Replaced fixed 500ms sleep with a poll loop that waits for the server to be fully started (up to 10 seconds).
+- **Map Cost Not Tracked When Last Item Consumed**: Fixed compass/beacon cost not being recorded when using the last one in a stack. The game logs `BagMgr@:RemoveBagItem` instead of the normal `Modfy BagItem` when a slot is fully emptied. Added a parser for this line format.
+
+---
+
 ## [0.4.3] - 2026-02-06
 
 ### Added
