@@ -1198,14 +1198,34 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                     return 1
             else:
                 # This blocks until main window is closed
-                webview.start()
+                # Force EdgeChromium (WebView2) to prevent silent fallback to
+                # MSHTML (IE11) which can't render modern CSS/JS properly.
+                # If WebView2 is unavailable, this raises an exception caught
+                # below, triggering a browser mode fallback instead.
+                webview.start(gui='edgechromium')
 
             logger.info("Application shutdown complete")
             return 0
         except Exception as webview_error:
-            # pywebview/pythonnet failed - fall back to browser mode
-            logger.warning(f"Native window failed: {webview_error}")
+            # pywebview/EdgeChromium failed - fall back to browser mode
+            # Common causes: WebView2 runtime not installed, MOTW blocking DLLs,
+            # or .NET components missing. Browser mode works identically.
+            logger.warning(f"Native window failed (WebView2/EdgeChromium): {webview_error}")
             logger.info("Falling back to browser mode...")
+
+            # Show a message box pointing users to the WebView2 download
+            if is_frozen():
+                try:
+                    import ctypes
+                    msg = (
+                        "Native window mode requires the Microsoft Edge WebView2 Runtime.\n\n"
+                        "TITrack will open in your browser instead (works identically).\n\n"
+                        "To use native window mode, install WebView2 from:\n"
+                        "https://developer.microsoft.com/en-us/microsoft-edge/webview2/"
+                    )
+                    ctypes.windll.user32.MessageBoxW(0, msg, "TITrack", 0x40)  # MB_ICONINFORMATION
+                except Exception:
+                    pass
 
             # Enable browser mode in app so UI shows Exit button
             app.state.browser_mode = True
