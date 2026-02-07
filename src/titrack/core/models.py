@@ -127,6 +127,15 @@ class ParsedBagEvent:
 
 
 @dataclass
+class ParsedBagRemoveEvent:
+    """Parsed BagMgr remove event (slot fully cleared, e.g., last item consumed)."""
+
+    page_id: int
+    slot_id: int
+    raw_line: str
+
+
+@dataclass
 class ParsedContextMarker:
     """Parsed ItemChange context marker (start/end of block)."""
 
@@ -167,4 +176,4 @@ class ParsedPlayerDataEvent:
 
 
 # Type alias for any parsed event
-ParsedEvent = ParsedBagEvent | ParsedContextMarker | ParsedLevelEvent | ParsedLevelIdEvent | ParsedPlayerDataEvent | None
+ParsedEvent = ParsedBagEvent | ParsedBagRemoveEvent | ParsedContextMarker | ParsedLevelEvent | ParsedLevelIdEvent | ParsedPlayerDataEvent | None

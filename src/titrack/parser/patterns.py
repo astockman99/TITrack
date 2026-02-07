@@ -12,6 +12,14 @@ BAG_MODIFY_PATTERN = re.compile(
     r"Num\s*=\s*(?P<num>\d+)"
 )
 
+# BagMgr remove line (slot fully cleared, e.g., last item in stack consumed)
+# Example: GameLog: Display: [Game] BagMgr@:RemoveBagItem PageId = 103 SlotId = 39
+BAG_REMOVE_PATTERN = re.compile(
+    r"GameLog:\s*Display:\s*\[Game\]\s*BagMgr@:RemoveBagItem\s+"
+    r"PageId\s*=\s*(?P<page_id>\d+)\s+"
+    r"SlotId\s*=\s*(?P<slot_id>\d+)"
+)
+
 # BagMgr init/snapshot line (triggered by sorting inventory or opening bag)
 # Example: GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 609
 BAG_INIT_PATTERN = re.compile(

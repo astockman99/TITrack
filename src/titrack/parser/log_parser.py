@@ -2,6 +2,7 @@
 
 from titrack.core.models import (
     ParsedBagEvent,
+    ParsedBagRemoveEvent,
     ParsedContextMarker,
     ParsedEvent,
     ParsedLevelEvent,
@@ -10,6 +11,7 @@ from titrack.core.models import (
 )
 from titrack.parser.patterns import (
     BAG_MODIFY_PATTERN,
+    BAG_REMOVE_PATTERN,
     BAG_INIT_PATTERN,
     ITEM_CHANGE_PATTERN,
     LEVEL_EVENT_PATTERN,
@@ -43,6 +45,15 @@ def parse_line(line: str) -> ParsedEvent:
             num=int(match.group("num")),
             raw_line=line,
             is_init=False,
+        )
+
+    # Try BagMgr remove (slot fully cleared, e.g., last item consumed)
+    match = BAG_REMOVE_PATTERN.search(line)
+    if match:
+        return ParsedBagRemoveEvent(
+            page_id=int(match.group("page_id")),
+            slot_id=int(match.group("slot_id")),
+            raw_line=line,
         )
 
     # Try BagMgr init/snapshot (triggered by sorting inventory)

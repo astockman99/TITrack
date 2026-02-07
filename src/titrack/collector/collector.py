@@ -10,12 +10,14 @@ from titrack.core.models import (
     EventContext,
     ItemDelta,
     ParsedBagEvent,
+    ParsedBagRemoveEvent,
     ParsedContextMarker,
     ParsedLevelEvent,
     ParsedLevelIdEvent,
     ParsedPlayerDataEvent,
     Price,
     Run,
+    SlotKey,
 )
 from titrack.core.run_segmenter import RunSegmenter
 from titrack.db.connection import Database
@@ -286,6 +288,8 @@ class Collector:
 
         if isinstance(event, ParsedContextMarker):
             self._handle_context_marker(event)
+        elif isinstance(event, ParsedBagRemoveEvent):
+            self._handle_bag_remove_event(event, timestamp)
         elif isinstance(event, ParsedBagEvent):
             self._handle_bag_event(event, timestamp)
         elif isinstance(event, ParsedLevelIdEvent):
@@ -312,6 +316,33 @@ class Collector:
         else:
             self._current_context = EventContext.OTHER
             self._current_proto_name = None
+
+    def _handle_bag_remove_event(self, event: ParsedBagRemoveEvent, timestamp: datetime) -> None:
+        """Handle BagMgr remove events (slot fully cleared, e.g., last item consumed).
+
+        Looks up existing slot state to determine what was removed, then
+        synthesizes a regular bag event with Num=0 so the delta calculator
+        can compute the correct negative delta.
+        """
+        if event.page_id in EXCLUDED_PAGES:
+            return
+
+        # Look up what was in this slot
+        key = SlotKey(event.page_id, event.slot_id)
+        old_state = self.delta_calc.get_state(key)
+        if old_state is None:
+            return  # Unknown slot, nothing to do
+
+        # Synthesize a regular bag event with Num=0
+        synthetic = ParsedBagEvent(
+            page_id=event.page_id,
+            slot_id=event.slot_id,
+            config_base_id=old_state.config_base_id,
+            num=0,
+            raw_line=event.raw_line,
+            is_init=False,
+        )
+        self._handle_bag_event(synthetic, timestamp)
 
     def _handle_bag_event(self, event: ParsedBagEvent, timestamp: datetime) -> None:
         """Handle BagMgr modification and init events."""
