@@ -295,18 +295,29 @@ class Database:
 
     def _fix_placeholder_item_names(self, cursor: sqlite3.Cursor) -> None:
         """
-        Fix items with placeholder names (e.g. Memory_6143) by updating
-        from the seed file. Runs on every startup to catch name corrections.
+        Fix items with placeholder names by updating from the seed file.
+        Runs on every startup to catch name corrections.
+
+        Detects placeholder patterns:
+        - Memory_6143 (memory card placeholders)
+        - Icon_Skill_Leapslam_128, Icon_Support_Split_128 (icon filenames)
+        - SkillIcon_Skill_Blink, SkillIcon_Support_Guard (skill icon refs)
+        - Skill_MarkerArrow, SKill_DiffusionBlade (internal code names)
+        - S12_LengJing_White01 (season asset placeholders)
         """
         import re
 
+        PLACEHOLDER_PATTERN = re.compile(
+            r"^(Memory_\d+|Icon_(Skill|Support)_.+_128|SkillIcon_.+|S[Kk]ill_.+|S\d+_.+)$"
+        )
+
         rows = cursor.execute(
-            "SELECT config_base_id, name_en FROM items WHERE name_en LIKE 'Memory\\_%' ESCAPE '\\'"
+            "SELECT config_base_id, name_en FROM items WHERE name_en IS NOT NULL"
         ).fetchall()
 
         placeholder_ids = {
             row[0] for row in rows
-            if re.fullmatch(r"Memory_\d+", row[1])
+            if PLACEHOLDER_PATTERN.match(row[1])
         }
 
         if not placeholder_ids:
@@ -327,7 +338,7 @@ class Database:
                 item_id = int(item["id"])
                 if item_id in placeholder_ids:
                     name_en = item.get("name_en", "")
-                    if name_en and not re.fullmatch(r"Memory_\d+", name_en):
+                    if name_en and not PLACEHOLDER_PATTERN.match(name_en):
                         cursor.execute(
                             "UPDATE items SET name_en = ? WHERE config_base_id = ?",
                             (name_en, item_id),

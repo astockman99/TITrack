@@ -341,7 +341,7 @@
     },
     {
       "id": "7001",
-      "name_en": "Icon_Skill_Leapslam_128",
+      "name_en": "Leap Attack",
       "name_cn": "跃击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Leapslam_128.webp",
@@ -352,7 +352,7 @@
     },
     {
       "id": "7002",
-      "name_en": "Icon_Skill_Iceshot_128",
+      "name_en": "Ice Shot",
       "name_cn": "寒冰射击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Iceshot_128.webp",
@@ -363,7 +363,7 @@
     },
     {
       "id": "7006",
-      "name_en": "Icon_Skill_Emberslam_128",
+      "name_en": "Hammer of Ash",
       "name_cn": "灰烬之锤",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Emberslam_128.webp",
@@ -374,7 +374,7 @@
     },
     {
       "id": "7007",
-      "name_en": "Icon_Skill_Prismaticbolt_128",
+      "name_en": "Chromatic Shot",
       "name_cn": "五彩魔矢",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Prismaticbolt_128.webp",
@@ -385,7 +385,7 @@
     },
     {
       "id": "7008",
-      "name_en": "Icon_Skill_Bang_128",
+      "name_en": "Resurrection Warcry",
       "name_cn": "复苏战吼",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Bang_128.webp",
@@ -396,7 +396,7 @@
     },
     {
       "id": "7018",
-      "name_en": "Icon_Skill_Cyclone_128",
+      "name_en": "Whirlwind",
       "name_cn": "旋风斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Cyclone_128.webp",
@@ -407,7 +407,7 @@
     },
     {
       "id": "7019",
-      "name_en": "Icon_Skill_FocusedStrike_128",
+      "name_en": "Focused Slash",
       "name_cn": "专注斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FocusedStrike_128.webp",
@@ -418,7 +418,7 @@
     },
     {
       "id": "7020",
-      "name_en": "Icon_Skill_StoneSkin_128",
+      "name_en": "Stoneskin",
       "name_cn": "石肤术",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_StoneSkin_128.webp",
@@ -429,7 +429,7 @@
     },
     {
       "id": "7021",
-      "name_en": "Icon_Skill_Nimbus_128",
+      "name_en": "Thundercloud",
       "name_cn": "雷云放射",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Nimbus_128.webp",
@@ -440,7 +440,7 @@
     },
     {
       "id": "7025",
-      "name_en": "SkillIcon_Skill_Blink",
+      "name_en": "Blink",
       "name_cn": "闪现",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Blink_Icon_128.webp",
@@ -451,7 +451,7 @@
     },
     {
       "id": "7027",
-      "name_en": "Icon_Skill_Strafe_128",
+      "name_en": "Bombard",
       "name_cn": "炮轰",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Strafe_128.webp",
@@ -462,7 +462,7 @@
     },
     {
       "id": "7028",
-      "name_en": "Icon_Skill_Shadowbolt_128",
+      "name_en": "Shadow Shot",
       "name_cn": "暗影弹",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Shadowbolt_128.webp",
@@ -473,7 +473,7 @@
     },
     {
       "id": "7029",
-      "name_en": "Icon_Skill_Shadowswamp_128",
+      "name_en": "Shadow Swamp",
       "name_cn": "暗影之沼",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Shadowswamp_128.webp",
@@ -484,7 +484,7 @@
     },
     {
       "id": "7030",
-      "name_en": "Skill_MarkerArrow",
+      "name_en": "Marked Rain of Arrows",
       "name_cn": "标记箭雨",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MarkerArrow_Icon_128.webp",
@@ -495,7 +495,7 @@
     },
     {
       "id": "7031",
-      "name_en": "Icon_Skill_WildRage_128",
+      "name_en": "Bull's Rage",
       "name_cn": "公牛之怒",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_WildRage_128.webp",
@@ -506,7 +506,7 @@
     },
     {
       "id": "7032",
-      "name_en": "SkillIcon_Skill_ShadowDash",
+      "name_en": "Shadow Dash",
       "name_cn": "暗影冲刺",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ShadowDash_Icon_128.webp",
@@ -517,7 +517,7 @@
     },
     {
       "id": "7033",
-      "name_en": "Icon_Skill_IceShield_128",
+      "name_en": "Frost Shield",
       "name_cn": "寒冰盾",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceShield_128.webp",
@@ -528,7 +528,7 @@
     },
     {
       "id": "7034",
-      "name_en": "Icon_Skill_RocketJump_128",
+      "name_en": "Rocket Jump",
       "name_cn": "火箭跳",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_RocketJump_128.webp",
@@ -539,7 +539,7 @@
     },
     {
       "id": "7035",
-      "name_en": "Icon_Skill_Fireball_128",
+      "name_en": "Split Firebolt",
       "name_cn": "裂变火球",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Fireball_128.webp",
@@ -550,7 +550,7 @@
     },
     {
       "id": "7036",
-      "name_en": "Icon_Skill_Blizzard_128",
+      "name_en": "Blizzard",
       "name_cn": "暴风雪",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_Blizzard_128.webp",
@@ -561,7 +561,7 @@
     },
     {
       "id": "7039",
-      "name_en": "SkillIcon_Skill_Blur",
+      "name_en": "Obscure",
       "name_cn": "模糊",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Blur_Icon_128.webp",
@@ -572,7 +572,7 @@
     },
     {
       "id": "7040",
-      "name_en": "Icon_Skill_BoilingMana_128",
+      "name_en": "Mana Boil",
       "name_cn": "魔力沸腾",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_BoilingMana_128.webp",
@@ -583,7 +583,7 @@
     },
     {
       "id": "7041",
-      "name_en": "Icon_Skill_IceCrash_128",
+      "name_en": "Frost Impact",
       "name_cn": "寒霜破击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceCrash_128.webp",
@@ -594,7 +594,7 @@
     },
     {
       "id": "7042",
-      "name_en": "Icon_Skill_FlameRoad_128",
+      "name_en": "Path of Flames",
       "name_cn": "烈焰之径",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FlameRoad_128.webp",
@@ -605,7 +605,7 @@
     },
     {
       "id": "7043",
-      "name_en": "Icon_Skill_ViolentSweep_128",
+      "name_en": "Berserking Blade",
       "name_cn": "暴走巨刃",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ViolentSweep_128.webp",
@@ -616,7 +616,7 @@
     },
     {
       "id": "7044",
-      "name_en": "Icon_Skill_ChargedSmash_128",
+      "name_en": "Charged Pummel",
       "name_cn": "充能猛击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ChargedSmash_128.webp",
@@ -627,7 +627,7 @@
     },
     {
       "id": "7047",
-      "name_en": "Icon_Skill_LightningChain_128",
+      "name_en": "Chain Lightning",
       "name_cn": "闪电链",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_LightningChain_128.webp",
@@ -638,7 +638,7 @@
     },
     {
       "id": "7048",
-      "name_en": "Icon_Skill_DoubleStab_128",
+      "name_en": "Double Thrusts",
       "name_cn": "双重突刺",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_DoubleStab_128.webp",
@@ -649,7 +649,7 @@
     },
     {
       "id": "7049",
-      "name_en": "Icon_Skill_LifeLeech_128",
+      "name_en": "Mind Control",
       "name_cn": "摄念夺识",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_LifeLeech_128.webp",
@@ -660,7 +660,7 @@
     },
     {
       "id": "7050",
-      "name_en": "Icon_Skill_IceRing_128",
+      "name_en": "Ring of Ice",
       "name_cn": "冰环术",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceRing_128.webp",
@@ -671,7 +671,7 @@
     },
     {
       "id": "7051",
-      "name_en": "Icon_Skill_SplitArrow_128",
+      "name_en": "Split Shot",
       "name_cn": "分裂射击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_SplitArrow_128.webp",
@@ -682,7 +682,7 @@
     },
     {
       "id": "7052",
-      "name_en": "Icon_Skill_FlameSlash_128",
+      "name_en": "Flame Slash",
       "name_cn": "烈焰斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FlameSlash_128.webp",
@@ -693,7 +693,7 @@
     },
     {
       "id": "7053",
-      "name_en": "Icon_Skill_FrostSlash_128",
+      "name_en": "Icy Blade",
       "name_cn": "冰凌斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FrostSlash_128.webp",
@@ -704,7 +704,7 @@
     },
     {
       "id": "7054",
-      "name_en": "Icon_Skill_FrostStab_128",
+      "name_en": "Frost Spike",
       "name_cn": "碎冰刺击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FrostStab_128.webp",
@@ -715,7 +715,7 @@
     },
     {
       "id": "7055",
-      "name_en": "Icon_Skill_ViperStab_128",
+      "name_en": "Wilt Spike",
       "name_cn": "凋零刺击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ViperStab_128.webp",
@@ -726,7 +726,7 @@
     },
     {
       "id": "7056",
-      "name_en": "SkillIcon_Skill_LightningShoot",
+      "name_en": "Lightning Shot",
       "name_cn": "闪电射击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_LightningShoot_Icon_128.webp",
@@ -737,7 +737,7 @@
     },
     {
       "id": "7057",
-      "name_en": "Icon_Skill_PoisonBullet_128",
+      "name_en": "Corrosive Shot",
       "name_cn": "侵蚀弹",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_PoisonBullet_128.webp",
@@ -748,7 +748,7 @@
     },
     {
       "id": "7058",
-      "name_en": "SkillIcon_Skill_FireShoot",
+      "name_en": "Burning Shot",
       "name_cn": "燃烧射击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FireShoot_Icon_128.webp",
@@ -759,7 +759,7 @@
     },
     {
       "id": "7059",
-      "name_en": "Icon_Skill_LightningBullet_128",
+      "name_en": "Electrifying Shot",
       "name_cn": "电光弹",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_LightningBullet_128.webp",
@@ -770,7 +770,7 @@
     },
     {
       "id": "7060",
-      "name_en": "Icon_Skill_VenomThrow_128",
+      "name_en": "Corrosive Throw",
       "name_cn": "侵蚀投掷",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_VenomThrow_128.webp",
@@ -781,7 +781,7 @@
     },
     {
       "id": "7062",
-      "name_en": "SkillIcon_Skill_ChargedRainOfBullets",
+      "name_en": "Inexhaustible Barrage",
       "name_cn": "不竭弹雨",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ChargedRainOfBullets_Icon_128.webp",
@@ -792,7 +792,7 @@
     },
     {
       "id": "7063",
-      "name_en": "SkillIcon_Skill_RainOfArrows",
+      "name_en": "Rain of Arrows",
       "name_cn": "箭雨",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_RainOfArrows_Icon_128.webp",
@@ -803,7 +803,7 @@
     },
     {
       "id": "7064",
-      "name_en": "Icon_Skill_SavageCharge_128",
+      "name_en": "Savage Charge",
       "name_cn": "野蛮冲锋",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_SavageCharge_128.webp",
@@ -814,7 +814,7 @@
     },
     {
       "id": "7065",
-      "name_en": "Icon_Skill_ConeOfCold_128",
+      "name_en": "Ice Lances",
       "name_cn": "冰锥术",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ConeOfCold_128.webp",
@@ -825,7 +825,7 @@
     },
     {
       "id": "7066",
-      "name_en": "Icon_Skill_SparkBullet_128",
+      "name_en": "Sparkle",
       "name_cn": "电火花",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_SparkBullet_128.webp",
@@ -836,7 +836,7 @@
     },
     {
       "id": "7067",
-      "name_en": "SKill_DiffusionBlade",
+      "name_en": "Ring of Blades",
       "name_cn": "环绕飞刃",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SKill_DiffusionBlade_Icon_128.webp",
@@ -847,7 +847,7 @@
     },
     {
       "id": "7068",
-      "name_en": "SkillIcon_Skill_FirePile",
+      "name_en": "Flame Core",
       "name_cn": "聚焰之核",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FirePile_Icon_128.webp",
@@ -858,7 +858,7 @@
     },
     {
       "id": "7069",
-      "name_en": "Icon_Skill_ThunderStorm_128",
+      "name_en": "Lightning Storm",
       "name_cn": "闪电风暴",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ThunderStorm_128.webp",
@@ -869,7 +869,7 @@
     },
     {
       "id": "7070",
-      "name_en": "Icon_Skill_FlameBlast_128",
+      "name_en": "Flame Jet",
       "name_cn": "烈焰释放",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FlameBlast_128.webp",
@@ -880,7 +880,7 @@
     },
     {
       "id": "7071",
-      "name_en": "Icon_Skill_IceArea_128",
+      "name_en": "Frost Terra",
       "name_cn": "寒霜地面",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceArea_128.webp",
@@ -891,7 +891,7 @@
     },
     {
       "id": "7072",
-      "name_en": "SkillIcon_Skill_FireRay",
+      "name_en": "Scorching Beam",
       "name_cn": "灼热射线",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FireRay_Icon_128.webp",
@@ -902,7 +902,7 @@
     },
     {
       "id": "7073",
-      "name_en": "SkillIcon_Skill_ChaosRay",
+      "name_en": "Wilting Beam",
       "name_cn": "枯萎射线",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ChaosRay_Icon_128.webp",
@@ -913,7 +913,7 @@
     },
     {
       "id": "7074",
-      "name_en": "Icon_Skill_IceBlink_128",
+      "name_en": "Frigid Transmission",
       "name_cn": "寒冰传送",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceBlink_128.webp",
@@ -924,7 +924,7 @@
     },
     {
       "id": "7078",
-      "name_en": "SkillIcon_Skill_ForceCharge",
+      "name_en": "Forced Start",
       "name_cn": "强制启动",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ForceCharge_Icon_128.webp",
@@ -935,7 +935,7 @@
     },
     {
       "id": "7079",
-      "name_en": "SkillIcon_Skill_FireShield",
+      "name_en": "Aegis of Fire",
       "name_cn": "烈火神盾",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FireShield_Icon_128.webp",
@@ -946,7 +946,7 @@
     },
     {
       "id": "7080",
-      "name_en": "SkillIcon_Skill_PainDelay",
+      "name_en": "Delayed Pain",
       "name_cn": "痛觉延迟",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_PainDelay_Icon_128.webp",
@@ -957,7 +957,7 @@
     },
     {
       "id": "7081",
-      "name_en": "SkillIcon_Skill_BufferDefense",
+      "name_en": "Defensive Buffer",
       "name_cn": "缓冲防御",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_BufferDefense_Icon_128.webp",
@@ -968,7 +968,7 @@
     },
     {
       "id": "7082",
-      "name_en": "SkillIcon_Skill_SwiftWind",
+      "name_en": "Brisk Wind",
       "name_cn": "迅疾之风",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SwiftWind_Icon_128.webp",
@@ -979,7 +979,7 @@
     },
     {
       "id": "7084",
-      "name_en": "SkillIcon_Skill_Bloodlust",
+      "name_en": "Burst of Anger",
       "name_cn": "怒火狂飙",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Bloodlust_Icon_128.webp",
@@ -990,7 +990,7 @@
     },
     {
       "id": "7086",
-      "name_en": "SkillIcon_Skill_BurningWave",
+      "name_en": "Scorching Pulse",
       "name_cn": "灼热波纹",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_BurningWave_Icon_128.webp",
@@ -1001,7 +1001,7 @@
     },
     {
       "id": "7087",
-      "name_en": "SkillIcon_Skill_Concentrate",
+      "name_en": "Fixate",
       "name_cn": "聚焦",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Concentrate_Icon_128.webp",
@@ -1012,7 +1012,7 @@
     },
     {
       "id": "7088",
-      "name_en": "SkillIcon_Skill_ArcaneSurge",
+      "name_en": "Secret Origin Unleash",
       "name_cn": "秘源释放",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ArcaneSurge_Icon_128.webp",
@@ -1023,7 +1023,7 @@
     },
     {
       "id": "7089",
-      "name_en": "SkillIcon_Skill_Aiming",
+      "name_en": "Aim",
       "name_cn": "瞄准",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Aiming_Icon_128.webp",
@@ -1034,7 +1034,7 @@
     },
     {
       "id": "7090",
-      "name_en": "SkillIcon_Skill_PhasingWalk",
+      "name_en": "Blurry Steps",
       "name_cn": "迷踪步",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_PhasingWalk_Icon_128.webp",
@@ -1045,7 +1045,7 @@
     },
     {
       "id": "7091",
-      "name_en": "SkillIcon_Skill_EarthShock",
+      "name_en": "Groundshaker",
       "name_cn": "震撼大地",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_EarthShock_Icon_128.webp",
@@ -1056,7 +1056,7 @@
     },
     {
       "id": "7092",
-      "name_en": "SkillIcon_Skill_FocusedShoot",
+      "name_en": "Focused Shot",
       "name_cn": "专注射击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FocusedShoot_Icon_128.webp",
@@ -1067,7 +1067,7 @@
     },
     {
       "id": "7093",
-      "name_en": "SkillIcon_Skill_FireBlast",
+      "name_en": "Fire Burst",
       "name_cn": "爆炎术",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FireBlast_Icon_128.webp",
@@ -1078,7 +1078,7 @@
     },
     {
       "id": "7094",
-      "name_en": "SkillIcon_Skill_OverloadLightningBall",
+      "name_en": "Thunderbolt Overload",
       "name_cn": "超载雷球",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_OverloadLightningBall_Icon_128.webp",
@@ -1089,7 +1089,7 @@
     },
     {
       "id": "7120",
-      "name_en": "Icon_Skill_WildCry_128",
+      "name_en": "Fearless Warcry",
       "name_cn": "狂猛战吼",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_WildCry_128.webp",
@@ -1100,7 +1100,7 @@
     },
     {
       "id": "7121",
-      "name_en": "Icon_Skill_RageCry_128",
+      "name_en": "Raging Warcry",
       "name_cn": "暴怒战吼",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_RageCry_128.webp",
@@ -1111,7 +1111,7 @@
     },
     {
       "id": "7122",
-      "name_en": "Icon_Skill_AncestralCry_128",
+      "name_en": "Charging Warcry",
       "name_cn": "冲锋战吼",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_AncestralCry_128.webp",
@@ -1122,7 +1122,7 @@
     },
     {
       "id": "7123",
-      "name_en": "Icon_Skill_BlackHole_128",
+      "name_en": "Black Hole",
       "name_cn": "黑洞",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_BlackHole_128.webp",
@@ -1133,7 +1133,7 @@
     },
     {
       "id": "7125",
-      "name_en": "SkillIcon_Skill_SummonMechanicalGuard",
+      "name_en": "Summon Machine Guard",
       "name_cn": "召唤机械警卫",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonMechanicalGuard_Icon_128.webp",
@@ -1144,7 +1144,7 @@
     },
     {
       "id": "7126",
-      "name_en": "SkillIcon_Skill_SummonIceSpiderTank",
+      "name_en": "Summon Spider Tank",
       "name_cn": "召唤蜘蛛坦克",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceSpiderTank_Icon_128.webp",
@@ -1155,7 +1155,7 @@
     },
     {
       "id": "7130",
-      "name_en": "SkillIcon_Skill_ElementBreak",
+      "name_en": "Timid",
       "name_cn": "胆怯",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ElementBreak_Icon_128.webp",
@@ -1166,7 +1166,7 @@
     },
     {
       "id": "7131",
-      "name_en": "SkillIcon_Skill_Conductivity",
+      "name_en": "Electrocute",
       "name_cn": "感电",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Conductivity_Icon_128.webp",
@@ -1177,7 +1177,7 @@
     },
     {
       "id": "7132",
-      "name_en": "SkillIcon_Skill_Vulnerable",
+      "name_en": "Vulnerability",
       "name_cn": "易伤",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Vulnerable_Icon_128.webp",
@@ -1188,7 +1188,7 @@
     },
     {
       "id": "7133",
-      "name_en": "SkillIcon_Skill_Blazing",
+      "name_en": "Scorch",
       "name_cn": "炽热",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Blazing_Icon_128.webp",
@@ -1199,7 +1199,7 @@
     },
     {
       "id": "7134",
-      "name_en": "SkillIcon_Skill_Blind",
+      "name_en": "Dazzled",
       "name_cn": "盲目",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Blind_Icon_128.webp",
@@ -1210,7 +1210,7 @@
     },
     {
       "id": "7135",
-      "name_en": "SkillIcon_Skill_EntanglingPain",
+      "name_en": "Entangled Pain",
       "name_cn": "苦痛纠缠",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_EntanglingPain_Icon_128.webp",
@@ -1221,7 +1221,7 @@
     },
     {
       "id": "7136",
-      "name_en": "SkillIcon_Skill_ErodingCold",
+      "name_en": "Biting Cold",
       "name_cn": "蚀骨之寒",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ErodingCold_Icon_128.webp",
@@ -1232,7 +1232,7 @@
     },
     {
       "id": "7137",
-      "name_en": "SkillIcon_Skill_ErodingEvil",
+      "name_en": "Corruption",
       "name_cn": "邪恶侵蚀",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ErodingEvil_Icon_128.webp",
@@ -1243,7 +1243,7 @@
     },
     {
       "id": "7143",
-      "name_en": "SkillIcon_Skill_HealthFountain",
+      "name_en": "Life Source",
       "name_cn": "生命源泉",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_HealthFountain_Icon_128.webp",
@@ -1254,7 +1254,7 @@
     },
     {
       "id": "7144",
-      "name_en": "SkillIcon_Skill_ManaFountain",
+      "name_en": "Mana Source",
       "name_cn": "魔力源泉",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ManaFountain_Icon_128.webp",
@@ -1265,7 +1265,7 @@
     },
     {
       "id": "7145",
-      "name_en": "SkillIcon_Skill_ElementShake",
+      "name_en": "Elemental Shock",
       "name_cn": "元素震荡",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ElementShake_Icon_128.webp",
@@ -1276,7 +1276,7 @@
     },
     {
       "id": "7146",
-      "name_en": "SkillIcon_Skill_MarchOfMachines",
+      "name_en": "Machine Army",
       "name_cn": "机械行军",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_MarchOfMachines_Icon_128.webp",
@@ -1287,7 +1287,7 @@
     },
     {
       "id": "7147",
-      "name_en": "SkillIcon_Skill_Pray",
+      "name_en": "Prayer",
       "name_cn": "祈愿",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Pray_Icon_128.webp",
@@ -1298,7 +1298,7 @@
     },
     {
       "id": "7149",
-      "name_en": "SkillIcon_Skill_DarkPortal",
+      "name_en": "Dark Gate",
       "name_cn": "黑暗之门",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_DarkPortal_Icon_128.webp",
@@ -1309,7 +1309,7 @@
     },
     {
       "id": "7153",
-      "name_en": "Skill_ThunderArea",
+      "name_en": "Thunderlight Bond",
       "name_cn": "雷光羁绊",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderArea_Icon_128.webp",
@@ -1320,7 +1320,7 @@
     },
     {
       "id": "7154",
-      "name_en": "Skill_SoulStealArea",
+      "name_en": "Arcane Circle",
       "name_cn": "秘法阵",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SoulStealArea_Icon_128.webp",
@@ -1331,7 +1331,7 @@
     },
     {
       "id": "7155",
-      "name_en": "Skill_FrostTether",
+      "name_en": "Ice Bond",
       "name_cn": "冰霜羁绊",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostTether_Icon_128.webp",
@@ -1342,7 +1342,7 @@
     },
     {
       "id": "7156",
-      "name_en": "Skill_BornFromDeath",
+      "name_en": "Drinking Recovery",
       "name_cn": "渴饮疗愈",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_BornFromDeath_Icon_128.webp",
@@ -1353,7 +1353,7 @@
     },
     {
       "id": "7157",
-      "name_en": "Skill_Regroup",
+      "name_en": "Reform",
       "name_cn": "重整阵势",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Regroup_Icon_128.webp",
@@ -1364,7 +1364,7 @@
     },
     {
       "id": "7158",
-      "name_en": "Skill_QuickReload",
+      "name_en": "Centralized Loading",
       "name_cn": "集中上膛",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_QuickReload_Icon_128.webp",
@@ -1375,7 +1375,7 @@
     },
     {
       "id": "7159",
-      "name_en": "Skill_FlashBow",
+      "name_en": "Blink Arrow",
       "name_cn": "瞬闪弓",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlashBow_Icon_128.webp",
@@ -1386,7 +1386,7 @@
     },
     {
       "id": "7160",
-      "name_en": "Skill_CutForward",
+      "name_en": "Swift Shadow Raid",
       "name_cn": "迅影奔袭",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CutForward_Icon_128.webp",
@@ -1397,7 +1397,7 @@
     },
     {
       "id": "7161",
-      "name_en": "Skill_DesperateFormation",
+      "name_en": "Safeguard Ring",
       "name_cn": "绝境阵",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DesperateFormation_Icon_128.webp",
@@ -1408,7 +1408,7 @@
     },
     {
       "id": "7167",
-      "name_en": "Skill_IceRay",
+      "name_en": "Icebound Beam",
       "name_cn": "冰魄射线",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceRay_Icon_128.webp",
@@ -1419,7 +1419,7 @@
     },
     {
       "id": "7168",
-      "name_en": "Skill_WhirlingBlade",
+      "name_en": "Spiral Strike",
       "name_cn": "螺旋击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_WhirlingBlade_Icon_128.webp",
@@ -1430,7 +1430,7 @@
     },
     {
       "id": "7169",
-      "name_en": "SkillIcon_Skill_CombinedPotion",
+      "name_en": "Compound Source",
       "name_cn": "复合源泉",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_CombinedPotion_Icon_128.webp",
@@ -1441,7 +1441,7 @@
     },
     {
       "id": "7170",
-      "name_en": "Skill_ShadowSlash",
+      "name_en": "Moon Strike",
       "name_cn": "月华斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ShadowSlash_Icon_128.webp",
@@ -1452,7 +1452,7 @@
     },
     {
       "id": "7172",
-      "name_en": "Skill_Tornado",
+      "name_en": "Howling Gale",
       "name_cn": "呼啸烈风",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Tornado_Icon_128.webp",
@@ -1463,7 +1463,7 @@
     },
     {
       "id": "7173",
-      "name_en": "Skill_SabotRounds",
+      "name_en": "Blazing Bullet",
       "name_cn": "炽炎穿弹",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SabotRounds_Icon_128.webp",
@@ -1474,7 +1474,7 @@
     },
     {
       "id": "7174",
-      "name_en": "Skill_ThunderSlash",
+      "name_en": "Thunder Slash",
       "name_cn": "雷影斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderSlash_Icon_128.webp",
@@ -1485,7 +1485,7 @@
     },
     {
       "id": "7175",
-      "name_en": "Skill_LightningStab",
+      "name_en": "Thunder Spike",
       "name_cn": "雷光刺击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningStab_Icon_128.webp",
@@ -1496,7 +1496,7 @@
     },
     {
       "id": "7177",
-      "name_en": "Skill_Doom",
+      "name_en": "Haunting Abomination",
       "name_cn": "恶煞缠身",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Doom_Icon_128.webp",
@@ -1507,7 +1507,7 @@
     },
     {
       "id": "7178",
-      "name_en": "Skill_FrostCore",
+      "name_en": "Frost Core",
       "name_cn": "寒霜之核",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostCore_Icon_128.webp",
@@ -1518,7 +1518,7 @@
     },
     {
       "id": "7179",
-      "name_en": "Skill_ThunderCore",
+      "name_en": "Thunder Core",
       "name_cn": "雷降之核",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderCore_Icon_128.webp",
@@ -1529,7 +1529,7 @@
     },
     {
       "id": "7180",
-      "name_en": "Skill_GhostBladeSpirit",
+      "name_en": "Ghost Blade Einherjar",
       "name_cn": "幽刃英灵",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_GhostBladeSpirit_Icon_128.webp",
@@ -1540,7 +1540,7 @@
     },
     {
       "id": "7181",
-      "name_en": "Skill_ArrowSpirit",
+      "name_en": "Arrow Einherjar",
       "name_cn": "飞箭英灵",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArrowSpirit_Icon_128.webp",
@@ -1551,7 +1551,7 @@
     },
     {
       "id": "7182",
-      "name_en": "Skill_SummonPhantom",
+      "name_en": "Summon Grim Phantom",
       "name_cn": "召唤幽浮魅影",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonPhantom_Icon_128.webp",
@@ -1562,7 +1562,7 @@
     },
     {
       "id": "7183",
-      "name_en": "SkillIcon_Skill_SummonMechanicalGuard",
+      "name_en": "Overpower",
       "name_cn": "压制重击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonMechanicalGuard_Icon_128.webp",
@@ -1573,7 +1573,7 @@
     },
     {
       "id": "7184",
-      "name_en": "SkillIcon_Skill_SummonMechanicalGuard",
+      "name_en": "Onslaught Punch",
       "name_cn": "进击之拳",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonMechanicalGuard_Icon_128.webp",
@@ -1584,7 +1584,7 @@
     },
     {
       "id": "7185",
-      "name_en": "SkillIcon_Skill_SummonIceSpiderTank",
+      "name_en": "Aimed Shot",
       "name_cn": "瞄准射击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceSpiderTank_Icon_128.webp",
@@ -1595,7 +1595,7 @@
     },
     {
       "id": "7186",
-      "name_en": "SkillIcon_Skill_SummonFireElement",
+      "name_en": "Blazing Dance",
       "name_cn": "烈焰挥舞",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonFireElement_Icon_128.webp",
@@ -1606,7 +1606,7 @@
     },
     {
       "id": "7187",
-      "name_en": "SkillIcon_Skill_SummonFireElement",
+      "name_en": "Blazing Spin",
       "name_cn": "烈焰飞旋",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonFireElement_Icon_128.webp",
@@ -1617,7 +1617,7 @@
     },
     {
       "id": "7188",
-      "name_en": "SkillIcon_Skill_SummonFireElement",
+      "name_en": "Blazing Incineration",
       "name_cn": "烈焰暴燃",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonFireElement_Icon_128.webp",
@@ -1628,7 +1628,7 @@
     },
     {
       "id": "7189",
-      "name_en": "SkillIcon_Skill_SummonFireElement",
+      "name_en": "Molten Rising",
       "name_cn": "熔火升腾",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonFireElement_Icon_128.webp",
@@ -1639,7 +1639,7 @@
     },
     {
       "id": "7190",
-      "name_en": "SkillIcon_Skill_SummonIceIceElement",
+      "name_en": "Glacier Ripples",
       "name_cn": "冰川涟漪",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceIceElement_Icon_128.webp",
@@ -1650,7 +1650,7 @@
     },
     {
       "id": "7191",
-      "name_en": "SkillIcon_Skill_SummonIceIceElement",
+      "name_en": "Frost Release",
       "name_cn": "寒潮缓释",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceIceElement_Icon_128.webp",
@@ -1661,7 +1661,7 @@
     },
     {
       "id": "7192",
-      "name_en": "SkillIcon_Skill_SummonIceIceElement",
+      "name_en": "Permafrost Cast",
       "name_cn": "冰浇雪铸",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceIceElement_Icon_128.webp",
@@ -1672,7 +1672,7 @@
     },
     {
       "id": "7193",
-      "name_en": "SkillIcon_Skill_SummonIceIceElement",
+      "name_en": "Ice Earthshaker",
       "name_cn": "撼地冰暴",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceIceElement_Icon_128.webp",
@@ -1683,7 +1683,7 @@
     },
     {
       "id": "7194",
-      "name_en": "SkillIcon_Skill_SummonThunderElement",
+      "name_en": "Lightning Star",
       "name_cn": "闪电流星",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonThunderElement_Icon_128.webp",
@@ -1694,7 +1694,7 @@
     },
     {
       "id": "7195",
-      "name_en": "SkillIcon_Skill_SummonThunderElement",
+      "name_en": "Thunderlight Arrow",
       "name_cn": "雷光飞矢",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonThunderElement_Icon_128.webp",
@@ -1705,7 +1705,7 @@
     },
     {
       "id": "7196",
-      "name_en": "SkillIcon_Skill_SummonThunderElement",
+      "name_en": "Thundercloud Surge",
       "name_cn": "雷云激荡",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonThunderElement_Icon_128.webp",
@@ -1716,7 +1716,7 @@
     },
     {
       "id": "7197",
-      "name_en": "SkillIcon_Skill_SummonThunderElement",
+      "name_en": "Lightning Surge",
       "name_cn": "雷驰电涌",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonThunderElement_Icon_128.webp",
@@ -1727,7 +1727,7 @@
     },
     {
       "id": "7198",
-      "name_en": "Skill_SummonPhantom",
+      "name_en": "High Energy Beam",
       "name_cn": "高能光束",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonPhantom_Icon_128.webp",
@@ -1738,7 +1738,7 @@
     },
     {
       "id": "7199",
-      "name_en": "Skill_SummonPhantom",
+      "name_en": "Destructive Light Cannon",
       "name_cn": "毁灭光炮",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonPhantom_Icon_128.webp",
@@ -1749,7 +1749,7 @@
     },
     {
       "id": "7200",
-      "name_en": "Skill_BladeRoundabout",
+      "name_en": "Whirlwind Blade",
       "name_cn": "刀锋回旋",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_BladeRoundabout_Icon_128.webp",
@@ -1760,7 +1760,7 @@
     },
     {
       "id": "7201",
-      "name_en": "Skill_ThunderstormRay",
+      "name_en": "Lightning Beam",
       "name_cn": "雷暴射线",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderstormRay_Icon_128.webp",
@@ -1771,7 +1771,7 @@
     },
     {
       "id": "7202",
-      "name_en": "Skill_QuicklyPhantom",
+      "name_en": "Speed Phantom",
       "name_cn": "迅法幻身",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_QuicklyPhantom_Icon_128.webp",
@@ -1782,7 +1782,7 @@
     },
     {
       "id": "7203",
-      "name_en": "Skill_ShootFetters",
+      "name_en": "Archery Bond",
       "name_cn": "射术羁绊",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ShootFetters_Icon_128.webp",
@@ -1793,7 +1793,7 @@
     },
     {
       "id": "7204",
-      "name_en": "Skill_LifeNourish",
+      "name_en": "Nourishment of Life",
       "name_cn": "生息滋养",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LifeNourish_Icon_128.webp",
@@ -1804,7 +1804,7 @@
     },
     {
       "id": "7205",
-      "name_en": "Skill_DazzlingBloom",
+      "name_en": "Dazzling Bloom",
       "name_cn": "夺目绽放",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DazzlingBloom_Icon_128.webp",
@@ -1815,7 +1815,7 @@
     },
     {
       "id": "7206",
-      "name_en": "Skill_FollowStar",
+      "name_en": "Star Stalker",
       "name_cn": "追猎星芒",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FollowStar_Icon_128.webp",
@@ -1826,7 +1826,7 @@
     },
     {
       "id": "7207",
-      "name_en": "Skill_TuningField",
+      "name_en": "Harmonious Field",
       "name_cn": "调谐力场",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_TuningField_Icon_128.webp",
@@ -1837,7 +1837,7 @@
     },
     {
       "id": "7208",
-      "name_en": "SKill_EvilChain",
+      "name_en": "Shackles of Malice",
       "name_cn": "恶意枷锁",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SKill_EvilChain_Icon_128.webp",
@@ -1848,7 +1848,7 @@
     },
     {
       "id": "7210",
-      "name_en": "Skill_SummonRockElement",
+      "name_en": "Shattered Stone",
       "name_cn": "裂石打击",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_Icon_128.webp",
@@ -1859,7 +1859,7 @@
     },
     {
       "id": "7211",
-      "name_en": "Skill_SummonRockElement",
+      "name_en": "Gold Rush",
       "name_cn": "聚石碎金",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_Icon_128.webp",
@@ -1870,7 +1870,7 @@
     },
     {
       "id": "7212",
-      "name_en": "Skill_SummonRockElement",
+      "name_en": "Rock Blast",
       "name_cn": "乱石横飞",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_Icon_128.webp",
@@ -1881,7 +1881,7 @@
     },
     {
       "id": "7213",
-      "name_en": "Skill_SummonRockElement",
+      "name_en": "Towering Mountains",
       "name_cn": "群峰压顶",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_Icon_128.webp",
@@ -1892,7 +1892,7 @@
     },
     {
       "id": "7215",
-      "name_en": "Skill_SummonRotElement",
+      "name_en": "Scattered Mud",
       "name_cn": "零落成泥",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_Icon_128.webp",
@@ -1903,7 +1903,7 @@
     },
     {
       "id": "7216",
-      "name_en": "Skill_SummonRotElement",
+      "name_en": "Withering Payback",
       "name_cn": "凋敝奉还",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_Icon_128.webp",
@@ -1914,7 +1914,7 @@
     },
     {
       "id": "7217",
-      "name_en": "Skill_SummonRotElement",
+      "name_en": "Bleak Grass",
       "name_cn": "哀草丛生",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_Icon_128.webp",
@@ -1925,7 +1925,7 @@
     },
     {
       "id": "7218",
-      "name_en": "Skill_SummonRotElement",
+      "name_en": "World of Thorns",
       "name_cn": "荆天棘地",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_Icon_128.webp",
@@ -1936,7 +1936,7 @@
     },
     {
       "id": "7222",
-      "name_en": "Skill_MinionRising",
+      "name_en": "Rising Edge",
       "name_cn": "新锐崛起",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MinionRising_Icon_128.webp",
@@ -1947,7 +1947,7 @@
     },
     {
       "id": "7223",
-      "name_en": "Skill_ArcSlash_Starter1",
+      "name_en": "Crescent Slash",
       "name_cn": "碎月弧光斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArcSlash_Starter1_Icon_128.webp",
@@ -1958,7 +1958,7 @@
     },
     {
       "id": "7224",
-      "name_en": "Skill_FlameSerpent_Starter1",
+      "name_en": "Serpent Beam",
       "name_cn": "流焰炎蛇引",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameSerpent_Starter1_Icon_128.webp",
@@ -1969,7 +1969,7 @@
     },
     {
       "id": "7225",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Gale Slash",
       "name_cn": "疾风裂地斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -1980,7 +1980,7 @@
     },
     {
       "id": "7226",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Spectral Slash",
       "name_cn": "分身灵爆斩",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -1991,7 +1991,7 @@
     },
     {
       "id": "7228",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Shockwave Warcry",
       "name_cn": "破势战吼",
       "type_cn": "主动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -2002,7 +2002,7 @@
     },
     {
       "id": "7406",
-      "name_en": "Icon_Support_Split_128",
+      "name_en": "Projectile Split",
       "name_cn": "投射物分裂",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Split_128.webp",
@@ -2013,7 +2013,7 @@
     },
     {
       "id": "7401",
-      "name_en": "Icon_Support_ExtraProjectiles_128",
+      "name_en": "Multiple Projectiles",
       "name_cn": "散射",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_ExtraProjectiles_128.webp",
@@ -2024,7 +2024,7 @@
     },
     {
       "id": "7408",
-      "name_en": "Icon_Support_MeleeKnockback_128",
+      "name_en": "Melee Knockback",
       "name_cn": "近战击退",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_MeleeKnockback_128.webp",
@@ -2035,7 +2035,7 @@
     },
     {
       "id": "7407",
-      "name_en": "Icon_Support_IncreasedArea_128",
+      "name_en": "Increased Area",
       "name_cn": "范围扩大",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_IncreasedArea_128.webp",
@@ -2046,7 +2046,7 @@
     },
     {
       "id": "7405",
-      "name_en": "Icon_Support_Multistrike_128",
+      "name_en": "Multistrike",
       "name_cn": "连续攻击",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Multistrike_128.webp",
@@ -2057,7 +2057,7 @@
     },
     {
       "id": "7410",
-      "name_en": "Skill_Overload",
+      "name_en": "Overload",
       "name_cn": "过载",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Overload_Icon_128.webp",
@@ -2068,7 +2068,7 @@
     },
     {
       "id": "7411",
-      "name_en": "Skill_HighEnergyCrash",
+      "name_en": "Tendonslicer",
       "name_cn": "断筋锋刃",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_HighEnergyCrash_Icon_128.webp",
@@ -2079,7 +2079,7 @@
     },
     {
       "id": "7413",
-      "name_en": "Icon_Support_Rekindle_128",
+      "name_en": "Additional Ignite",
       "name_cn": "额外点燃",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Rekindle_128.webp",
@@ -2090,7 +2090,7 @@
     },
     {
       "id": "7412",
-      "name_en": "Icon_Support_Frozen_128",
+      "name_en": "Glacial Freeze",
       "name_cn": "凛冽冰冻",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Frozen_128.webp",
@@ -2101,7 +2101,7 @@
     },
     {
       "id": "7416",
-      "name_en": "Icon_Support_IncreasedDuration_128",
+      "name_en": "Extended Duration",
       "name_cn": "持续时间延长",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_IncreasedDuration_128.webp",
@@ -2112,7 +2112,7 @@
     },
     {
       "id": "7417",
-      "name_en": "Icon_Support_SpellConcentration_128",
+      "name_en": "Spell Concentration",
       "name_cn": "法术集中",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_SpellConcentration_128.webp",
@@ -2123,7 +2123,7 @@
     },
     {
       "id": "7415",
-      "name_en": "Icon_Support_FasterTravel_128",
+      "name_en": "Quick Mobility",
       "name_cn": "急速位移",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_FasterTravel_128.webp",
@@ -2134,7 +2134,7 @@
     },
     {
       "id": "7420",
-      "name_en": "Icon_Support_IncreasedCriticalDamage_128",
+      "name_en": "Critical Strike Damage Increase",
       "name_cn": "提高暴击伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_IncreasedCriticalDamage_128.webp",
@@ -2145,7 +2145,7 @@
     },
     {
       "id": "7414",
-      "name_en": "Icon_Support_HighVoltage_128",
+      "name_en": "High Voltage",
       "name_cn": "高压电",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_HighVoltage_128.webp",
@@ -2156,7 +2156,7 @@
     },
     {
       "id": "7421",
-      "name_en": "Icon_Support_PhysicalToFire_128",
+      "name_en": "Physical to Fire",
       "name_cn": "物理转火焰",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_PhysicalToFire_128.webp",
@@ -2167,7 +2167,7 @@
     },
     {
       "id": "7422",
-      "name_en": "Icon_Support_LightningToIce_128",
+      "name_en": "Lightning to Cold",
       "name_cn": "闪电转冰冷",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_LightningToIce_128.webp",
@@ -2178,7 +2178,7 @@
     },
     {
       "id": "7418",
-      "name_en": "Icon_Support_AddedChaosDamage_128",
+      "name_en": "Added Erosion Damage",
       "name_cn": "附加腐蚀伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AddedChaosDamage_128.webp",
@@ -2189,7 +2189,7 @@
     },
     {
       "id": "7419",
-      "name_en": "Icon_Support_IncreasedCriticalRate_128",
+      "name_en": "Critical Strike Rating Increase",
       "name_cn": "提高暴击值",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_IncreasedCriticalRate_128.webp",
@@ -2200,7 +2200,7 @@
     },
     {
       "id": "7426",
-      "name_en": "Skill_Passivation",
+      "name_en": "Passivation",
       "name_cn": "钝化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Passivation_Icon_128.webp",
@@ -2211,7 +2211,7 @@
     },
     {
       "id": "7423",
-      "name_en": "Icon_Support_DeeperWound_128",
+      "name_en": "Deep Wounds",
       "name_cn": "伤口加深",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_DeeperWound_128.webp",
@@ -2222,7 +2222,7 @@
     },
     {
       "id": "7428",
-      "name_en": "SkillIcon_Support_BloodMagic",
+      "name_en": "Cost Conversion",
       "name_cn": "耗能转化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_BloodMagic_Icon_128.webp",
@@ -2233,7 +2233,7 @@
     },
     {
       "id": "7427",
-      "name_en": "Icon_Support_FasterCasting_128",
+      "name_en": "Quick Decision",
       "name_cn": "速决",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_FasterCasting_128.webp",
@@ -2244,7 +2244,7 @@
     },
     {
       "id": "7424",
-      "name_en": "Icon_Support_Hypertoxin_128",
+      "name_en": "Improved Corrosion",
       "name_cn": "强烈侵蚀",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Hypertoxin_128.webp",
@@ -2255,7 +2255,7 @@
     },
     {
       "id": "7429",
-      "name_en": "Icon_Support_Bounce_128",
+      "name_en": "Jump",
       "name_cn": "弹射",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Bounce_128.webp",
@@ -2266,7 +2266,7 @@
     },
     {
       "id": "7431",
-      "name_en": "Icon_Support_AddedFireDamage_128",
+      "name_en": "Added Fire Damage",
       "name_cn": "附加火焰伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AddedFireDamage_128.webp",
@@ -2277,7 +2277,7 @@
     },
     {
       "id": "7433",
-      "name_en": "Icon_Support_AddedLightningDamage_128",
+      "name_en": "Added Lightning Damage",
       "name_cn": "附加闪电伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AddedLightningDamage_128.webp",
@@ -2288,7 +2288,7 @@
     },
     {
       "id": "7430",
-      "name_en": "Icon_Support_LessDuration_128",
+      "name_en": "Shortened Duration",
       "name_cn": "持续时间缩短",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_LessDuration_128.webp",
@@ -2299,7 +2299,7 @@
     },
     {
       "id": "7432",
-      "name_en": "Icon_Support_AddedIceDamage_128",
+      "name_en": "Added Cold Damage",
       "name_cn": "附加冰冷伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AddedIceDamage_128.webp",
@@ -2310,7 +2310,7 @@
     },
     {
       "id": "7435",
-      "name_en": "Icon_Support_ElemetalFocus_128",
+      "name_en": "Elemental Fusion",
       "name_cn": "元素融合",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_ElemetalFocus_128.webp",
@@ -2321,7 +2321,7 @@
     },
     {
       "id": "7434",
-      "name_en": "Icon_Support_ControlledSpell_128",
+      "name_en": "Control Spell",
       "name_cn": "法术控制",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_ControlledSpell_128.webp",
@@ -2332,7 +2332,7 @@
     },
     {
       "id": "7441",
-      "name_en": "Skill_Grudge",
+      "name_en": "Grudge",
       "name_cn": "幽怨",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Grudge_Icon_128.webp",
@@ -2343,7 +2343,7 @@
     },
     {
       "id": "7440",
-      "name_en": "Icon_Support_SlowerProjectiles_128",
+      "name_en": "Slow Projectile",
       "name_cn": "慢速投射",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_SlowerProjectiles_128.webp",
@@ -2354,7 +2354,7 @@
     },
     {
       "id": "7442",
-      "name_en": "Icon_Support_Pierce_128",
+      "name_en": "Projectile Penetration",
       "name_cn": "投射物穿透",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Pierce_128.webp",
@@ -2365,7 +2365,7 @@
     },
     {
       "id": "7443",
-      "name_en": "Icon_Support_Crush_128",
+      "name_en": "Steamroll",
       "name_cn": "碾压",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Crush_128.webp",
@@ -2376,7 +2376,7 @@
     },
     {
       "id": "7439",
-      "name_en": "Skill_Slaughter",
+      "name_en": "Recklessness",
       "name_cn": "狂莽",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Slaughter_Icon_128.webp",
@@ -2387,7 +2387,7 @@
     },
     {
       "id": "7447",
-      "name_en": "Skill_MultifacetedGuard",
+      "name_en": "Multifaceted Guard",
       "name_cn": "多面护卫",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MultifacetedGuard_Icon_128.webp",
@@ -2398,7 +2398,7 @@
     },
     {
       "id": "7445",
-      "name_en": "Skill_EmergencyStopShot",
+      "name_en": "Hunting Tempo",
       "name_cn": "狩猎节奏",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EmergencyStopShot_Icon_128.webp",
@@ -2409,7 +2409,7 @@
     },
     {
       "id": "7448",
-      "name_en": "Skill_ModifiedSentinel",
+      "name_en": "Sentry Modification",
       "name_cn": "改装哨卫",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ModifiedSentinel_Icon_128.webp",
@@ -2420,7 +2420,7 @@
     },
     {
       "id": "7449",
-      "name_en": "Icon_Support_FireBurst_128",
+      "name_en": "Fire Explosion",
       "name_cn": "火焰爆发",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_FireBurst_128.webp",
@@ -2431,7 +2431,7 @@
     },
     {
       "id": "7450",
-      "name_en": "Skill_Lob",
+      "name_en": "Nova Shot",
       "name_cn": "坠星射击",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Lob_Icon_128.webp",
@@ -2442,7 +2442,7 @@
     },
     {
       "id": "7452",
-      "name_en": "SkillIcon_Support_PhantomStab",
+      "name_en": "Haunt",
       "name_cn": "惑影重重",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_PhantomStab_Icon_128.webp",
@@ -2453,7 +2453,7 @@
     },
     {
       "id": "7451",
-      "name_en": "Icon_Skill_FlameBlast_128",
+      "name_en": "Precision Strike",
       "name_cn": "精确打击",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FlameBlast_128.webp",
@@ -2464,7 +2464,7 @@
     },
     {
       "id": "7444",
-      "name_en": "Icon_Support_Catalyst_128",
+      "name_en": "Cataclysm",
       "name_cn": "催化剂",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Catalyst_128.webp",
@@ -2475,7 +2475,7 @@
     },
     {
       "id": "7463",
-      "name_en": "Icon_Support_Enlightenment_128",
+      "name_en": "Restrain",
       "name_cn": "节流",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Enlightenment_128.webp",
@@ -2486,7 +2486,7 @@
     },
     {
       "id": "7456",
-      "name_en": "Skill_FurySlah",
+      "name_en": "Raging Slash",
       "name_cn": "怒斩",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FurySlah_Icon_128.webp",
@@ -2497,7 +2497,7 @@
     },
     {
       "id": "7455",
-      "name_en": "SkillIcon_Support_PreparedChanneling",
+      "name_en": "Channel Preparation",
       "name_cn": "预备引导",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_PreparedChanneling_Icon_128.webp",
@@ -2508,7 +2508,7 @@
     },
     {
       "id": "7454",
-      "name_en": "SkillIcon_Support_ProtectWhenChanneling",
+      "name_en": "Guard",
       "name_cn": "守护",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_ProtectWhenChanneling_Icon_128.webp",
@@ -2519,7 +2519,7 @@
     },
     {
       "id": "7458",
-      "name_en": "Skill_FastReturn",
+      "name_en": "Quick Return",
       "name_cn": "快速回气",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FastReturn_Icon_128.webp",
@@ -2530,7 +2530,7 @@
     },
     {
       "id": "7464",
-      "name_en": "Icon_Support_AttackFocusing_128",
+      "name_en": "Attack Focus",
       "name_cn": "攻击专注",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AttackFocusing_128.webp",
@@ -2541,7 +2541,7 @@
     },
     {
       "id": "7472",
-      "name_en": "SkillIcon_Support_PainIntensify",
+      "name_en": "Pain Amplification",
       "name_cn": "痛楚加剧",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_PainIntensify_Icon_128.webp",
@@ -2552,7 +2552,7 @@
     },
     {
       "id": "7469",
-      "name_en": "Icon_Support_WindShoot_128",
+      "name_en": "Wind Projectiles",
       "name_cn": "疾风投射",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_WindShoot_128.webp",
@@ -2563,7 +2563,7 @@
     },
     {
       "id": "7473",
-      "name_en": "Icon_Support_Blind_128",
+      "name_en": "Blind",
       "name_cn": "致盲",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Blind_128.webp",
@@ -2574,7 +2574,7 @@
     },
     {
       "id": "7474",
-      "name_en": "Icon_Support_Conduction_128",
+      "name_en": "Electric Punishment",
       "name_cn": "电能惩击",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_Conduction_128.webp",
@@ -2585,7 +2585,7 @@
     },
     {
       "id": "7476",
-      "name_en": "Icon_Support_AilmentEnhance_128",
+      "name_en": "Enhanced Ailment",
       "name_cn": "强化异常",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AilmentEnhance_128.webp",
@@ -2596,7 +2596,7 @@
     },
     {
       "id": "7477",
-      "name_en": "Skill_AddedPhysicalDamage",
+      "name_en": "Added Physical Damage",
       "name_cn": "附加物理伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AddedPhysicalDamage_Icon_128.webp",
@@ -2607,7 +2607,7 @@
     },
     {
       "id": "7475",
-      "name_en": "Icon_Support_AilmentFinish_128",
+      "name_en": "Ailment Termination",
       "name_cn": "异常终结",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_AilmentFinish_128.webp",
@@ -2618,7 +2618,7 @@
     },
     {
       "id": "7478",
-      "name_en": "Icon_Support_CooldownReduce_128",
+      "name_en": "Cooldown Reduction",
       "name_cn": "加速冷却",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_CooldownReduce_128.webp",
@@ -2629,7 +2629,7 @@
     },
     {
       "id": "7479",
-      "name_en": "SkillIcon_Support_EmergentRecover",
+      "name_en": "Emergency restoration",
       "name_cn": "应急回复",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_EmergentRecover_Icon_128.webp",
@@ -2640,7 +2640,7 @@
     },
     {
       "id": "7485",
-      "name_en": "Skill_AreaSplit",
+      "name_en": "Ground Divide",
       "name_cn": "地面分化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AreaSplit_Icon_128.webp",
@@ -2651,7 +2651,7 @@
     },
     {
       "id": "7487",
-      "name_en": "Skill_SplitRay",
+      "name_en": "Scattershot Beam",
       "name_cn": "散射光束",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SplitRay_Icon_128.webp",
@@ -2662,7 +2662,7 @@
     },
     {
       "id": "7480",
-      "name_en": "SkillIcon_Support_InstantRecover",
+      "name_en": "Instant restoration",
       "name_cn": "瞬时回复",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_InstantRecover_Icon_128.webp",
@@ -2673,7 +2673,7 @@
     },
     {
       "id": "7488",
-      "name_en": "Skill_ConcentratedRay",
+      "name_en": "Focused Beam",
       "name_cn": "聚能光束",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ConcentratedRay_Icon_128.webp",
@@ -2684,7 +2684,7 @@
     },
     {
       "id": "7489",
-      "name_en": "Skill_RefractionRay",
+      "name_en": "Refracted Prism",
       "name_cn": "折射光棱",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_RefractionRay_Icon_128.webp",
@@ -2695,7 +2695,7 @@
     },
     {
       "id": "7494",
-      "name_en": "SkillIcon_Support_ElementalDouble",
+      "name_en": "Elemental Duo",
       "name_cn": "元素双雄",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_ElementalDouble_Icon_128.webp",
@@ -2706,7 +2706,7 @@
     },
     {
       "id": "7491",
-      "name_en": "SkillIcon_Support_MinionHealth",
+      "name_en": "Servant Life",
       "name_cn": "仆从生命",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_MinionHealth_Icon_128.webp",
@@ -2717,7 +2717,7 @@
     },
     {
       "id": "7490",
-      "name_en": "SkillIcon_Support_MinionDamage",
+      "name_en": "Servant Damage",
       "name_cn": "仆从伤害",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_MinionDamage_Icon_128.webp",
@@ -2728,7 +2728,7 @@
     },
     {
       "id": "7495",
-      "name_en": "SkillIcon_Support_RabidArmy",
+      "name_en": "Maniacal Army",
       "name_cn": "狂热之军",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_RabidArmy_Icon_128.webp",
@@ -2739,7 +2739,7 @@
     },
     {
       "id": "7496",
-      "name_en": "SkillIcon_Support_MachineReform",
+      "name_en": "Mechanical Modification",
       "name_cn": "机械改造",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_MachineReform_Icon_128.webp",
@@ -2750,7 +2750,7 @@
     },
     {
       "id": "7497",
-      "name_en": "SkillIcon_Support_AttackCommand",
+      "name_en": "Assault Command",
       "name_cn": "袭击命令",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_AttackCommand_Icon_128.webp",
@@ -2761,7 +2761,7 @@
     },
     {
       "id": "7504",
-      "name_en": "Skill_BathInBlood",
+      "name_en": "Well-Fought Battle",
       "name_cn": "酣战",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_BathInBlood_Icon_128.webp",
@@ -2772,7 +2772,7 @@
     },
     {
       "id": "7498",
-      "name_en": "SkillIcon_Support_DefendStance",
+      "name_en": "Defense Form",
       "name_cn": "防御姿态",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_DefendStance_Icon_128.webp",
@@ -2783,7 +2783,7 @@
     },
     {
       "id": "7505",
-      "name_en": "Skill_FragileResurrection",
+      "name_en": "Fragile Resurrection",
       "name_cn": "脆弱复苏",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FragileResurrection_Icon_128.webp",
@@ -2794,7 +2794,7 @@
     },
     {
       "id": "7507",
-      "name_en": "Skill_MedicineResidue",
+      "name_en": "Residues",
       "name_cn": "药性残留",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MedicineResidue_Icon_128.webp",
@@ -2805,7 +2805,7 @@
     },
     {
       "id": "7509",
-      "name_en": "Skill_AtADash",
+      "name_en": "All In",
       "name_cn": "一鼓作气",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AtADash_Icon_128.webp",
@@ -2816,7 +2816,7 @@
     },
     {
       "id": "7511",
-      "name_en": "Skill_EmergencyAvoidance",
+      "name_en": "Emergency Avoidance",
       "name_cn": "紧急回避",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EmergencyAvoidance_Icon_128.webp",
@@ -2827,7 +2827,7 @@
     },
     {
       "id": "7512",
-      "name_en": "Skill_TogatherBattleCry",
+      "name_en": "Concentration Warcry",
       "name_cn": "集中战吼",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_TogatherBattleCry_Icon_128.webp",
@@ -2838,7 +2838,7 @@
     },
     {
       "id": "7510",
-      "name_en": "Skill_ArmourStill",
+      "name_en": "Iron Fortification",
       "name_cn": "铁甲仍在",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArmourStill_Icon_128.webp",
@@ -2849,7 +2849,7 @@
     },
     {
       "id": "7513",
-      "name_en": "Skill_AgainBattleCry",
+      "name_en": "Lion's Roars",
       "name_cn": "狮吼连连",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AgainBattleCry_Icon_128.webp",
@@ -2860,7 +2860,7 @@
     },
     {
       "id": "7514",
-      "name_en": "Skill_IntermittentBursts",
+      "name_en": "Periodic Burst",
       "name_cn": "间歇性爆发",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IntermittentBursts_Icon_128.webp",
@@ -2871,7 +2871,7 @@
     },
     {
       "id": "7515",
-      "name_en": "Skill_CurseArea",
+      "name_en": "Terrain of Malice",
       "name_cn": "恶意之域",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CurseArea_Icon_128.webp",
@@ -2882,7 +2882,7 @@
     },
     {
       "id": "7516",
-      "name_en": "Skill_LightingTreat",
+      "name_en": "Electric Overload",
       "name_cn": "电能超载",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightingTreat_Icon_128.webp",
@@ -2893,7 +2893,7 @@
     },
     {
       "id": "7519",
-      "name_en": "Skill_Incessantly",
+      "name_en": "Carpet Bombardment",
       "name_cn": "地毯轰炸",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Incessantly_Icon_128.webp",
@@ -2904,7 +2904,7 @@
     },
     {
       "id": "7517",
-      "name_en": "Skill_ElementBlast",
+      "name_en": "Elemental Impact",
       "name_cn": "元素冲击",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ElementBlast_Icon_128.webp",
@@ -2915,7 +2915,7 @@
     },
     {
       "id": "7521",
-      "name_en": "Skill_MassEffect",
+      "name_en": "Mass Effect",
       "name_cn": "质量效应",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MassEffect_Icon_128.webp",
@@ -2926,7 +2926,7 @@
     },
     {
       "id": "7525",
-      "name_en": "Skill_EnhanceBenefit",
+      "name_en": "Focus Acceleration",
       "name_cn": "贯注强化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EnhanceBenefit_Icon_128.webp",
@@ -2937,7 +2937,7 @@
     },
     {
       "id": "7526",
-      "name_en": "Skill_EnhanceDamage",
+      "name_en": "Focus Buff",
       "name_cn": "贯注增效",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EnhanceDamage_Icon_128.webp",
@@ -2948,7 +2948,7 @@
     },
     {
       "id": "7528",
-      "name_en": "SkillIcon_Support_BloodMagic",
+      "name_en": "Seal Conversion",
       "name_cn": "封印转化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_BloodMagic_Icon_128.webp",
@@ -2959,7 +2959,7 @@
     },
     {
       "id": "7522",
-      "name_en": "Skill_MultiLayeredDefense",
+      "name_en": "Defense Layers",
       "name_cn": "层层防御",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MultiLayeredDefense_Icon_128.webp",
@@ -2970,7 +2970,7 @@
     },
     {
       "id": "7530",
-      "name_en": "Skill_AccelerateAfterSpell",
+      "name_en": "Magic Dash",
       "name_cn": "御法飞驰",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AccelerateAfterSpell_Icon_128.webp",
@@ -2981,7 +2981,7 @@
     },
     {
       "id": "7531",
-      "name_en": "Skill_SpellFall",
+      "name_en": "Psychic Surge",
       "name_cn": "灵能奔涌",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SpellFall_Icon_128.webp",
@@ -2992,7 +2992,7 @@
     },
     {
       "id": "7532",
-      "name_en": "Skill_BrutalGrowth",
+      "name_en": "Savage Growth",
       "name_cn": "野蛮生长",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_BrutalGrowth_Icon_128.webp",
@@ -3003,7 +3003,7 @@
     },
     {
       "id": "7533",
-      "name_en": "Skill_HarvestTime",
+      "name_en": "Harvest Time",
       "name_cn": "丰收时刻",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_HarvestTime_Icon_128.webp",
@@ -3014,7 +3014,7 @@
     },
     {
       "id": "7529",
-      "name_en": "Skill_Surge",
+      "name_en": "Psychic Burst",
       "name_cn": "灵能乍泄",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Surge_Icon_128.webp",
@@ -3025,7 +3025,7 @@
     },
     {
       "id": "7534",
-      "name_en": "SkillIcon_Skill_BarrierDetonate",
+      "name_en": "Preparation",
       "name_cn": "预备",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_BarrierDetonate_Icon_128.webp",
@@ -3036,7 +3036,7 @@
     },
     {
       "id": "7605",
-      "name_en": "Skill_GladiatorialRoar",
+      "name_en": "Gladiator's Roar",
       "name_cn": "角斗怒吼",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_GladiatorialRoar_Icon_128.webp",
@@ -3047,7 +3047,7 @@
     },
     {
       "id": "7603",
-      "name_en": "Skill_Gathering",
+      "name_en": "Charge",
       "name_cn": "蓄势",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Gathering_Icon_128.webp",
@@ -3058,7 +3058,7 @@
     },
     {
       "id": "7606",
-      "name_en": "Skill_AuraEnhance",
+      "name_en": "Aura Amplification",
       "name_cn": "光环增幅",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AuraEnhance_Icon_128.webp",
@@ -3069,7 +3069,7 @@
     },
     {
       "id": "7613",
-      "name_en": "SkillIcon_Skill_FieldOfShield",
+      "name_en": "Protection Field",
       "name_cn": "保护力场",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FieldOfShield_Icon_128.webp",
@@ -3080,7 +3080,7 @@
     },
     {
       "id": "7612",
-      "name_en": "Skill_FriendsOfSpiritMagus",
+      "name_en": "Friend of Spirit Magi",
       "name_cn": "魔灵之友",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FriendsOfSpiritMagus_Icon_128.webp",
@@ -3091,7 +3091,7 @@
     },
     {
       "id": "7615",
-      "name_en": "Skill_EmergentCharge",
+      "name_en": "Critical Charge",
       "name_cn": "濒危充能",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EmergentCharge_Icon_128.webp",
@@ -3102,7 +3102,7 @@
     },
     {
       "id": "7614",
-      "name_en": "Skill_AutoCharge",
+      "name_en": "Auto-Charge",
       "name_cn": "自动充能",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AutoCharge_Icon_128.webp",
@@ -3113,7 +3113,7 @@
     },
     {
       "id": "7621",
-      "name_en": "Skill_Breathing",
+      "name_en": "Recuperation",
       "name_cn": "调息",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Breathing_Icon_128.webp",
@@ -3124,7 +3124,7 @@
     },
     {
       "id": "7616",
-      "name_en": "Skill_PerfusedCharge",
+      "name_en": "Restoration Charge",
       "name_cn": "回复充能",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PerfusedCharge_Icon_128.webp",
@@ -3135,7 +3135,7 @@
     },
     {
       "id": "8600",
-      "name_en": "SkillIcon_Support_BloodMagicSpecial",
+      "name_en": "Precise: Seal Conversion",
       "name_cn": "精密 封印转化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_BloodMagicSpecial_Icon_128.webp",
@@ -3146,7 +3146,7 @@
     },
     {
       "id": "8601",
-      "name_en": "SkillIcon_Support_SelflessSpecial",
+      "name_en": "Precise: Selfless",
       "name_cn": "精密 无私",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_SelflessSpecial_Icon_128.webp",
@@ -3157,7 +3157,7 @@
     },
     {
       "id": "8602",
-      "name_en": "SkillIcon_Support_SelfishSpecial",
+      "name_en": "Precise: Selfishness",
       "name_cn": "精密 自私",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_SelfishSpecial_Icon_128.webp",
@@ -3168,7 +3168,7 @@
     },
     {
       "id": "8603",
-      "name_en": "SkillIcon_Support_MoreIsGreatSpecial",
+      "name_en": "Precise: Stand as One",
       "name_cn": "精密 多则能成",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_MoreIsGreatSpecial_Icon_128.webp",
@@ -3179,7 +3179,7 @@
     },
     {
       "id": "8604",
-      "name_en": "Skill_SelfDisciplineSpecial",
+      "name_en": "Precise: Disciplined",
       "name_cn": "精密 律己",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SelfDisciplineSpecial_Icon_128.webp",
@@ -3190,7 +3190,7 @@
     },
     {
       "id": "8605",
-      "name_en": "Skill_AuraConcentrateSpecial",
+      "name_en": "Precise: Concentrated",
       "name_cn": "精密 全神贯注",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AuraConcentrateSpecial_Icon_128.webp",
@@ -3201,7 +3201,7 @@
     },
     {
       "id": "8606",
-      "name_en": "Skill_StrongFaceStrongSpecial",
+      "name_en": "Precise: Malleable",
       "name_cn": "精密 遇强则强",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_StrongFaceStrongSpecial_Icon_128.webp",
@@ -3212,7 +3212,7 @@
     },
     {
       "id": "8607",
-      "name_en": "Skill_PeopleStrongSpecial",
+      "name_en": "Precise: Safety in Numbers",
       "name_cn": "精密 人多势众",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PeopleStrongSpecial_Icon_128.webp",
@@ -3223,7 +3223,7 @@
     },
     {
       "id": "8608",
-      "name_en": "Skill_EnhanceDamageSpecial",
+      "name_en": "Precise: Focus Buff",
       "name_cn": "精密 贯注增效",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EnhanceDamageSpecial_Icon_128.webp",
@@ -3234,7 +3234,7 @@
     },
     {
       "id": "8611",
-      "name_en": "SkillIcon_Support_SysmbiosisSpecial",
+      "name_en": "Precise: Superpower",
       "name_cn": "精密 超能共生",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Support_SysmbiosisSpecial_Icon_128.webp",
@@ -3245,7 +3245,7 @@
     },
     {
       "id": "8612",
-      "name_en": "Skill_FriendsOfSpiritMagusSpecial",
+      "name_en": "Precise: Friend of Spirit Magi",
       "name_cn": "精密 魔灵之友",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FriendsOfSpiritMagusSpecial_Icon_128.webp",
@@ -3256,7 +3256,7 @@
     },
     {
       "id": "8613",
-      "name_en": "SkillIcon_Skill_FieldOfShieldSpecial",
+      "name_en": "Precise: Protection Field",
       "name_cn": "精密 保护力场",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FieldOfShieldSpecial_Icon_128.webp",
@@ -3267,7 +3267,7 @@
     },
     {
       "id": "8614",
-      "name_en": "Icon_Support_EnlightenmentSpecial_128",
+      "name_en": "Precise Restrain",
       "name_cn": "精密 节流",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Support_EnlightenmentSpecial_128.webp",
@@ -3278,7 +3278,7 @@
     },
     {
       "id": "8615",
-      "name_en": "Skill_MixElementSpecial",
+      "name_en": "Precise: Harmony",
       "name_cn": "精密 调合",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MixElementSpecial_Icon_128.webp",
@@ -3289,7 +3289,7 @@
     },
     {
       "id": "8616",
-      "name_en": "Skill_PurifySpecial",
+      "name_en": "Precise: Purify",
       "name_cn": "精密 净化",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PurifySpecial_Icon_128.webp",
@@ -3300,7 +3300,7 @@
     },
     {
       "id": "7622",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Spell Tangle",
       "name_cn": "法术纠缠",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -3311,7 +3311,7 @@
     },
     {
       "id": "7620",
-      "name_en": "Skill_Determination",
+      "name_en": "Willpower",
       "name_cn": "定力",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Determination_Icon_128.webp",
@@ -3322,7 +3322,7 @@
     },
     {
       "id": "7618",
-      "name_en": "Skill_Seclusion",
+      "name_en": "Reclusion",
       "name_cn": "隐遁",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Seclusion_Icon_128.webp",
@@ -3333,7 +3333,7 @@
     },
     {
       "id": "7623",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Manifold Entanglement",
       "name_cn": "多重纠缠",
       "type_cn": "辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -3344,7 +3344,7 @@
     },
     {
       "id": "7101",
-      "name_en": "SkillIcon_Skill_Rabid",
+      "name_en": "Fearless",
       "name_cn": "狂猛",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Rabid_Icon_128.webp",
@@ -3355,7 +3355,7 @@
     },
     {
       "id": "7102",
-      "name_en": "SkillIcon_Skill_Weapon",
+      "name_en": "Weapon Amplification",
       "name_cn": "武器增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Weapon_Icon_128.webp",
@@ -3366,7 +3366,7 @@
     },
     {
       "id": "7103",
-      "name_en": "SkillIcon_Skill_Regen",
+      "name_en": "Rejuvenation",
       "name_cn": "再生",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Regen_Icon_128.webp",
@@ -3377,7 +3377,7 @@
     },
     {
       "id": "7104",
-      "name_en": "SkillIcon_Skill_LightingAura",
+      "name_en": "Electric Conversion",
       "name_cn": "电能转化",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_LightingAura_Icon_128.webp",
@@ -3388,7 +3388,7 @@
     },
     {
       "id": "7105",
-      "name_en": "SkillIcon_Skill_IceAura",
+      "name_en": "Frigid Domain",
       "name_cn": "冰寒领域",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_IceAura_Icon_128.webp",
@@ -3399,7 +3399,7 @@
     },
     {
       "id": "7106",
-      "name_en": "SkillIcon_Skill_Agility",
+      "name_en": "Nimbleness",
       "name_cn": "灵敏",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Agility_Icon_128.webp",
@@ -3410,7 +3410,7 @@
     },
     {
       "id": "7107",
-      "name_en": "SkillIcon_Skill_ElementalEnhance",
+      "name_en": "Spell Amplification",
       "name_cn": "法术增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ElementalEnhance_Icon_128.webp",
@@ -3421,7 +3421,7 @@
     },
     {
       "id": "7108",
-      "name_en": "SkillIcon_Skill_EnergyFort",
+      "name_en": "Energy Fortress",
       "name_cn": "能量壁垒",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_EnergyFort_Icon_128.webp",
@@ -3432,7 +3432,7 @@
     },
     {
       "id": "7109",
-      "name_en": "SkillIcon_Skill_SourceOfMana",
+      "name_en": "Magical Source",
       "name_cn": "魔源",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SourceOfMana_Icon_128.webp",
@@ -3443,7 +3443,7 @@
     },
     {
       "id": "7110",
-      "name_en": "SkillIcon_Skill_PreciseProjectile",
+      "name_en": "Precise Projectiles",
       "name_cn": "精准投射",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_PreciseProjectile_Icon_128.webp",
@@ -3454,7 +3454,7 @@
     },
     {
       "id": "7111",
-      "name_en": "SkillIcon_Skill_ElementalResistance",
+      "name_en": "Elemental Resistance",
       "name_cn": "元素抵抗",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ElementalResistance_Icon_128.webp",
@@ -3465,7 +3465,7 @@
     },
     {
       "id": "7112",
-      "name_en": "SkillIcon_Skill_Haste",
+      "name_en": "Swiftness",
       "name_cn": "疾速",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Haste_Icon_128.webp",
@@ -3476,7 +3476,7 @@
     },
     {
       "id": "7113",
-      "name_en": "SkillIcon_Skill_DeepPain",
+      "name_en": "Deep Pain",
       "name_cn": "深层苦痛",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_DeepPain_Icon_128.webp",
@@ -3487,7 +3487,7 @@
     },
     {
       "id": "7114",
-      "name_en": "SkillIcon_Skill_ChaosEnhance",
+      "name_en": "Erosion Amplification",
       "name_cn": "腐蚀增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ChaosEnhance_Icon_128.webp",
@@ -3498,7 +3498,7 @@
     },
     {
       "id": "7115",
-      "name_en": "SkillIcon_Skill_FireAura",
+      "name_en": "Charged Flames",
       "name_cn": "烈焰充能",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FireAura_Icon_128.webp",
@@ -3509,7 +3509,7 @@
     },
     {
       "id": "7116",
-      "name_en": "SkillIcon_Skill_Solid",
+      "name_en": "Steadfast",
       "name_cn": "坚固",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_Solid_Icon_128.webp",
@@ -3520,7 +3520,7 @@
     },
     {
       "id": "7127",
-      "name_en": "SkillIcon_Skill_SummonFireElement",
+      "name_en": "Summon Fire Magus",
       "name_cn": "召唤火焰之灵",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonFireElement_Icon_128.webp",
@@ -3531,7 +3531,7 @@
     },
     {
       "id": "7128",
-      "name_en": "SkillIcon_Skill_SummonIceIceElement",
+      "name_en": "Summon Frost Magus",
       "name_cn": "召唤寒冰之灵",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonIceIceElement_Icon_128.webp",
@@ -3542,7 +3542,7 @@
     },
     {
       "id": "7129",
-      "name_en": "SkillIcon_Skill_SummonThunderElement",
+      "name_en": "Summon Thunder Magus",
       "name_cn": "召唤雷霆之灵",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SummonThunderElement_Icon_128.webp",
@@ -3553,7 +3553,7 @@
     },
     {
       "id": "7138",
-      "name_en": "Icon_Skill_PhysicalBless_128",
+      "name_en": "Acuteness Focus",
       "name_cn": "锐利贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_PhysicalBless_128.webp",
@@ -3564,7 +3564,7 @@
     },
     {
       "id": "7139",
-      "name_en": "Icon_Skill_ChaosBless_128",
+      "name_en": "Corrosion Focus",
       "name_cn": "侵蚀贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ChaosBless_128.webp",
@@ -3575,7 +3575,7 @@
     },
     {
       "id": "7140",
-      "name_en": "Icon_Skill_IceBless_128",
+      "name_en": "Ice Focus",
       "name_cn": "寒冰贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceBless_128.webp",
@@ -3586,7 +3586,7 @@
     },
     {
       "id": "7141",
-      "name_en": "Icon_Skill_ThunderBless_128",
+      "name_en": "Thunder Focus",
       "name_cn": "雷霆贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ThunderBless_128.webp",
@@ -3597,7 +3597,7 @@
     },
     {
       "id": "7142",
-      "name_en": "Icon_Skill_FireBless_128",
+      "name_en": "Flame Focus",
       "name_cn": "熔火贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FireBless_128.webp",
@@ -3608,7 +3608,7 @@
     },
     {
       "id": "7209",
-      "name_en": "Skill_SummonRockElement",
+      "name_en": "Summon Rock Magus",
       "name_cn": "召唤磐石之灵",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_Icon_128.webp",
@@ -3619,7 +3619,7 @@
     },
     {
       "id": "7214",
-      "name_en": "Skill_SummonRotElement",
+      "name_en": "Summon Erosion Magus",
       "name_cn": "召唤腐化之灵",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_Icon_128.webp",
@@ -3630,7 +3630,7 @@
     },
     {
       "id": "7219",
-      "name_en": "Skill_MinionEnhance",
+      "name_en": "Radical Order",
       "name_cn": "激进号令",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MinionEnhance_Icon_128.webp",
@@ -3641,7 +3641,7 @@
     },
     {
       "id": "7220",
-      "name_en": "Skill_AttackEnhance",
+      "name_en": "Cruelty",
       "name_cn": "暴虐",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AttackEnhance_Icon_128.webp",
@@ -3652,7 +3652,7 @@
     },
     {
       "id": "7221",
-      "name_en": "Skill_AreaEnhance",
+      "name_en": "Domain Expansion",
       "name_cn": "领域扩张",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AreaEnhance_Icon_128.webp",
@@ -3663,7 +3663,7 @@
     },
     {
       "id": "8300",
-      "name_en": "SkillIcon_Skill_RabidSpecial",
+      "name_en": "Precise: Fearless",
       "name_cn": "精密 狂猛",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_RabidSpecial_Icon_128.webp",
@@ -3674,7 +3674,7 @@
     },
     {
       "id": "8301",
-      "name_en": "SkillIcon_Skill_WeaponSpecial",
+      "name_en": "Precise: Weapon Amplification",
       "name_cn": "精密 武器增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_WeaponSpecial_Icon_128.webp",
@@ -3685,7 +3685,7 @@
     },
     {
       "id": "8302",
-      "name_en": "SkillIcon_Skill_RegenSpecial",
+      "name_en": "Precise: Rejuvenation",
       "name_cn": "精密 再生",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_RegenSpecial_Icon_128.webp",
@@ -3696,7 +3696,7 @@
     },
     {
       "id": "8303",
-      "name_en": "SkillIcon_Skill_LightingAuraSpecial",
+      "name_en": "Precise: Electric Conversion",
       "name_cn": "精密 电能转化",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_LightingAuraSpecial_Icon_128.webp",
@@ -3707,7 +3707,7 @@
     },
     {
       "id": "8304",
-      "name_en": "SkillIcon_Skill_IceAuraSpecial",
+      "name_en": "Precise: Frigid Domain",
       "name_cn": "精密 冰寒领域",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_IceAuraSpecial_Icon_128.webp",
@@ -3718,7 +3718,7 @@
     },
     {
       "id": "8305",
-      "name_en": "SkillIcon_Skill_AgilitySpecial",
+      "name_en": "Precise: Nimbleness",
       "name_cn": "精密 灵敏",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_AgilitySpecial_Icon_128.webp",
@@ -3729,7 +3729,7 @@
     },
     {
       "id": "8306",
-      "name_en": "SkillIcon_Skill_ElementalEnhanceSpecial",
+      "name_en": "Precise: Spell Amplification",
       "name_cn": "精密 法术增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ElementalEnhanceSpecial_Icon_128.webp",
@@ -3740,7 +3740,7 @@
     },
     {
       "id": "8307",
-      "name_en": "SkillIcon_Skill_EnergyFortSpecial",
+      "name_en": "Precise: Energy Fortress",
       "name_cn": "精密 能量壁垒",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_EnergyFortSpecial_Icon_128.webp",
@@ -3751,7 +3751,7 @@
     },
     {
       "id": "8308",
-      "name_en": "SkillIcon_Skill_SourceOfManaSpecial",
+      "name_en": "Precise: Magical Source",
       "name_cn": "精密 魔源",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SourceOfManaSpecial_Icon_128.webp",
@@ -3762,7 +3762,7 @@
     },
     {
       "id": "8309",
-      "name_en": "SkillIcon_Skill_PreciseProjectileSpecial",
+      "name_en": "Precise: Precise Projectiles",
       "name_cn": "精密 精准投射",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_PreciseProjectileSpecial_Icon_128.webp",
@@ -3773,7 +3773,7 @@
     },
     {
       "id": "8310",
-      "name_en": "SkillIcon_Skill_ElementalResistanceSpecial",
+      "name_en": "Precise: Elemental Resistance",
       "name_cn": "精密 元素抵抗",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ElementalResistanceSpecial_Icon_128.webp",
@@ -3784,7 +3784,7 @@
     },
     {
       "id": "8311",
-      "name_en": "SkillIcon_Skill_HasteSpecial",
+      "name_en": "Precise: Swiftness",
       "name_cn": "精密 疾速",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_HasteSpecial_Icon_128.webp",
@@ -3795,7 +3795,7 @@
     },
     {
       "id": "8312",
-      "name_en": "SkillIcon_Skill_DeepPainSpecial",
+      "name_en": "Precise: Deep Pain",
       "name_cn": "精密 深层苦痛",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_DeepPainSpecial_Icon_128.webp",
@@ -3806,7 +3806,7 @@
     },
     {
       "id": "8313",
-      "name_en": "SkillIcon_Skill_ChaosEnhanceSpecial",
+      "name_en": "Precise: Erosion Amplification",
       "name_cn": "精密 腐蚀增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_ChaosEnhanceSpecial_Icon_128.webp",
@@ -3817,7 +3817,7 @@
     },
     {
       "id": "8314",
-      "name_en": "SkillIcon_Skill_FireAuraSpecial",
+      "name_en": "Precise: Charged Flames",
       "name_cn": "精密 烈焰充能",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_FireAuraSpecial_Icon_128.webp",
@@ -3828,7 +3828,7 @@
     },
     {
       "id": "8315",
-      "name_en": "SkillIcon_Skill_SolidSpecial",
+      "name_en": "Precise: Steadfast",
       "name_cn": "精密 坚固",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_SkillIcon_Skill_SolidSpecial_Icon_128.webp",
@@ -3839,7 +3839,7 @@
     },
     {
       "id": "8316",
-      "name_en": "Icon_Skill_PhysicalBlessSpecial_128",
+      "name_en": "Precise: Acuteness Focus",
       "name_cn": "精密 锐利贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_PhysicalBlessSpecial_128.webp",
@@ -3850,7 +3850,7 @@
     },
     {
       "id": "8317",
-      "name_en": "Icon_Skill_ChaosBlessSpecial_128",
+      "name_en": "Precise: Corrosion Focus",
       "name_cn": "精密 侵蚀贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ChaosBlessSpecial_128.webp",
@@ -3861,7 +3861,7 @@
     },
     {
       "id": "8318",
-      "name_en": "Icon_Skill_IceBlessSpecial_128",
+      "name_en": "Precise: Ice Focus",
       "name_cn": "精密 寒冰贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_IceBlessSpecial_128.webp",
@@ -3872,7 +3872,7 @@
     },
     {
       "id": "8319",
-      "name_en": "Icon_Skill_ThunderBlessSpecial_128",
+      "name_en": "Precise: Thunder Focus",
       "name_cn": "精密 雷霆贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_ThunderBlessSpecial_128.webp",
@@ -3883,7 +3883,7 @@
     },
     {
       "id": "8320",
-      "name_en": "Icon_Skill_FireBlessSpecial_128",
+      "name_en": "Precise: Flame Focus",
       "name_cn": "精密 熔火贯注",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/Icon_Skill_FireBlessSpecial_128.webp",
@@ -3894,7 +3894,7 @@
     },
     {
       "id": "8328",
-      "name_en": "Skill_MinionEnhanceSpecial",
+      "name_en": "Precise: Radical Order",
       "name_cn": "精密 激进号令",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MinionEnhanceSpecial_Icon_128.webp",
@@ -3905,7 +3905,7 @@
     },
     {
       "id": "8329",
-      "name_en": "Skill_AttackEnhanceSpecial",
+      "name_en": "Precise: Cruelty",
       "name_cn": "精密 暴虐",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AttackEnhanceSpecial_Icon_128.webp",
@@ -3916,7 +3916,7 @@
     },
     {
       "id": "8330",
-      "name_en": "Skill_AreaEnhanceSpecial",
+      "name_en": "Precise: Domain Expansion",
       "name_cn": "精密 领域扩张",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AreaEnhanceSpecial_Icon_128.webp",
@@ -3927,7 +3927,7 @@
     },
     {
       "id": "8331",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Precise: Ailment Amplification",
       "name_cn": "精密 异常增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -3938,7 +3938,7 @@
     },
     {
       "id": "7230",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Ailment Amplification",
       "name_cn": "异常增幅",
       "type_cn": "被动技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -3949,7 +3949,7 @@
     },
     {
       "id": "8000",
-      "name_en": "Skill_CMPreparation",
+      "name_en": "Activation Medium: Preparation",
       "name_cn": "触媒：预备",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMPreparation_Icon_128.webp",
@@ -3960,7 +3960,7 @@
     },
     {
       "id": "8002",
-      "name_en": "Skill_CMPerpetualMotion",
+      "name_en": "Activation Medium: Perpetual Motion",
       "name_cn": "触媒：永动",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMPerpetualMotion_Icon_128.webp",
@@ -3971,7 +3971,7 @@
     },
     {
       "id": "8003",
-      "name_en": "Skill_CMStrongRival",
+      "name_en": "Activation Medium: Elite",
       "name_cn": "触媒：劲敌",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMStrongRival_Icon_128.webp",
@@ -3982,7 +3982,7 @@
     },
     {
       "id": "8004",
-      "name_en": "Skill_CMLeader",
+      "name_en": "Activation Medium: Boss",
       "name_cn": "触媒：首领",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMLeader_Icon_128.webp",
@@ -3993,7 +3993,7 @@
     },
     {
       "id": "8005",
-      "name_en": "Skill_CMLife",
+      "name_en": "Activation Medium: Life",
       "name_cn": "触媒：生命",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMLife_Icon_128.webp",
@@ -4004,7 +4004,7 @@
     },
     {
       "id": "8006",
-      "name_en": "Skill_CMShield",
+      "name_en": "Activation Medium: Energy Shield",
       "name_cn": "触媒：护盾",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMShield_Icon_128.webp",
@@ -4015,7 +4015,7 @@
     },
     {
       "id": "8007",
-      "name_en": "Skill_CMHeavyHamage",
+      "name_en": "Activation Medium: Severe Injury",
       "name_cn": "触媒：重创",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMHeavyHamage_Icon_128.webp",
@@ -4026,7 +4026,7 @@
     },
     {
       "id": "8008",
-      "name_en": "Skill_CMContinuousAttack",
+      "name_en": "Activation Medium: Multistrike",
       "name_cn": "触媒：连续攻击",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMContinuousAttack_Icon_128.webp",
@@ -4037,7 +4037,7 @@
     },
     {
       "id": "8009",
-      "name_en": "Skill_CMWreck",
+      "name_en": "Activation Medium: Demolisher",
       "name_cn": "触媒：破击",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMWreck_Icon_128.webp",
@@ -4048,7 +4048,7 @@
     },
     {
       "id": "8010",
-      "name_en": "Skill_CMBurstOfSpells",
+      "name_en": "Activation Medium: Spell Burst",
       "name_cn": "触媒：法术迸发",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMBurstOfSpells_Icon_128.webp",
@@ -4059,7 +4059,7 @@
     },
     {
       "id": "8011",
-      "name_en": "Skill_CMStart",
+      "name_en": "Activation Medium: Start",
       "name_cn": "触媒：起步",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMStart_Icon_128.webp",
@@ -4070,7 +4070,7 @@
     },
     {
       "id": "8012",
-      "name_en": "Skill_CMStop",
+      "name_en": "Activation Medium: Root",
       "name_cn": "触媒：止步",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMStop_Icon_128.webp",
@@ -4081,7 +4081,7 @@
     },
     {
       "id": "8013",
-      "name_en": "Skill_CMActivateResonance",
+      "name_en": "Activation Medium: Resonance Activation",
       "name_cn": "触媒：激活共鸣",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMActivateResonance_Icon_128.webp",
@@ -4092,7 +4092,7 @@
     },
     {
       "id": "8014",
-      "name_en": "Skill_CMResonance",
+      "name_en": "Activation Medium: Resonance",
       "name_cn": "触媒：共鸣",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMResonance_Icon_128.webp",
@@ -4103,7 +4103,7 @@
     },
     {
       "id": "8015",
-      "name_en": "Skill_CMRhythm",
+      "name_en": "Activation Medium: Rhythm",
       "name_cn": "触媒：律动",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMRhythm_Icon_128.webp",
@@ -4114,7 +4114,7 @@
     },
     {
       "id": "8017",
-      "name_en": "Skill_CMRhythmOftheWind",
+      "name_en": "Activation Medium: Wind Rhythm",
       "name_cn": "触媒：疾风律动",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMRhythmOftheWind_Icon_128.webp",
@@ -4125,7 +4125,7 @@
     },
     {
       "id": "8018",
-      "name_en": "Skill_CMStopAttack",
+      "name_en": "Activation Medium: Root Attack",
       "name_cn": "触媒：止步攻击",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMStopAttack_Icon_128.webp",
@@ -4136,7 +4136,7 @@
     },
     {
       "id": "8019",
-      "name_en": "Skill_CMStationaryAttack",
+      "name_en": "Activation Medium: Still Attack",
       "name_cn": "触媒：静止攻击",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMStationaryAttack_Icon_128.webp",
@@ -4147,7 +4147,7 @@
     },
     {
       "id": "8020",
-      "name_en": "Skill_CMSentinel",
+      "name_en": "Activation Medium: Sentry",
       "name_cn": "触媒：哨卫",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMSentinel_Icon_128.webp",
@@ -4158,7 +4158,7 @@
     },
     {
       "id": "8021",
-      "name_en": "Skill_CMSummon",
+      "name_en": "Activation Medium: Minion",
       "name_cn": "触媒：召唤物",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMSummon_Icon_128.webp",
@@ -4169,7 +4169,7 @@
     },
     {
       "id": "8022",
-      "name_en": "Skill_CMCriticalHit",
+      "name_en": "Activation Medium: Critical Strike",
       "name_cn": "触媒：暴击",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMCriticalHit_Icon_128.webp",
@@ -4180,7 +4180,7 @@
     },
     {
       "id": "8023",
-      "name_en": "Skill_CMGuide",
+      "name_en": "Activation Medium: Channel",
       "name_cn": "触媒：引导",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMGuide_Icon_128.webp",
@@ -4191,7 +4191,7 @@
     },
     {
       "id": "8024",
-      "name_en": "Skill_CMArcaneSignal",
+      "name_en": "Activation Medium: Instruction",
       "name_cn": "触媒：指令",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMArcaneSignal_Icon_128.webp",
@@ -4202,7 +4202,7 @@
     },
     {
       "id": "8025",
-      "name_en": "Skill_CMLocking",
+      "name_en": "Activation Medium: Lock On",
       "name_cn": "触媒：锁定",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMLocking_Icon_128.webp",
@@ -4213,7 +4213,7 @@
     },
     {
       "id": "8026",
-      "name_en": "Skill_CMTrack",
+      "name_en": "Activation Medium: Track",
       "name_cn": "触媒：追踪",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMTrack_Icon_128.webp",
@@ -4224,7 +4224,7 @@
     },
     {
       "id": "8027",
-      "name_en": "Skill_CMDoppelgangerSignal",
+      "name_en": "Activation Medium: Burst Activation",
       "name_cn": "触媒：激活迸发",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMDoppelgangerSignal_Icon_128.webp",
@@ -4235,7 +4235,7 @@
     },
     {
       "id": "8028",
-      "name_en": "Skill_CMStationaryUse",
+      "name_en": "Activation Medium: Motionless",
       "name_cn": "触媒：静止",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_CMStationaryUse_Icon_128.webp",
@@ -4246,7 +4246,7 @@
     },
     {
       "id": "8030",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Activation Medium: Tangle",
       "name_cn": "触媒：纠缠",
       "type_cn": "触媒技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -4257,7 +4257,7 @@
     },
     {
       "id": "7701",
-      "name_en": "Skill_FocusedShoot_support02",
+      "name_en": "Focused Shot: Long Shot (Magnificent)",
       "name_cn": "专注射击：远射（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedShoot_support02_Icon_128.webp",
@@ -4268,7 +4268,7 @@
     },
     {
       "id": "7700",
-      "name_en": "Skill_FocusedShoot_support01",
+      "name_en": "Focused Shot: Aspire (Magnificent)",
       "name_cn": "专注射击：奋起（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedShoot_support01_Icon_128.webp",
@@ -4279,7 +4279,7 @@
     },
     {
       "id": "7705",
-      "name_en": "Skill_FireShoot_support01",
+      "name_en": "Burning Shot: Fiery Blast (Magnificent)",
       "name_cn": "燃烧射击：炎爆（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireShoot_support01_Icon_128.webp",
@@ -4290,7 +4290,7 @@
     },
     {
       "id": "7706",
-      "name_en": "Skill_FireShoot_support02",
+      "name_en": "Burning Shot: Combustion (Magnificent)",
       "name_cn": "燃烧射击：助燃（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireShoot_support02_Icon_128.webp",
@@ -4301,7 +4301,7 @@
     },
     {
       "id": "7714",
-      "name_en": "Skill_FocusedStrike_support02",
+      "name_en": "Focused Slash: Duel (Magnificent)",
       "name_cn": "专注斩：决斗（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedStrike_support02_Icon_128.webp",
@@ -4312,7 +4312,7 @@
     },
     {
       "id": "7710",
-      "name_en": "Skill_LightningChain_support02",
+      "name_en": "Chain Lightning: Augmentation (Magnificent)",
       "name_cn": "闪电链：增幅（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningChain_support02_Icon_128.webp",
@@ -4323,7 +4323,7 @@
     },
     {
       "id": "7713",
-      "name_en": "Skill_FocusedStrike_support01",
+      "name_en": "Focused Slash: Tranquility (Magnificent)",
       "name_cn": "专注斩：静息（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedStrike_support01_Icon_128.webp",
@@ -4334,7 +4334,7 @@
     },
     {
       "id": "7709",
-      "name_en": "Skill_LightningChain_support01",
+      "name_en": "Chain Lightning: Web of Lightning (Magnificent)",
       "name_cn": "闪电链：电网（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningChain_support01_Icon_128.webp",
@@ -4345,7 +4345,7 @@
     },
     {
       "id": "7717",
-      "name_en": "Skill_FrostSlash_support01",
+      "name_en": "Icy Blade: Quick Freeze (Magnificent)",
       "name_cn": "冰凌斩：速冻（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostSlash_support01_Icon_128.webp",
@@ -4356,7 +4356,7 @@
     },
     {
       "id": "7721",
-      "name_en": "Skill_FlameSlash_support01",
+      "name_en": "Flame Slash: Immediate Threat (Magnificent)",
       "name_cn": "烈焰斩：近患（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameSlash_support01_Icon_128.webp",
@@ -4367,7 +4367,7 @@
     },
     {
       "id": "7727",
-      "name_en": "Skill_SabotRounds_support01",
+      "name_en": "Blazing Bullet: Fiery Blast (Magnificent)",
       "name_cn": "炽炎穿弹：炎爆（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SabotRounds_support01_Icon_128.webp",
@@ -4378,7 +4378,7 @@
     },
     {
       "id": "7731",
-      "name_en": "Skill_ViperStab_support02",
+      "name_en": "Wilt Spike: Languish (Magnificent)",
       "name_cn": "凋零刺击：颓靡（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViperStab_support02_Icon_128.webp",
@@ -4389,7 +4389,7 @@
     },
     {
       "id": "7730",
-      "name_en": "Skill_ViperStab_support01",
+      "name_en": "Wilt Spike: Wither (Magnificent)",
       "name_cn": "凋零刺击：凋残（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViperStab_support01_Icon_128.webp",
@@ -4400,7 +4400,7 @@
     },
     {
       "id": "7724",
-      "name_en": "Skill_VenomThrow_support01",
+      "name_en": "Corrosive Throw: Augmentation (Magnificent)",
       "name_cn": "侵蚀投掷：增幅（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_VenomThrow_support01_Icon_128.webp",
@@ -4411,7 +4411,7 @@
     },
     {
       "id": "7735",
-      "name_en": "Skill_Emberslam_support02",
+      "name_en": "Hammer of Ash: Rekindle (Magnificent)",
       "name_cn": "灰烬之锤：复燃（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Emberslam_support02_Icon_128.webp",
@@ -4422,7 +4422,7 @@
     },
     {
       "id": "7739",
-      "name_en": "Skill_IceCrash_support01",
+      "name_en": "Frost Impact: Ice Cluster (Magnificent)",
       "name_cn": "寒霜破击：冰丛（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceCrash_support01_Icon_128.webp",
@@ -4433,7 +4433,7 @@
     },
     {
       "id": "7734",
-      "name_en": "Skill_Emberslam_support01",
+      "name_en": "Hammer of Ash: Upheaval (Magnificent)",
       "name_cn": "灰烬之锤：激荡（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Emberslam_support01_Icon_128.webp",
@@ -4444,7 +4444,7 @@
     },
     {
       "id": "7740",
-      "name_en": "Skill_IceCrash_support02",
+      "name_en": "Frost Impact: Frozen Trajectory (Magnificent)",
       "name_cn": "寒霜破击：凝冻（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceCrash_support02_Icon_128.webp",
@@ -4455,7 +4455,7 @@
     },
     {
       "id": "7745",
-      "name_en": "Skill_Cyclone_support01",
+      "name_en": "Whirlwind: Wind Barrier (Magnificent)",
       "name_cn": "旋风斩：风障（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Cyclone_support01_Icon_128.webp",
@@ -4466,7 +4466,7 @@
     },
     {
       "id": "7747",
-      "name_en": "Skill_LightningShoot_support01",
+      "name_en": "Lightning Shot: Offshoot (Magnificent)",
       "name_cn": "闪电射击：衍生（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningShoot_support01_Icon_128.webp",
@@ -4477,7 +4477,7 @@
     },
     {
       "id": "7744",
-      "name_en": "Skill_Cyclone_support02",
+      "name_en": "Whirlwind: Endless Wind (Magnificent)",
       "name_cn": "旋风斩：长风（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Cyclone_support02_Icon_128.webp",
@@ -4488,7 +4488,7 @@
     },
     {
       "id": "7750",
-      "name_en": "Skill_SplitArrow_support01",
+      "name_en": "Split Shot: Volley (Magnificent)",
       "name_cn": "分裂射击：齐射（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SplitArrow_support01_Icon_128.webp",
@@ -4499,7 +4499,7 @@
     },
     {
       "id": "7751",
-      "name_en": "Skill_SplitArrow_support02",
+      "name_en": "Split Shot: Diversion (Magnificent)",
       "name_cn": "分裂射击：分流（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SplitArrow_support02_Icon_128.webp",
@@ -4510,7 +4510,7 @@
     },
     {
       "id": "7754",
-      "name_en": "Skill_Iceshot_support01",
+      "name_en": "Ice Shot: Ice Blast (Magnificent)",
       "name_cn": "寒冰射击：冰爆（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Iceshot_support01_Icon_128.webp",
@@ -4521,7 +4521,7 @@
     },
     {
       "id": "7761",
-      "name_en": "Skill_ViolentSweep_support03",
+      "name_en": "Berserking Blade: Desperation (Magnificent)",
       "name_cn": "暴走巨刃：亡命（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViolentSweep_support03_Icon_128.webp",
@@ -4532,7 +4532,7 @@
     },
     {
       "id": "7757",
-      "name_en": "Skill_Strafe_support02",
+      "name_en": "Bombard: Guided (Magnificent)",
       "name_cn": "炮轰：制导（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Strafe_support02_Icon_128.webp",
@@ -4543,7 +4543,7 @@
     },
     {
       "id": "7756",
-      "name_en": "Skill_Strafe_support01",
+      "name_en": "Bombard: Cannon (Magnificent)",
       "name_cn": "炮轰：重炮（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Strafe_support01_Icon_128.webp",
@@ -4554,7 +4554,7 @@
     },
     {
       "id": "7765",
-      "name_en": "Skill_ChargedSmash_support01",
+      "name_en": "Charged Pummel: Drastic Shift (Magnificent)",
       "name_cn": "充能猛击：剧变（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedSmash_support01_Icon_128.webp",
@@ -4565,7 +4565,7 @@
     },
     {
       "id": "7762",
-      "name_en": "Skill_ViolentSweep_support01",
+      "name_en": "Berserking Blade: Sweep (Magnificent)",
       "name_cn": "暴走巨刃：扫荡（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViolentSweep_support01_Icon_128.webp",
@@ -4576,7 +4576,7 @@
     },
     {
       "id": "7769",
-      "name_en": "Skill_ShadowSlash_support01",
+      "name_en": "Moon Strike: Rainbow (Magnificent)",
       "name_cn": "月华斩：长虹（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ShadowSlash_support01_Icon_128.webp",
@@ -4587,7 +4587,7 @@
     },
     {
       "id": "7766",
-      "name_en": "Skill_ChargedSmash_support02",
+      "name_en": "Charged Pummel: Connected (Magnificent)",
       "name_cn": "充能猛击：贯通（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedSmash_support02_Icon_128.webp",
@@ -4598,7 +4598,7 @@
     },
     {
       "id": "7770",
-      "name_en": "Skill_ShadowSlash_support02",
+      "name_en": "Moon Strike: Lunar Ring (Magnificent)",
       "name_cn": "月华斩：月环（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ShadowSlash_support02_Icon_128.webp",
@@ -4609,7 +4609,7 @@
     },
     {
       "id": "7773",
-      "name_en": "Skill_SavageCharge_support01",
+      "name_en": "Savage Charge: Infuriate (Magnificent)",
       "name_cn": "野蛮冲锋：触怒（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SavageCharge_support01_Icon_128.webp",
@@ -4620,7 +4620,7 @@
     },
     {
       "id": "7774",
-      "name_en": "Skill_SavageCharge_support02",
+      "name_en": "Savage Charge: Bulldoze (Magnificent)",
       "name_cn": "野蛮冲锋：猛进（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SavageCharge_support02_Icon_128.webp",
@@ -4631,7 +4631,7 @@
     },
     {
       "id": "7776",
-      "name_en": "Skill_MarkerArrow_support01",
+      "name_en": "Marked Rain of Arrows: Heartpiercer (Magnificent)",
       "name_cn": "标记箭雨：穿心（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MarkerArrow_support01_Icon_128.webp",
@@ -4642,7 +4642,7 @@
     },
     {
       "id": "7777",
-      "name_en": "Skill_MarkerArrow_support02",
+      "name_en": "Marked Rain of Arrows: Chain Reaction (Magnificent)",
       "name_cn": "标记箭雨：株连（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MarkerArrow_support02_Icon_128.webp",
@@ -4653,7 +4653,7 @@
     },
     {
       "id": "7780",
-      "name_en": "Skill_PoisonBullet_support01",
+      "name_en": "Corrosive Shot: Swift Action (Magnificent)",
       "name_cn": "侵蚀弹：迅发（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PoisonBullet_support01_Icon_128.webp",
@@ -4664,7 +4664,7 @@
     },
     {
       "id": "7783",
-      "name_en": "Skill_ChargedRainOfBullets_support01",
+      "name_en": "Inexhaustible Barrage: Bombard (Magnificent)",
       "name_cn": "不竭弹雨：狂轰（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedRainOfBullets_support01_Icon_128.webp",
@@ -4675,7 +4675,7 @@
     },
     {
       "id": "7786",
-      "name_en": "Skill_LightningStab_support01",
+      "name_en": "Thunder Spike: Numb (Magnificent)",
       "name_cn": "雷光刺击：麻木（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningStab_support01_Icon_128.webp",
@@ -4686,7 +4686,7 @@
     },
     {
       "id": "7795",
-      "name_en": "Skill_DiffusionBlade_support02",
+      "name_en": "Ring of Blades: Blade Formation (Magnificent)",
       "name_cn": "环绕飞刃：刀阵（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DiffusionBlade_support02_Icon_128.webp",
@@ -4697,7 +4697,7 @@
     },
     {
       "id": "7790",
-      "name_en": "Skill_ThunderSlash_support01",
+      "name_en": "Thunder Slash: Keen Edge (Magnificent)",
       "name_cn": "雷影斩：疾锋（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderSlash_support01_Icon_128.webp",
@@ -4708,7 +4708,7 @@
     },
     {
       "id": "7802",
-      "name_en": "Skill_RainOfArrows_support01",
+      "name_en": "Rain of Arrows: Swift Flight (Magnificent)",
       "name_cn": "箭雨：疾驰（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_RainOfArrows_support01_Icon_128.webp",
@@ -4719,7 +4719,7 @@
     },
     {
       "id": "7798",
-      "name_en": "Skill_FrostStab_support01",
+      "name_en": "Frost Spike: Offshoot (Magnificent)",
       "name_cn": "碎冰刺击：衍生（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostStab_support01_Icon_128.webp",
@@ -4730,7 +4730,7 @@
     },
     {
       "id": "7805",
-      "name_en": "Skill_ArrowSpirit_support01",
+      "name_en": "Arrow Einherjar: Arrowstorm (Magnificent)",
       "name_cn": "飞箭英灵：万箭（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArrowSpirit_support01_Icon_128.webp",
@@ -4741,7 +4741,7 @@
     },
     {
       "id": "7808",
-      "name_en": "Skill_Shadowbolt_support01",
+      "name_en": "Shadow Shot: Eradicate (Magnificent)",
       "name_cn": "暗影弹：围剿（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Shadowbolt_support01_Icon_128.webp",
@@ -4752,7 +4752,7 @@
     },
     {
       "id": "7809",
-      "name_en": "Skill_Fireball_support01",
+      "name_en": "Split Firebolt: Split (Magnificent)",
       "name_cn": "裂变火球：分裂（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Fireball_support01_Icon_128.webp",
@@ -4763,7 +4763,7 @@
     },
     {
       "id": "7812",
-      "name_en": "Skill_ConeOfCold_support02",
+      "name_en": "Ice Lances: Ice Corrosion (Magnificent)",
       "name_cn": "冰锥术：冰蚀（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ConeOfCold_support02_Icon_128.webp",
@@ -4774,7 +4774,7 @@
     },
     {
       "id": "7791",
-      "name_en": "Skill_ThunderSlash_support04",
+      "name_en": "Thunder Slash: Blade Cluster (Magnificent)",
       "name_cn": "雷影斩：刀丛（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderSlash_support04_Icon_128.webp",
@@ -4785,7 +4785,7 @@
     },
     {
       "id": "7815",
-      "name_en": "Skill_SparkBullet_support01",
+      "name_en": "Sparkle: Magnetic Field (Magnificent)",
       "name_cn": "电火花：磁场（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SparkBullet_support01_Icon_128.webp",
@@ -4796,7 +4796,7 @@
     },
     {
       "id": "7811",
-      "name_en": "Skill_ConeOfCold_support01",
+      "name_en": "Ice Lances: Rebound (Magnificent)",
       "name_cn": "冰锥术：回弹（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ConeOfCold_support01_Icon_128.webp",
@@ -4807,7 +4807,7 @@
     },
     {
       "id": "7820",
-      "name_en": "Skill_BladeRoundabout_support02",
+      "name_en": "Whirlwind Blade: Swift Slash (Magnificent)",
       "name_cn": "刀锋回旋：快刀（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_BladeRoundabout_support02_Icon_128.webp",
@@ -4818,7 +4818,7 @@
     },
     {
       "id": "7826",
-      "name_en": "Skill_Blizzard_support02",
+      "name_en": "Blizzard: Hail (Magnificent)",
       "name_cn": "暴风雪：冰雹（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Blizzard_support02_Icon_128.webp",
@@ -4829,7 +4829,7 @@
     },
     {
       "id": "7825",
-      "name_en": "Skill_Blizzard_support01",
+      "name_en": "Blizzard: Freezing Point (Magnificent)",
       "name_cn": "暴风雪：冰点（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Blizzard_support01_Icon_128.webp",
@@ -4840,7 +4840,7 @@
     },
     {
       "id": "7823",
-      "name_en": "Skill_IceRing_support01",
+      "name_en": "Ring of Ice: Ice Seal (Magnificent)",
       "name_cn": "冰环术：封冻（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceRing_support01_Icon_128.webp",
@@ -4851,7 +4851,7 @@
     },
     {
       "id": "7819",
-      "name_en": "Skill_BladeRoundabout_support01",
+      "name_en": "Whirlwind Blade: Unsheath (Magnificent)",
       "name_cn": "刀锋回旋：出鞘（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_BladeRoundabout_support01_Icon_128.webp",
@@ -4862,7 +4862,7 @@
     },
     {
       "id": "7829",
-      "name_en": "Skill_ThunderStorm_support01",
+      "name_en": "Lightning Storm: Surging Thunder (Magnificent)",
       "name_cn": "闪电风暴：雷潮（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderStorm_support01_Icon_128.webp",
@@ -4873,7 +4873,7 @@
     },
     {
       "id": "7832",
-      "name_en": "Skill_FirePile_support01",
+      "name_en": "Flame Core: Lone Vanguard (Magnificent)",
       "name_cn": "聚焰之核：孤军（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FirePile_support01_Icon_128.webp",
@@ -4884,7 +4884,7 @@
     },
     {
       "id": "7835",
-      "name_en": "Skill_FlameBlast_support02",
+      "name_en": "Flame Jet: Scorched Earth (Magnificent)",
       "name_cn": "烈焰释放：焦土（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameBlast_support02_Icon_128.webp",
@@ -4895,7 +4895,7 @@
     },
     {
       "id": "7834",
-      "name_en": "Skill_FlameBlast_support01",
+      "name_en": "Flame Jet: Burst (Magnificent)",
       "name_cn": "烈焰释放：爆裂（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameBlast_support01_Icon_128.webp",
@@ -4906,7 +4906,7 @@
     },
     {
       "id": "7838",
-      "name_en": "Skill_IceArea_support01",
+      "name_en": "Frost Terra: Rime (Magnificent)",
       "name_cn": "寒霜地面：霜冻（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceArea_support01_Icon_128.webp",
@@ -4917,7 +4917,7 @@
     },
     {
       "id": "7842",
-      "name_en": "Skill_Shadowswamp_support01",
+      "name_en": "Shadow Swamp: Gushing Spring (Magnificent)",
       "name_cn": "暗影之沼：涌泉（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Shadowswamp_support01_Icon_128.webp",
@@ -4928,7 +4928,7 @@
     },
     {
       "id": "7847",
-      "name_en": "Skill_OverloadLightningBall_support02",
+      "name_en": "Thunderbolt Overload: Retribution (Magnificent)",
       "name_cn": "超载雷球：惩恶（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_OverloadLightningBall_support02_Icon_128.webp",
@@ -4939,7 +4939,7 @@
     },
     {
       "id": "7843",
-      "name_en": "Skill_Shadowswamp_support02",
+      "name_en": "Shadow Swamp: Splatter (Magnificent)",
       "name_cn": "暗影之沼：溅污（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Shadowswamp_support02_Icon_128.webp",
@@ -4950,7 +4950,7 @@
     },
     {
       "id": "7849",
-      "name_en": "Skill_FrostCore_support01",
+      "name_en": "Frost Core: Chase (Magnificent)",
       "name_cn": "寒霜之核：追击（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostCore_support01_Icon_128.webp",
@@ -4961,7 +4961,7 @@
     },
     {
       "id": "7839",
-      "name_en": "Skill_IceArea_support02",
+      "name_en": "Frost Terra: Snow Shell (Magnificent)",
       "name_cn": "寒霜地面：雪壳（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceArea_support02_Icon_128.webp",
@@ -4972,7 +4972,7 @@
     },
     {
       "id": "7851",
-      "name_en": "Skill_SummonThunderElement_support01",
+      "name_en": "Summon Thunder Magus: Lightning Ward (Magnificent)",
       "name_cn": "召唤雷霆之灵：辟雷（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonThunderElement_support01_Icon_128.webp",
@@ -4983,7 +4983,7 @@
     },
     {
       "id": "7852",
-      "name_en": "Skill_SummonThunderElement_support02",
+      "name_en": "Summon Thunder Magus: Continuation (Magnificent)",
       "name_cn": "召唤雷霆之灵：延袭（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonThunderElement_support02_Icon_128.webp",
@@ -4994,7 +4994,7 @@
     },
     {
       "id": "7846",
-      "name_en": "Skill_OverloadLightningBall_support01",
+      "name_en": "Thunderbolt Overload: Leap (Magnificent)",
       "name_cn": "超载雷球：飞跃（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_OverloadLightningBall_support01_Icon_128.webp",
@@ -5005,7 +5005,7 @@
     },
     {
       "id": "7857",
-      "name_en": "Skill_SummonIceIceElement_support03",
+      "name_en": "Summon Frost Magus: Ice Crusher (Magnificent)",
       "name_cn": "召唤寒冰之灵：破冰（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonIceIceElement_support03_Icon_128.webp",
@@ -5016,7 +5016,7 @@
     },
     {
       "id": "7860",
-      "name_en": "Skill_SummonFireElement_support02",
+      "name_en": "Summon Fire Magus: Aflame (Magnificent)",
       "name_cn": "召唤火焰之灵：炽烈（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonFireElement_support02_Icon_128.webp",
@@ -5027,7 +5027,7 @@
     },
     {
       "id": "7856",
-      "name_en": "Skill_SummonIceIceElement_support02",
+      "name_en": "Summon Frost Magus: Piercing Cold (Magnificent)",
       "name_cn": "召唤寒冰之灵：冷冽（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonIceIceElement_support02_Icon_128.webp",
@@ -5038,7 +5038,7 @@
     },
     {
       "id": "7855",
-      "name_en": "Skill_SummonIceIceElement_support01",
+      "name_en": "Summon Frost Magus: Cold Ward (Magnificent)",
       "name_cn": "召唤寒冰之灵：辟寒（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonIceIceElement_support01_Icon_128.webp",
@@ -5049,7 +5049,7 @@
     },
     {
       "id": "7861",
-      "name_en": "Skill_SummonFireElement_support03",
+      "name_en": "Summon Fire Magus: Flowing Flames (Magnificent)",
       "name_cn": "召唤火焰之灵：浴火（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonFireElement_support03_Icon_128.webp",
@@ -5060,7 +5060,7 @@
     },
     {
       "id": "7864",
-      "name_en": "Skill_AIMachine_Field",
+      "name_en": "Synthetic Troop: Force Field (Magnificent)",
       "name_cn": "智械：力场（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_AIMachine_Field_Icon_128.webp",
@@ -5071,7 +5071,7 @@
     },
     {
       "id": "7865",
-      "name_en": "Skill_SummonMechanicalGuard_support01",
+      "name_en": "Summon Machine Guard: Iron Fist (Magnificent)",
       "name_cn": "召唤机械警卫：铁拳（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonMechanicalGuard_support01_Icon_128.webp",
@@ -5082,7 +5082,7 @@
     },
     {
       "id": "7859",
-      "name_en": "Skill_SummonFireElement_support01",
+      "name_en": "Summon Fire Magus: Fire Ward (Magnificent)",
       "name_cn": "召唤火焰之灵：辟火（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonFireElement_support01_Icon_128.webp",
@@ -5093,7 +5093,7 @@
     },
     {
       "id": "7866",
-      "name_en": "Skill_SummonMechanicalGuard_support02",
+      "name_en": "Summon Machine Guard: Pummel (Magnificent)",
       "name_cn": "召唤机械警卫：连击（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonMechanicalGuard_support02_Icon_128.webp",
@@ -5104,7 +5104,7 @@
     },
     {
       "id": "7870",
-      "name_en": "Skill_SummonPhantom_support01",
+      "name_en": "Summon Grim Phantom: Glare (Magnificent)",
       "name_cn": "召唤幽浮魅影：炫光（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonPhantom_support01_Icon_128.webp",
@@ -5115,7 +5115,7 @@
     },
     {
       "id": "7875",
-      "name_en": "Skill_SummonIceSpiderTank_support01",
+      "name_en": "Summon Spider Tank: Steamroll (Magnificent)",
       "name_cn": "召唤蜘蛛坦克：碾压（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonIceSpiderTank_support01_Icon_128.webp",
@@ -5126,7 +5126,7 @@
     },
     {
       "id": "7878",
-      "name_en": "Skill_GhostBladeSpirit_support01",
+      "name_en": "Ghost Blade Einherjar: Prestige (Magnificent)",
       "name_cn": "幽刃英灵：积威（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_GhostBladeSpirit_support01_Icon_128.webp",
@@ -5137,7 +5137,7 @@
     },
     {
       "id": "7882",
-      "name_en": "Skill_EarthShock_support01",
+      "name_en": "Groundshaker: Frequent Quake (Magnificent)",
       "name_cn": "震撼大地：频发（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EarthShock_support01_Icon_128.webp",
@@ -5148,7 +5148,7 @@
     },
     {
       "id": "7871",
-      "name_en": "Skill_SummonPhantom_support02",
+      "name_en": "Summon Grim Phantom: Spur (Magnificent)",
       "name_cn": "召唤幽浮魅影：驱策（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonPhantom_support02_Icon_128.webp",
@@ -5159,7 +5159,7 @@
     },
     {
       "id": "7891",
-      "name_en": "Skill_EvilChain_support01",
+      "name_en": "Shackles of Malice: Defile (Magnificent)",
       "name_cn": "恶意枷锁：玷污（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EvilChain_support01_Icon_128.webp",
@@ -5170,7 +5170,7 @@
     },
     {
       "id": "7888",
-      "name_en": "Skill_Tornado_support02",
+      "name_en": "Howling Gale: Headwind (Magnificent)",
       "name_cn": "呼啸烈风：逆风（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Tornado_support02_Icon_128.webp",
@@ -5181,7 +5181,7 @@
     },
     {
       "id": "7883",
-      "name_en": "Skill_EarthShock_support02",
+      "name_en": "Groundshaker: Epicenter (Magnificent)",
       "name_cn": "震撼大地：震源（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EarthShock_support02_Icon_128.webp",
@@ -5192,7 +5192,7 @@
     },
     {
       "id": "7879",
-      "name_en": "Skill_GhostBladeSpirit_support02",
+      "name_en": "Ghost Blade Einherjar: Unbroken (Magnificent)",
       "name_cn": "幽刃英灵：无间（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_GhostBladeSpirit_support02_Icon_128.webp",
@@ -5203,7 +5203,7 @@
     },
     {
       "id": "7887",
-      "name_en": "Skill_Tornado_support01",
+      "name_en": "Howling Gale: Rapid Sweep (Magnificent)",
       "name_cn": "呼啸烈风：疾掠（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Tornado_support01_Icon_128.webp",
@@ -5214,7 +5214,7 @@
     },
     {
       "id": "7892",
-      "name_en": "Skill_EvilChain_support02",
+      "name_en": "Shackles of Malice: Vendetta (Magnificent)",
       "name_cn": "恶意枷锁：怀恨（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_EvilChain_support02_Icon_128.webp",
@@ -5225,7 +5225,7 @@
     },
     {
       "id": "7896",
-      "name_en": "Skill_LifeLeech_support02",
+      "name_en": "Mind Control: Befuddle (Magnificent)",
       "name_cn": "摄念夺识：惑乱（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LifeLeech_support02_Icon_128.webp",
@@ -5236,7 +5236,7 @@
     },
     {
       "id": "7900",
-      "name_en": "Skill_FireBlast_support02",
+      "name_en": "Fire Burst: Violent Blast (Magnificent)",
       "name_cn": "爆炎术：暴烈（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireBlast_support02_Icon_128.webp",
@@ -5247,7 +5247,7 @@
     },
     {
       "id": "7899",
-      "name_en": "Skill_FireBlast_support01",
+      "name_en": "Fire Burst: Heart of Flame (Magnificent)",
       "name_cn": "爆炎术：焰心（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireBlast_support01_Icon_128.webp",
@@ -5258,7 +5258,7 @@
     },
     {
       "id": "7895",
-      "name_en": "Skill_LifeLeech_support01",
+      "name_en": "Mind Control: Concentrate (Magnificent)",
       "name_cn": "摄念夺识：凝神（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LifeLeech_support01_Icon_128.webp",
@@ -5269,7 +5269,7 @@
     },
     {
       "id": "7907",
-      "name_en": "Skill_FireRay_support01",
+      "name_en": "Scorching Beam: Supercharge (Magnificent)",
       "name_cn": "灼热射线：增压（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireRay_support01_Icon_128.webp",
@@ -5280,7 +5280,7 @@
     },
     {
       "id": "7912",
-      "name_en": "Skill_ThunderCore_support02",
+      "name_en": "Thunder Core: Lone Vanguard (Magnificent)",
       "name_cn": "雷降之核：孤军（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderCore_support02_Icon_128.webp",
@@ -5291,7 +5291,7 @@
     },
     {
       "id": "7903",
-      "name_en": "Skill_IceRay_support01",
+      "name_en": "Icebound Beam: Frostbitten (Magnificent)",
       "name_cn": "冰魄射线：冻伤（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceRay_support01_Icon_128.webp",
@@ -5302,7 +5302,7 @@
     },
     {
       "id": "7908",
-      "name_en": "Skill_FireRay_support02",
+      "name_en": "Scorching Beam: Shockwave (Magnificent)",
       "name_cn": "灼热射线：震波（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireRay_support02_Icon_128.webp",
@@ -5313,7 +5313,7 @@
     },
     {
       "id": "7911",
-      "name_en": "Skill_ThunderCore_support01",
+      "name_en": "Thunder Core: Electric Field (Magnificent)",
       "name_cn": "雷降之核：电场（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderCore_support01_Icon_128.webp",
@@ -5324,7 +5324,7 @@
     },
     {
       "id": "7915",
-      "name_en": "Skill_FlameRoad_support01",
+      "name_en": "Path of Flames: Spontaneous Combustion (Magnificent)",
       "name_cn": "烈焰之径：自燃（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameRoad_support01_Icon_128.webp",
@@ -5335,7 +5335,7 @@
     },
     {
       "id": "7919",
-      "name_en": "Skill_Nimbus_support01",
+      "name_en": "Thundercloud: Billowing Cloud (Magnificent)",
       "name_cn": "雷云放射：云涌（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Nimbus_support01_Icon_128.webp",
@@ -5346,7 +5346,7 @@
     },
     {
       "id": "7920",
-      "name_en": "Skill_Nimbus_support02",
+      "name_en": "Thundercloud: Alarmed Awakening (Magnificent)",
       "name_cn": "雷云放射：惊蛰（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Nimbus_support02_Icon_128.webp",
@@ -5357,7 +5357,7 @@
     },
     {
       "id": "7923",
-      "name_en": "Skill_SummonRockElement_support01",
+      "name_en": "Summon Rock Magus: Unyielding (Magnificent)",
       "name_cn": "召唤磐石之灵：强硬（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_support01_Icon_128.webp",
@@ -5368,7 +5368,7 @@
     },
     {
       "id": "7924",
-      "name_en": "Skill_SummonRockElement_support01",
+      "name_en": "Summon Rock Magus: Forging (Magnificent)",
       "name_cn": "召唤磐石之灵：锻压（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_support01_Icon_128.webp",
@@ -5379,7 +5379,7 @@
     },
     {
       "id": "7927",
-      "name_en": "Skill_SummonRotElement_support01",
+      "name_en": "Summon Erosion Magus: Plague Source (Magnificent)",
       "name_cn": "召唤腐化之灵：疫源（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_support01_Icon_128.webp",
@@ -5390,7 +5390,7 @@
     },
     {
       "id": "7925",
-      "name_en": "Skill_SummonRockElement_support02",
+      "name_en": "Summon Rock Magus: Clustering Sand (Magnificent)",
       "name_cn": "召唤磐石之灵：聚砂（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRockElement_support02_Icon_128.webp",
@@ -5401,7 +5401,7 @@
     },
     {
       "id": "7929",
-      "name_en": "Skill_SummonRotElement_support03",
+      "name_en": "Summon Erosion Magus: Frequent Quake (Magnificent)",
       "name_cn": "召唤腐化之灵：频发（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_support03_Icon_128.webp",
@@ -5412,7 +5412,7 @@
     },
     {
       "id": "7928",
-      "name_en": "Skill_SummonRotElement_support02",
+      "name_en": "Summon Erosion Magus: Wicked (Magnificent)",
       "name_cn": "召唤腐化之灵：坏种（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SummonRotElement_support02_Icon_128.webp",
@@ -5423,7 +5423,7 @@
     },
     {
       "id": "7935",
-      "name_en": "Skill_ThunderstormRay_support01",
+      "name_en": "Lightning Beam: Aftershock (Magnificent)",
       "name_cn": "雷暴射线：次生（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderstormRay_support01_Icon_128.webp",
@@ -5434,7 +5434,7 @@
     },
     {
       "id": "7936",
-      "name_en": "Skill_ThunderstormRay_support02",
+      "name_en": "Lightning Beam: Relentless (Magnificent)",
       "name_cn": "雷暴射线：凌厉（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderstormRay_support02_Icon_128.webp",
@@ -5445,7 +5445,7 @@
     },
     {
       "id": "7939",
-      "name_en": "Skill_ChaosRay_support01",
+      "name_en": "Wilting Beam: Dispirit (Magnificent)",
       "name_cn": "枯萎射线：萎靡（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChaosRay_support01_Icon_128.webp",
@@ -5456,7 +5456,7 @@
     },
     {
       "id": "7940",
-      "name_en": "Skill_ChaosRay_support02",
+      "name_en": "Wilting Beam: Reflection (Magnificent)",
       "name_cn": "枯萎射线：反射（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChaosRay_support02_Icon_128.webp",
@@ -5467,7 +5467,7 @@
     },
     {
       "id": "7943",
-      "name_en": "Skill_LightningBullet_support01",
+      "name_en": "Electrifying Shot: Close-Range (Magnificent)",
       "name_cn": "电光弹：短程（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningBullet_support01_Icon_128.webp",
@@ -5478,7 +5478,7 @@
     },
     {
       "id": "7932",
-      "name_en": "Skill_DoubleStab_support01",
+      "name_en": "Double Thrusts: Restless (Magnificent)",
       "name_cn": "双重突刺：躁动（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DoubleStab_support01_Icon_128.webp",
@@ -5489,7 +5489,7 @@
     },
     {
       "id": "7948",
-      "name_en": "Skill_Doom_support01",
+      "name_en": "Haunting Abomination: Misdeeds (Magnificent)",
       "name_cn": "恶煞缠身：劣迹（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Doom_support01_Icon_128.webp",
@@ -5500,7 +5500,7 @@
     },
     {
       "id": "7949",
-      "name_en": "Skill_Doom_support02",
+      "name_en": "Haunting Abomination: Feud (Magnificent)",
       "name_cn": "恶煞缠身：宿怨（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Doom_support02_Icon_128.webp",
@@ -5511,7 +5511,7 @@
     },
     {
       "id": "7952",
-      "name_en": "Skill_ThunderBless_support01",
+      "name_en": "Thunder Focus: Haste (Magnificent)",
       "name_cn": "雷霆贯注：从速（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderBless_support01_Icon_128.webp",
@@ -5522,7 +5522,7 @@
     },
     {
       "id": "7953",
-      "name_en": "Skill_ThunderBless_support02",
+      "name_en": "Thunder Focus: Quickstep (Magnificent)",
       "name_cn": "雷霆贯注：捷足（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderBless_support02_Icon_128.webp",
@@ -5533,7 +5533,7 @@
     },
     {
       "id": "7956",
-      "name_en": "Skill_FireBless_support01",
+      "name_en": "Flame Focus: Kindling (Magnificent)",
       "name_cn": "熔火贯注：传火（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireBless_support01_Icon_128.webp",
@@ -5544,7 +5544,7 @@
     },
     {
       "id": "7962",
-      "name_en": "Skill_IceBless_support01",
+      "name_en": "Ice Focus: Shattered Ice (Magnificent)",
       "name_cn": "寒冰贯注：碎冰（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceBless_support01_Icon_128.webp",
@@ -5555,7 +5555,7 @@
     },
     {
       "id": "7960",
-      "name_en": "Skill_ChaosBless_support02",
+      "name_en": "Corrosion Focus: Infection (Magnificent)",
       "name_cn": "侵蚀贯注：侵染（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChaosBless_support02_Icon_128.webp",
@@ -5566,7 +5566,7 @@
     },
     {
       "id": "7959",
-      "name_en": "Skill_ChaosBless_support01",
+      "name_en": "Corrosion Focus: Clustering (Magnificent)",
       "name_cn": "侵蚀贯注：类聚（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChaosBless_support01_Icon_128.webp",
@@ -5577,7 +5577,7 @@
     },
     {
       "id": "7957",
-      "name_en": "Skill_FireBless_support02",
+      "name_en": "Flame Focus: Flint (Magnificent)",
       "name_cn": "熔火贯注：火石（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireBless_support02_Icon_128.webp",
@@ -5588,7 +5588,7 @@
     },
     {
       "id": "7963",
-      "name_en": "Skill_IceBless_support02",
+      "name_en": "Ice Focus: Permafrost (Magnificent)",
       "name_cn": "寒冰贯注：久冻（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceBless_support02_Icon_128.webp",
@@ -5599,7 +5599,7 @@
     },
     {
       "id": "7966",
-      "name_en": "Skill_PhysicalBless_support01",
+      "name_en": "Acuteness Focus: Piercing Agony (Magnificent)",
       "name_cn": "锐利贯注：锐痛（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PhysicalBless_support01_Icon_128.webp",
@@ -5610,7 +5610,7 @@
     },
     {
       "id": "7967",
-      "name_en": "Skill_PhysicalBless_support02",
+      "name_en": "Acuteness Focus: Sharpening (Magnificent)",
       "name_cn": "锐利贯注：砥砺（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PhysicalBless_support02_Icon_128.webp",
@@ -5621,7 +5621,7 @@
     },
     {
       "id": "7970",
-      "name_en": "Skill_ArcSlash_support01",
+      "name_en": "Crescent Slash: Raid (Magnificent)",
       "name_cn": "碎月弧光斩：强袭（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArcSlash_support01_Icon_128.webp",
@@ -5632,7 +5632,7 @@
     },
     {
       "id": "7971",
-      "name_en": "Skill_ArcSlash_support02",
+      "name_en": "Crescent Slash: Vile (Magnificent)",
       "name_cn": "碎月弧光斩：恶刃（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArcSlash_support02_Icon_128.webp",
@@ -5643,7 +5643,7 @@
     },
     {
       "id": "7974",
-      "name_en": "Skill_FlameSerpent_support01",
+      "name_en": "Serpent Beam: Barrage (Magnificent)",
       "name_cn": "流焰炎蛇引：火线（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameSerpent_support01_Icon_128.webp",
@@ -5654,7 +5654,7 @@
     },
     {
       "id": "7978",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Gale Slash: Onslaught (Magnificent)",
       "name_cn": "疾风裂地斩：突进（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -5665,7 +5665,7 @@
     },
     {
       "id": "7979",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Gale Slash: Dominance (Magnificent)",
       "name_cn": "疾风裂地斩：强横（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -5676,7 +5676,7 @@
     },
     {
       "id": "7982",
-      "name_en": "S12_LengJing_White01",
+      "name_en": "Spectral Slash: Detonation (Magnificent)",
       "name_cn": "分身灵爆斩：引爆（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/UI_S12_LengJing_White01.webp",
@@ -5687,7 +5687,7 @@
     },
     {
       "id": "7975",
-      "name_en": "Skill_FlameSerpent_support02",
+      "name_en": "Serpent Beam: Inferno (Magnificent)",
       "name_cn": "流焰炎蛇引：火海（华贵）",
       "type_cn": "华贵辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameSerpent_support02_Icon_128.webp",
@@ -5698,7 +5698,7 @@
     },
     {
       "id": "7707",
-      "name_en": "Skill_FireShoot_support03",
+      "name_en": "Burning Shot: Ignition (Noble)",
       "name_cn": "燃烧射击：纵火（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireShoot_support03_Icon_128.webp",
@@ -5709,7 +5709,7 @@
     },
     {
       "id": "7703",
-      "name_en": "Skill_FocusedShoot_support04",
+      "name_en": "Focused Shot: Power Bow (Noble)",
       "name_cn": "专注射击：强弓（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedShoot_support04_Icon_128.webp",
@@ -5720,7 +5720,7 @@
     },
     {
       "id": "7702",
-      "name_en": "Skill_FocusedShoot_support03",
+      "name_en": "Focused Shot: Building Momentum (Noble)",
       "name_cn": "专注射击：蓄锐（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedShoot_support03_Icon_128.webp",
@@ -5731,7 +5731,7 @@
     },
     {
       "id": "7704",
-      "name_en": "Skill_FocusedShoot_support05",
+      "name_en": "Focused Shot: Snipe (Noble)",
       "name_cn": "专注射击：狙击（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedShoot_support05_Icon_128.webp",
@@ -5742,7 +5742,7 @@
     },
     {
       "id": "7711",
-      "name_en": "Skill_LightningChain_support03",
+      "name_en": "Chain Lightning: Lucky (Noble)",
       "name_cn": "闪电链：幸运（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningChain_support03_Icon_128.webp",
@@ -5753,7 +5753,7 @@
     },
     {
       "id": "7708",
-      "name_en": "Skill_FireShoot_support04",
+      "name_en": "Burning Shot: Through Fire (Noble)",
       "name_cn": "燃烧射击：蹈火（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FireShoot_support04_Icon_128.webp",
@@ -5764,7 +5764,7 @@
     },
     {
       "id": "7715",
-      "name_en": "Skill_FocusedStrike_support03",
+      "name_en": "Focused Slash: Fervor (Noble)",
       "name_cn": "专注斩：战意（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedStrike_support03_Icon_128.webp",
@@ -5775,7 +5775,7 @@
     },
     {
       "id": "7712",
-      "name_en": "Skill_LightningChain_support04",
+      "name_en": "Chain Lightning: Merge (Noble)",
       "name_cn": "闪电链：合流（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningChain_support04_Icon_128.webp",
@@ -5786,7 +5786,7 @@
     },
     {
       "id": "7716",
-      "name_en": "Skill_FocusedStrike_support04",
+      "name_en": "Focused Slash: Behead (Noble)",
       "name_cn": "专注斩：斩首（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FocusedStrike_support04_Icon_128.webp",
@@ -5797,7 +5797,7 @@
     },
     {
       "id": "7720",
-      "name_en": "Skill_FrostSlash_support04",
+      "name_en": "Icy Blade: Hidden Edge (Noble)",
       "name_cn": "冰凌斩：藏锋（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostSlash_support04_Icon_128.webp",
@@ -5808,7 +5808,7 @@
     },
     {
       "id": "7722",
-      "name_en": "Skill_FlameSlash_support02",
+      "name_en": "Flame Slash: Inverted Blaze (Noble)",
       "name_cn": "烈焰斩：逆焚（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FlameSlash_support02_Icon_128.webp",
@@ -5819,7 +5819,7 @@
     },
     {
       "id": "7726",
-      "name_en": "Skill_VenomThrow_support03",
+      "name_en": "Corrosive Throw: Blitz Strike (Noble)",
       "name_cn": "侵蚀投掷：闪击（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_VenomThrow_support03_Icon_128.webp",
@@ -5830,7 +5830,7 @@
     },
     {
       "id": "7728",
-      "name_en": "Skill_SabotRounds_support02",
+      "name_en": "Blazing Bullet: Ignition Point (Noble)",
       "name_cn": "炽炎穿弹：燃点（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SabotRounds_support02_Icon_128.webp",
@@ -5841,7 +5841,7 @@
     },
     {
       "id": "7725",
-      "name_en": "Skill_VenomThrow_support02",
+      "name_en": "Corrosive Throw: Swift Strike (Noble)",
       "name_cn": "侵蚀投掷：迅击（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_VenomThrow_support02_Icon_128.webp",
@@ -5852,7 +5852,7 @@
     },
     {
       "id": "7723",
-      "name_en": "Skill_DoubleStab_support03",
+      "name_en": "Double Thrusts: Cutthroat (Noble)",
       "name_cn": "双重突刺：封喉（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DoubleStab_support03_Icon_128.webp",
@@ -5863,7 +5863,7 @@
     },
     {
       "id": "7729",
-      "name_en": "Skill_SabotRounds_support03",
+      "name_en": "Blazing Bullet: Dual Resonance (Noble)",
       "name_cn": "炽炎穿弹：双响（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SabotRounds_support03_Icon_128.webp",
@@ -5874,7 +5874,7 @@
     },
     {
       "id": "7733",
-      "name_en": "Skill_ViperStab_support04",
+      "name_en": "Wilt Spike: Evanescence (Noble)",
       "name_cn": "凋零刺击：幻灭（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViperStab_support04_Icon_128.webp",
@@ -5885,7 +5885,7 @@
     },
     {
       "id": "7732",
-      "name_en": "Skill_ViperStab_support03",
+      "name_en": "Wilt Spike: Mirage (Noble)",
       "name_cn": "凋零刺击：群影（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViperStab_support03_Icon_128.webp",
@@ -5896,7 +5896,7 @@
     },
     {
       "id": "7738",
-      "name_en": "Skill_Emberslam_support04",
+      "name_en": "Hammer of Ash: Blast Quake (Noble)",
       "name_cn": "灰烬之锤：震爆（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Emberslam_support04_Icon_128.webp",
@@ -5907,7 +5907,7 @@
     },
     {
       "id": "7737",
-      "name_en": "Skill_Emberslam_support03",
+      "name_en": "Hammer of Ash: Quickfire (Noble)",
       "name_cn": "灰烬之锤：急火（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Emberslam_support03_Icon_128.webp",
@@ -5918,7 +5918,7 @@
     },
     {
       "id": "7742",
-      "name_en": "Skill_IceCrash_support04",
+      "name_en": "Frost Impact: Chilling Buildup (Noble)",
       "name_cn": "寒霜破击：积寒（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceCrash_support04_Icon_128.webp",
@@ -5929,7 +5929,7 @@
     },
     {
       "id": "7746",
-      "name_en": "Skill_Cyclone_support03",
+      "name_en": "Whirlwind: Whirling Blade (Noble)",
       "name_cn": "旋风斩：飞刃（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Cyclone_support03_Icon_128.webp",
@@ -5940,7 +5940,7 @@
     },
     {
       "id": "7752",
-      "name_en": "Skill_SplitArrow_support03",
+      "name_en": "Split Shot: Collaboration (Noble)",
       "name_cn": "分裂射击：协力（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SplitArrow_support03_Icon_128.webp",
@@ -5951,7 +5951,7 @@
     },
     {
       "id": "7748",
-      "name_en": "Skill_LightningShoot_support02",
+      "name_en": "Lightning Shot: Crossed Lightning (Noble)",
       "name_cn": "闪电射击：交织（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningShoot_support02_Icon_128.webp",
@@ -5962,7 +5962,7 @@
     },
     {
       "id": "7753",
-      "name_en": "Skill_SplitArrow_support04",
+      "name_en": "Split Shot: Rapid Advance (Noble)",
       "name_cn": "分裂射击：长驱（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SplitArrow_support04_Icon_128.webp",
@@ -5973,7 +5973,7 @@
     },
     {
       "id": "7755",
-      "name_en": "Skill_Iceshot_support02",
+      "name_en": "Ice Shot: Batter (Noble)",
       "name_cn": "寒冰射击：冲击（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Iceshot_support02_Icon_128.webp",
@@ -5984,7 +5984,7 @@
     },
     {
       "id": "7758",
-      "name_en": "Skill_Strafe_support03",
+      "name_en": "Bombard: Fission (Noble)",
       "name_cn": "炮轰：裂变（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Strafe_support03_Icon_128.webp",
@@ -5995,7 +5995,7 @@
     },
     {
       "id": "7741",
-      "name_en": "Skill_IceCrash_support03",
+      "name_en": "Frost Impact: Chilling Surge (Noble)",
       "name_cn": "寒霜破击：骤寒（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_IceCrash_support03_Icon_128.webp",
@@ -6006,7 +6006,7 @@
     },
     {
       "id": "7759",
-      "name_en": "Skill_Strafe_support04",
+      "name_en": "Bombard: Grenade (Noble)",
       "name_cn": "炮轰：榴弹（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Strafe_support04_Icon_128.webp",
@@ -6017,7 +6017,7 @@
     },
     {
       "id": "7760",
-      "name_en": "Skill_Strafe_support05",
+      "name_en": "Bombard: Smokescreen (Noble)",
       "name_cn": "炮轰：烟幕（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Strafe_support05_Icon_128.webp",
@@ -6028,7 +6028,7 @@
     },
     {
       "id": "7763",
-      "name_en": "Skill_ViolentSweep_support02",
+      "name_en": "Berserking Blade: Decimate (Noble)",
       "name_cn": "暴走巨刃：残敌（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViolentSweep_support02_Icon_128.webp",
@@ -6039,7 +6039,7 @@
     },
     {
       "id": "7767",
-      "name_en": "Skill_ChargedSmash_support03",
+      "name_en": "Charged Pummel: Charge Reduction (Noble)",
       "name_cn": "充能猛击：降耗（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedSmash_support03_Icon_128.webp",
@@ -6050,7 +6050,7 @@
     },
     {
       "id": "7764",
-      "name_en": "Skill_ViolentSweep_support04",
+      "name_en": "Berserking Blade: Rampage (Noble)",
       "name_cn": "暴走巨刃：横行（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ViolentSweep_support04_Icon_128.webp",
@@ -6061,7 +6061,7 @@
     },
     {
       "id": "7768",
-      "name_en": "Skill_ChargedSmash_support04",
+      "name_en": "Charged Pummel: Electric Charge (Noble)",
       "name_cn": "充能猛击：蓄电（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedSmash_support04_Icon_128.webp",
@@ -6072,7 +6072,7 @@
     },
     {
       "id": "7771",
-      "name_en": "Skill_ShadowSlash_support03",
+      "name_en": "Moon Strike: Lunar Eclipse (Noble)",
       "name_cn": "月华斩：月蚀（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ShadowSlash_support03_Icon_128.webp",
@@ -6083,7 +6083,7 @@
     },
     {
       "id": "7772",
-      "name_en": "Skill_ShadowSlash_support04",
+      "name_en": "Moon Strike: Wax and Wane (Noble)",
       "name_cn": "月华斩：盈亏（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ShadowSlash_support04_Icon_128.webp",
@@ -6094,7 +6094,7 @@
     },
     {
       "id": "7778",
-      "name_en": "Skill_MarkerArrow_support03",
+      "name_en": "Marked Rain of Arrows: Hyper Blast (Noble)",
       "name_cn": "标记箭雨：高爆（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MarkerArrow_support03_Icon_128.webp",
@@ -6105,7 +6105,7 @@
     },
     {
       "id": "7779",
-      "name_en": "Skill_MarkerArrow_support04",
+      "name_en": "Marked Rain of Arrows: Threads of Arrows (Noble)",
       "name_cn": "标记箭雨：密缕（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_MarkerArrow_support04_Icon_128.webp",
@@ -6116,7 +6116,7 @@
     },
     {
       "id": "7775",
-      "name_en": "Skill_SavageCharge_support03",
+      "name_en": "Savage Charge: Raid (Noble)",
       "name_cn": "野蛮冲锋：突击（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_SavageCharge_support03_Icon_128.webp",
@@ -6127,7 +6127,7 @@
     },
     {
       "id": "7781",
-      "name_en": "Skill_PoisonBullet_support02",
+      "name_en": "Corrosive Shot: Degeneration (Noble)",
       "name_cn": "侵蚀弹：沦陷（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PoisonBullet_support02_Icon_128.webp",
@@ -6138,7 +6138,7 @@
     },
     {
       "id": "7784",
-      "name_en": "Skill_ChargedRainOfBullets_support02",
+      "name_en": "Inexhaustible Barrage: Fatal Pursuit (Noble)",
       "name_cn": "不竭弹雨：追歼（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedRainOfBullets_support02_Icon_128.webp",
@@ -6149,7 +6149,7 @@
     },
     {
       "id": "7785",
-      "name_en": "Skill_ChargedRainOfBullets_support03",
+      "name_en": "Inexhaustible Barrage: Landslide (Noble)",
       "name_cn": "不竭弹雨：倾泻（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ChargedRainOfBullets_support03_Icon_128.webp",
@@ -6160,7 +6160,7 @@
     },
     {
       "id": "7782",
-      "name_en": "Skill_PoisonBullet_support03",
+      "name_en": "Corrosive Shot: Burst of Agony (Noble)",
       "name_cn": "侵蚀弹：阵痛（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_PoisonBullet_support03_Icon_128.webp",
@@ -6171,7 +6171,7 @@
     },
     {
       "id": "7788",
-      "name_en": "Skill_LightningStab_support03",
+      "name_en": "Thunder Spike: Tremble (Noble)",
       "name_cn": "雷光刺击：震颤（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningStab_support03_Icon_128.webp",
@@ -6182,7 +6182,7 @@
     },
     {
       "id": "7789",
-      "name_en": "Skill_LightningStab_support02",
+      "name_en": "Thunder Spike: Rumbling Thunder (Noble)",
       "name_cn": "雷光刺击：奔雷（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_LightningStab_support02_Icon_128.webp",
@@ -6193,7 +6193,7 @@
     },
     {
       "id": "7796",
-      "name_en": "Skill_DiffusionBlade_support03",
+      "name_en": "Ring of Blades: Razor Edge (Noble)",
       "name_cn": "环绕飞刃：锋锐（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DiffusionBlade_support03_Icon_128.webp",
@@ -6204,7 +6204,7 @@
     },
     {
       "id": "7793",
-      "name_en": "Skill_ThunderSlash_support03",
+      "name_en": "Thunder Slash: Big Stride (Noble)",
       "name_cn": "雷影斩：阔步（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderSlash_support03_Icon_128.webp",
@@ -6215,7 +6215,7 @@
     },
     {
       "id": "7792",
-      "name_en": "Skill_ThunderSlash_support02",
+      "name_en": "Thunder Slash: Flurry (Noble)",
       "name_cn": "雷影斩：连斩（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ThunderSlash_support02_Icon_128.webp",
@@ -6226,7 +6226,7 @@
     },
     {
       "id": "7797",
-      "name_en": "Skill_DiffusionBlade_support04",
+      "name_en": "Ring of Blades: Strength in Numbers (Noble)",
       "name_cn": "环绕飞刃：众武（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_DiffusionBlade_support04_Icon_128.webp",
@@ -6237,7 +6237,7 @@
     },
     {
       "id": "7800",
-      "name_en": "Skill_FrostStab_support02",
+      "name_en": "Frost Spike: Ice Fission (Noble)",
       "name_cn": "碎冰刺击：冰裂（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostStab_support02_Icon_128.webp",
@@ -6248,7 +6248,7 @@
     },
     {
       "id": "7801",
-      "name_en": "Skill_FrostStab_support03",
+      "name_en": "Frost Spike: Glaciate (Noble)",
       "name_cn": "碎冰刺击：雪藏（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_FrostStab_support03_Icon_128.webp",
@@ -6259,7 +6259,7 @@
     },
     {
       "id": "7803",
-      "name_en": "Skill_RainOfArrows_support02",
+      "name_en": "Rain of Arrows: Payback (Noble)",
       "name_cn": "箭雨：奉还（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_RainOfArrows_support02_Icon_128.webp",
@@ -6270,7 +6270,7 @@
     },
     {
       "id": "7810",
-      "name_en": "Skill_Fireball_support02",
+      "name_en": "Split Firebolt: Focal Point (Noble)",
       "name_cn": "裂变火球：焦点（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_Fireball_support02_Icon_128.webp",
@@ -6281,7 +6281,7 @@
     },
     {
       "id": "7813",
-      "name_en": "Skill_ConeOfCold_support03",
+      "name_en": "Ice Lances: Bounce (Noble)",
       "name_cn": "冰锥术：跳弹（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ConeOfCold_support03_Icon_128.webp",
@@ -6292,7 +6292,7 @@
     },
     {
       "id": "7807",
-      "name_en": "Skill_ArrowSpirit_support03",
+      "name_en": "Arrow Einherjar: Fellowship (Noble)",
       "name_cn": "飞箭英灵：随行（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArrowSpirit_support03_Icon_128.webp",
@@ -6303,7 +6303,7 @@
     },
     {
       "id": "7806",
-      "name_en": "Skill_ArrowSpirit_support02",
+      "name_en": "Arrow Einherjar: Advancement (Noble)",
       "name_cn": "飞箭英灵：进阶（崇高）",
       "type_cn": "崇高辅助技能",
       "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Skill/CommonSkill/128/UI_Skill_ArrowSpirit_support02_Icon_128.webp",
