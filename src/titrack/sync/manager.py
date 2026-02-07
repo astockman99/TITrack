@@ -13,6 +13,7 @@ from typing import Callable, Optional
 
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
+from titrack.parser.patterns import FE_CONFIG_BASE_ID
 from titrack.sync.client import CloudClient, CloudPrice, CloudPriceHistory
 from titrack.sync.device import get_or_create_device_id
 
@@ -223,6 +224,10 @@ class SyncManager:
             prices_array: Full array of prices from AH search
         """
         if not self.is_enabled or not self.is_upload_enabled:
+            return
+
+        # FE is the base currency (always 1:1), never sync it
+        if config_base_id == FE_CONFIG_BASE_ID:
             return
 
         # Store in queue
@@ -575,7 +580,12 @@ class SyncManager:
         if not prices:
             return 0
 
-        # Upsert into cache
+        # Upsert into cache (skip FE - base currency is always 1:1)
+        prices = [p for p in prices if p.config_base_id != FE_CONFIG_BASE_ID]
+
+        if not prices:
+            return 0
+
         for price in prices:
             self.db.execute(
                 """
@@ -632,7 +642,7 @@ class SyncManager:
             """,
             (self._season_id,),
         )
-        item_ids = [r["config_base_id"] for r in rows] if rows else None
+        item_ids = [r["config_base_id"] for r in rows if r["config_base_id"] != FE_CONFIG_BASE_ID] if rows else None
         logger.info(f"Cloud sync: {len(item_ids) if item_ids else 0} inventory items need history download")
 
         # Fetch history (uses server-side RPC if item IDs available)
