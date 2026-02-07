@@ -5,6 +5,14 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Broken Native Window Rendering**: Fixed pywebview silently falling back to MSHTML (Internet Explorer) when WebView2 is unavailable, rendering unstyled HTML with non-functional buttons. Now forces EdgeChromium and falls back to browser mode with a message box linking to the WebView2 Runtime download.
+- **FE Price Spike in Sparklines**: Fixed bad cloud submissions for FE (Flame Elementium) causing price chart spikes. FE is the base currency (always 1:1) and is now excluded from cloud sync uploads, downloads, and history entirely.
+
+---
+
 ## [0.4.4] - 2026-02-07
 
 ### Fixed

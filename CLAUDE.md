@@ -209,7 +209,7 @@ The packaged EXE runs in a native window using pywebview (EdgeChromium on Window
 - **Window title**: "TITrack - Torchlight Infinite Loot Tracker"
 - **Default size**: 1280x800, minimum 800x600
 - **Shutdown**: Closing the window gracefully stops all services
-- **Browser fallback**: If pywebview/pythonnet fails (e.g., due to Windows MOTW blocking DLLs), the app automatically falls back to browser mode with an Exit button
+- **Browser fallback**: If WebView2 (EdgeChromium) is unavailable, the app shows a message box with a link to install the WebView2 Runtime and falls back to browser mode with an Exit button. The renderer is forced to EdgeChromium to prevent silent fallback to MSHTML (IE11) which cannot render modern CSS/JS.
 
 For debugging, run with `--no-window` flag to use browser mode instead:
 ```bash
@@ -626,6 +626,8 @@ TITrack supports opt-in cloud sync to share and receive community pricing data.
 2. If cloud sync is enabled, the price data is queued for upload
 3. Background threads upload your submissions and download community prices
 4. Community prices are used for inventory valuation and run value calculations
+
+**Note:** FE (Flame Elementium, ConfigBaseId 100300) is excluded from cloud sync entirely - it is the base currency and always valued at 1:1. This prevents bad submissions from corrupting sparklines or price calculations.
 
 ### Pricing Priority
 

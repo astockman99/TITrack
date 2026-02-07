@@ -19,17 +19,16 @@ TITrack runs in a native window by default. This requires:
 - Windows 10 or 11
 - WebView2 Runtime (pre-installed on Windows 11 and recent Windows 10)
 
-If the app doesn't open or shows a blank window:
+If WebView2 is not available, TITrack will show a message with a download
+link and automatically open in your default browser instead. Browser mode
+works identically to native window mode.
 
-1. Install WebView2 Runtime:
-   https://go.microsoft.com/fwlink/p/?LinkId=2124703
-
-2. If that doesn't help, install .NET 6 Desktop Runtime (x64):
-   https://dotnet.microsoft.com/download/dotnet/6.0
+To install WebView2 Runtime manually:
+   https://developer.microsoft.com/en-us/microsoft-edge/webview2/
 
 BROWSER MODE (FALLBACK)
 -----------------------
-If native window mode doesn't work on your system, you can run in browser mode:
+You can also force browser mode manually:
 
 1. Open Command Prompt in the TITrack folder
 2. Run: TITrack.exe serve --no-window
