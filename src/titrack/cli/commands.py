@@ -1047,11 +1047,18 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
 
         server_thread = threading.Thread(target=run_server, daemon=True)
         server_thread.start()
-        logger.info(f"Server started on port {args.port}")
 
-        # Wait briefly for server to start
+        # Wait for server to be ready before opening the window
         import time
-        time.sleep(0.5)
+        for _ in range(100):  # Up to 10 seconds
+            if server.started or server.should_exit:
+                break
+            time.sleep(0.1)
+
+        if not server.started:
+            logger.warning("Server did not start within 10 seconds")
+
+        logger.info(f"Server started on port {args.port}")
 
         # Create and run the native window
         def on_closing():
