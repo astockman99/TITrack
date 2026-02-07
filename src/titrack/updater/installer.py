@@ -159,6 +159,20 @@ if "%ERRORLEVEL%"=="0" (
     goto waitloop
 )
 
+REM Kill overlay if still running (it file-locks TITrackOverlay.exe)
+tasklist /FI "IMAGENAME eq TITrackOverlay.exe" 2>NUL | find /I /N "TITrackOverlay.exe">NUL
+if "%ERRORLEVEL%"=="0" (
+    echo Closing overlay...
+    taskkill /IM TITrackOverlay.exe >nul 2>&1
+)
+
+:waitoverlay
+tasklist /FI "IMAGENAME eq TITrackOverlay.exe" 2>NUL | find /I /N "TITrackOverlay.exe">NUL
+if "%ERRORLEVEL%"=="0" (
+    timeout /t 1 /nobreak >nul
+    goto waitoverlay
+)
+
 echo Applying update...
 timeout /t 2 /nobreak >nul
 
@@ -210,9 +224,16 @@ exit /b 0
             return False
 
         try:
-            # Start the update script in a new process
             import subprocess
 
+            # Kill overlay process before exiting so it doesn't file-lock
+            # TITrackOverlay.exe and prevent the update from overwriting it
+            subprocess.run(
+                ["taskkill", "/IM", "TITrackOverlay.exe"],
+                capture_output=True,
+            )
+
+            # Start the update script in a new process
             subprocess.Popen(
                 ["cmd", "/c", str(script_path)],
                 creationflags=subprocess.CREATE_NEW_CONSOLE,
