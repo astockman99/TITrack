@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "titrack"
-version = "0.4.4"
+version = "0.4.5"
 description = "Torchlight Infinite Local Loot Tracker"
 readme = "README.md"
 requires-python = ">=3.11"

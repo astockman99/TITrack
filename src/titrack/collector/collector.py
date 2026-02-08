@@ -33,6 +33,11 @@ from titrack.parser.exchange_parser import (
 from titrack.parser.player_parser import PlayerInfo, get_effective_player_id
 from titrack.data.inventory import EXCLUDED_PAGES
 
+# Proto names for non-loot inventory changes (trade house, recycling, etc.).
+# These update inventory (slot state) but should NOT create deltas
+# because they are not map loot.
+EXCLUDED_PROTO_NAMES = {"Push2", "XchgReceive", "ExchangeItem"}
+
 
 class Collector:
     """
@@ -391,6 +396,10 @@ class Collector:
         # For init events (inventory snapshot), only update slot state, don't create deltas
         # This prevents pollution of loot tracking when user sorts inventory
         if event.is_init:
+            return
+
+        # Non-loot events (trade house, recycling): update slot state but don't track as loot
+        if self._current_proto_name in EXCLUDED_PROTO_NAMES:
             return
 
         # Buffer map costs to associate with next run

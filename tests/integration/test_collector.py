@@ -285,6 +285,107 @@ class TestCollectorIntegration:
         assert misc_state.config_base_id == 440004
         assert misc_state.num == 2
 
+    def test_exchange_events_update_state_without_delta(self, test_env):
+        """Test that Push2/XchgReceive/ExchangeItem events update slot state but don't create deltas."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        # Seed initial slot state via an init line so the collector knows what's in slot 0
+        log_content = """\
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 41 ConfigBaseId = 5144 Num = 10
+[2026.01.28-10.01.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 start
+[2026.01.28-10.01.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 1500
+[2026.01.28-10.01.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 end
+[2026.01.28-10.01.01:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=XchgReceive start
+[2026.01.28-10.01.01:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 1500
+[2026.01.28-10.01.01:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=XchgReceive end
+[2026.01.28-10.02.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=ExchangeItem start
+[2026.01.28-10.02.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 41 ConfigBaseId = 5144 Num = 14
+[2026.01.28-10.02.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=ExchangeItem end
+"""
+        log_path = tmpdir / "exchange_test.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # No deltas should be created (exchange/recycle events are not loot)
+        assert len(deltas_received) == 0
+
+        # But slot state should reflect the trade house sale
+        fe_state = repo.get_slot_state(102, 0)
+        assert fe_state is not None
+        assert fe_state.config_base_id == FE_CONFIG_BASE_ID
+        assert fe_state.num == 1500
+
+        # Slot state should reflect recycled items too
+        recycle_state = repo.get_slot_state(102, 41)
+        assert recycle_state is not None
+        assert recycle_state.config_base_id == 5144
+        assert recycle_state.num == 14
+
+    def test_exchange_events_during_map_run_no_delta(self, test_env):
+        """Test that exchange events inside a map run don't create deltas."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        # Enter a map, pick up some FE, then collect a trade house sale, pick up more
+        log_content = """\
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
+[2026.01.28-10.00.05:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/02KD/KD_YuanSuKuangDong000/KD_YuanSuKuangDong000
+[2026.01.28-10.00.30:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
+[2026.01.28-10.00.30:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 550
+[2026.01.28-10.00.30:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
+[2026.01.28-10.01.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 start
+[2026.01.28-10.01.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 1550
+[2026.01.28-10.01.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 end
+[2026.01.28-10.01.30:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
+[2026.01.28-10.01.30:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 1600
+[2026.01.28-10.01.30:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
+[2026.01.28-10.05.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200
+"""
+        log_path = tmpdir / "exchange_in_map.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Only PickItems deltas should exist (50 + 50 = 100 FE from loot)
+        assert all(d.proto_name == "PickItems" for d in deltas_received)
+        total_loot = sum(d.delta for d in deltas_received)
+        assert total_loot == 100  # 50 from first pickup + 50 from second pickup
+
+        # Final slot state should include the exchange amount
+        fe_state = repo.get_slot_state(102, 0)
+        assert fe_state.num == 1600
+
+        # Verify the map run only has 100 FE of loot, not 1100
+        runs = repo.get_recent_runs(limit=10)
+        map_runs = [r for r in runs if not r.is_hub]
+        assert len(map_runs) >= 1
+        map_run = map_runs[0]
+        summary = repo.get_run_summary(map_run.id)
+        assert summary[FE_CONFIG_BASE_ID] == 100
+
     def test_init_bag_followed_by_pickup(self, test_env):
         """Test that init events set baseline for subsequent pickup deltas."""
         db = test_env["db"]

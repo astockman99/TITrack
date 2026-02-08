@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.4.5] - 2026-02-08
+
 ### Fixed
+- **Trade House Sales Counted as Map Loot**: Fixed collecting trade house (Exchange) sales while inside a map being counted as loot drops, skewing Value/Hour, Value/Map, and loot report stats. Events with proto names `Push2` and `XchgReceive` now update inventory (net worth) without creating deltas.
+- **Item Recycling Counted as Map Loot**: Fixed recycling items (e.g., memories → Memory Thread) while inside a map being counted as loot drops. The `ExchangeItem` proto name is now excluded from delta tracking.
 - **Broken Native Window Rendering**: Fixed pywebview silently falling back to MSHTML (Internet Explorer) when WebView2 is unavailable, rendering unstyled HTML with non-functional buttons. Now forces EdgeChromium and falls back to browser mode with a message box linking to the WebView2 Runtime download.
 - **FE Price Spike in Sparklines**: Fixed bad cloud submissions for FE (Flame Elementium) causing price chart spikes. FE is the base currency (always 1:1) and is now excluded from cloud sync uploads, downloads, and history entirely.
 - **Skill Item Names**: Fixed 543 skill items showing internal icon-filename placeholders (e.g., `SkillIcon_Support_ProtectWhenChanneling`) instead of proper English names (e.g., "Guard"). All 6 skill categories updated: Active, Support, Passive, Activation Medium, Magnificent, and Noble. Existing users get corrected names automatically on next launch.

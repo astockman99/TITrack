@@ -170,6 +170,7 @@ LevelMgr@ OpenLevel ...
 - Handle unknown ConfigBaseIds gracefully (show as "Unknown <id>")
 - `InitBagData` events update slot state but don't create deltas (used for inventory sync)
 - `RemoveBagItem` events fire when a slot is fully emptied (last item consumed). Has no ConfigBaseId/Num — lookup existing slot state to determine what was removed, then treat as Num=0.
+- Non-loot proto names (`Push2`, `XchgReceive`, `ExchangeItem`) update slot state but don't create deltas. These are trade house sales and item recycling — not map loot.
 
 ## Database Schema (Core Tables)
 
@@ -415,6 +416,7 @@ Click "Export CSV" to save the report. A native "Save As" dialog lets you choose
 ### Data Filtering
 
 - Only includes items picked up during map runs (excludes trade house purchases, crafting, etc.)
+- Excludes non-loot events: trade house sales (`Push2`, `XchgReceive`) and item recycling (`ExchangeItem`) — these update inventory/net worth but don't create deltas
 - Excludes map costs (Spv3Open events) from loot totals
 - Excludes gear page items (PageId 100)
 - Respects Trade Tax setting when calculating values
