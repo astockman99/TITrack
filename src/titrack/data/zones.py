@@ -91,6 +91,7 @@ ZONE_NAMES = {
 
     # Secret Realms
     "HD_YingGuangDianTang": "Secret Realm - Invaluable Time",
+    "HD_EMengZhiXia": "Secret Realm - Sea of Rites",
     "BZ_NaGouZhiXi": "Secret Realm - Unholy Pedestal",
 
     # Mistville (legacy league mechanic)
