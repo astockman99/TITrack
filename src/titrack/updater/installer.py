@@ -176,6 +176,22 @@ if "%ERRORLEVEL%"=="0" (
 echo Applying update...
 timeout /t 2 /nobreak >nul
 
+REM Verify TITrack.exe is unlocked before copying (Windows can hold locks briefly after exit)
+set RETRY=0
+:waitunlock
+set /a RETRY+=1
+ren "{app_dir}\\TITrack.exe" "TITrack.exe.old" >nul 2>&1
+if errorlevel 1 (
+    if %RETRY% LSS 10 (
+        echo Waiting for file lock to release... (attempt %RETRY%)
+        timeout /t 2 /nobreak >nul
+        goto waitunlock
+    )
+    echo WARNING: Could not verify file unlock, attempting copy anyway...
+) else (
+    ren "{app_dir}\\TITrack.exe.old" "TITrack.exe" >nul 2>&1
+)
+
 REM Copy new files (preserve data directory)
 xcopy /E /Y /I "{update_dir}\\*" "{app_dir}\\" >nul 2>&1
 
