@@ -27,6 +27,9 @@ router = APIRouter(prefix="/api/runs", tags=["runs"])
 # Level type constants (from game logs)
 LEVEL_TYPE_NORMAL = 3
 LEVEL_TYPE_NIGHTMARE = 11
+# Sub-zone level types: zones entered from within a map that shouldn't break the session.
+# These are kept as separate run entries but the surrounding map runs are recombined.
+SUB_ZONE_LEVEL_TYPES = {19}  # 19 = Fateful Contest (Arcana mechanic)
 
 
 class ResetResponse(BaseModel):
@@ -113,10 +116,11 @@ def _consolidate_runs(
     2. Are consecutive (no hub visit in between)
 
     Normal runs (level_type=3) are merged into one entry.
-    Nightmare runs (level_type=11) are kept separate with is_nightmare=True.
+    Sub-zone runs (nightmare level_type=11, fateful contest level_type=19, etc.)
+    are kept separate with is_nightmare=True.
 
-    This handles the Twinightmare mechanic where entering nightmare
-    creates a zone transition but it's part of the same map run.
+    Sub-zone runs with different level_uids (e.g., Fateful Contest) don't break
+    the session, so the surrounding map parts are recombined.
     """
     # Sort all runs by start time (ascending) to detect consecutive runs
     sorted_runs = sorted(all_runs_including_hubs, key=lambda r: r.start_ts)
@@ -134,6 +138,10 @@ def _consolidate_runs(
                 sessions.append(current_session)
                 current_session = []
                 current_uid = None
+        elif run.level_type in SUB_ZONE_LEVEL_TYPES:
+            # Sub-zone run (e.g., Fateful Contest) - save separately,
+            # don't break current session so surrounding map runs recombine
+            sessions.append([run])
         else:
             # Non-hub run
             if run.level_uid is None:
@@ -163,9 +171,15 @@ def _consolidate_runs(
         if not session_runs:
             continue
 
-        # Separate nightmare runs from normal runs within the session
-        normal_runs = [r for r in session_runs if r.level_type != LEVEL_TYPE_NIGHTMARE]
-        nightmare_runs = [r for r in session_runs if r.level_type == LEVEL_TYPE_NIGHTMARE]
+        # Separate sub-zone runs (nightmare, fateful contest, etc.) from normal runs
+        normal_runs = [
+            r for r in session_runs
+            if r.level_type != LEVEL_TYPE_NIGHTMARE and r.level_type not in SUB_ZONE_LEVEL_TYPES
+        ]
+        sub_zone_runs = [
+            r for r in session_runs
+            if r.level_type == LEVEL_TYPE_NIGHTMARE or r.level_type in SUB_ZONE_LEVEL_TYPES
+        ]
 
         # Consolidate normal runs into one entry
         if normal_runs:
@@ -233,8 +247,8 @@ def _consolidate_runs(
                 )
             )
 
-        # Keep nightmare runs separate
-        for run in nightmare_runs:
+        # Keep sub-zone runs (nightmare, fateful contest, etc.) separate
+        for run in sub_zone_runs:
             summary = repo.get_run_summary(run.id)
             fe_gained, total_value = repo.get_run_value(run.id)
 
@@ -251,10 +265,14 @@ def _consolidate_runs(
                     net_value = round(total_value - cost_value, 2)
                     has_unpriced_costs = bool(unpriced)
 
+            zone_name = get_zone_display_name(run.zone_signature, run.level_id)
+            if run.level_type == LEVEL_TYPE_NIGHTMARE:
+                zone_name += " (Nightmare)"
+
             result.append(
                 RunResponse(
                     id=run.id,
-                    zone_name=get_zone_display_name(run.zone_signature, run.level_id) + " (Nightmare)",
+                    zone_name=zone_name,
                     zone_signature=run.zone_signature,
                     start_ts=run.start_ts,
                     end_ts=run.end_ts,
@@ -711,9 +729,12 @@ def get_run(
             net_value = round(total_value - cost_value, 2)
             has_unpriced_costs = bool(unpriced)
 
-    is_nightmare = run.level_type == LEVEL_TYPE_NIGHTMARE
+    is_nightmare = (
+        run.level_type == LEVEL_TYPE_NIGHTMARE
+        or run.level_type in SUB_ZONE_LEVEL_TYPES
+    )
     zone_name = get_zone_display_name(run.zone_signature, run.level_id)
-    if is_nightmare:
+    if run.level_type == LEVEL_TYPE_NIGHTMARE:
         zone_name += " (Nightmare)"
 
     return RunResponse(

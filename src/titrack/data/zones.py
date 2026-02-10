@@ -94,6 +94,9 @@ ZONE_NAMES = {
     "HD_EMengZhiXia": "Secret Realm - Sea of Rites",
     "BZ_NaGouZhiXi": "Secret Realm - Unholy Pedestal",
 
+    # Arcana (league mechanic sub-zone)
+    "SuMingTaLuo": "Fateful Contest",
+
     # Mistville (legacy league mechanic)
     "WuDuYiZhi": "Mistville",
 
