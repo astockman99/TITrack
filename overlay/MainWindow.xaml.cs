@@ -25,6 +25,7 @@ public partial class MainWindow : Window
 
     // Overlay settings
     private bool _hideLoot = false;
+    private bool _hideLootInitialized = false;
     private double _savedHeight = 500;
     private const double CompactMinHeight = 120;
 
@@ -239,6 +240,7 @@ public partial class MainWindow : Window
 
     private async Task LoadHideLootAsync()
     {
+        bool newHideLoot = _hideLoot;
         try
         {
             var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_hide_loot");
@@ -249,7 +251,7 @@ public partial class MainWindow : Window
                 if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
                     valueElement.ValueKind != JsonValueKind.Null)
                 {
-                    _hideLoot = valueElement.GetString() == "true";
+                    newHideLoot = valueElement.GetString() == "true";
                 }
             }
         }
@@ -257,6 +259,13 @@ public partial class MainWindow : Window
         {
             // Use default on error
         }
+
+        // Only apply layout changes when the setting actually changes
+        if (newHideLoot == _hideLoot && _hideLootInitialized)
+            return;
+
+        _hideLoot = newHideLoot;
+        _hideLootInitialized = true;
 
         LootSectionBorder.Visibility = _hideLoot ? Visibility.Collapsed : Visibility.Visible;
         ResizeGrip.Visibility = _hideLoot ? Visibility.Collapsed : Visibility.Visible;
