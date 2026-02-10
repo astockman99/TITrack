@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Zone Name**: Added translation for Secret Realm - Sea of Rites (`HD_EMengZhiXia`)
+
 ---
 
 ## [0.4.5] - 2026-02-08
