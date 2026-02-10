@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Overlay Resize Snap-Back**: Fixed overlay window snapping back to its default size after the user resized it, caused by the hide-loot setting check resetting the height every 2 seconds
 - **Zone Name**: Added translation for Secret Realm - Sea of Rites (`HD_EMengZhiXia`)
+
+### Improved
+- **Overlay Responsive Padding**: Overlay padding and margins now scale proportionally when the window is resized smaller, allowing a much more compact layout (minimum width reduced from 280px to 180px)
 
 ---
 

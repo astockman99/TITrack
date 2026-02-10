@@ -238,7 +238,7 @@ The overlay is a **separate native WPF application** (`TITrackOverlay.exe`) that
 
 - **Always-on-top**: Stays above the game window (toggleable via pin button)
 - **True transparency**: Full background transparency with text drop shadows for visibility
-- **Compact layout**: ~320x500px showing essential stats
+- **Compact layout**: Default 320x500px, resizable down to 180px wide with responsive padding
 - **Frameless window**: Clean look without title bar, draggable via header
 - **Click-through**: Stats and loot areas pass clicks to the game; header/buttons/resize remain interactive
 - **Fast refresh**: Updates every 2 seconds
@@ -290,7 +290,7 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 - **✕ button**: Close overlay
 - **Header area**: Drag to move window
 - **Double-click header**: Reset window position
-- **Corner grip**: Resize window
+- **Corner grip**: Resize window (padding scales proportionally when shrinking below default size)
 - **Stats/Loot areas**: Click-through (passes clicks to game underneath)
 - **Hide Loot Pickups**: Toggle in Settings → Overlay to hide loot section for compact stats-only mode (overlay auto-resizes)
 

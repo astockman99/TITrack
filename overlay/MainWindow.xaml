@@ -3,13 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="TITrack Overlay"
         Width="320" Height="500"
-        MinWidth="280" MinHeight="300"
+        MinWidth="180" MinHeight="200"
         WindowStyle="None"
         AllowsTransparency="True"
         Topmost="True"
         ResizeMode="CanResizeWithGrip"
         ShowInTaskbar="True"
-        Background="Transparent">
+        Background="Transparent"
+        SizeChanged="Window_SizeChanged">
 
     <Window.Resources>
         <!-- Drop shadow effect for text visibility in transparent mode -->
@@ -113,7 +114,7 @@
                     Background="#e02a2a4a"
                     CornerRadius="8,8,0,0"
                     MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <Grid Margin="10,8">
+                <Grid x:Name="HeaderGrid" Margin="10,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />

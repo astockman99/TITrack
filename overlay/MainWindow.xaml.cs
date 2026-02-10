@@ -28,6 +28,8 @@ public partial class MainWindow : Window
     private bool _hideLootInitialized = false;
     private double _savedHeight = 500;
     private const double CompactMinHeight = 120;
+    private const double DefaultWidth = 320;
+    private const double MinPaddingScale = 0.25;
 
     // Track previous run to show after map ends
     private ActiveRunResponse? _previousRun = null;
@@ -147,6 +149,43 @@ public partial class MainWindow : Window
         {
             DragMove();
         }
+    }
+
+    private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // Scale padding proportionally as window shrinks below default width
+        double scale = Math.Clamp(ActualWidth / DefaultWidth, MinPaddingScale, 1.0);
+
+        double outerH = Math.Round(8 * scale);
+        double outerV = Math.Round(6 * scale);
+        double headerH = Math.Round(10 * scale);
+        double headerV = Math.Round(8 * scale);
+        double statPad = Math.Round(6 * scale);
+        double statGap = Math.Round(3 * scale);
+        double statRowGap = Math.Round(6 * scale);
+        double zoneH = Math.Round(8 * scale);
+        double zoneV = Math.Round(6 * scale);
+
+        HeaderGrid.Margin = new Thickness(headerH, headerV, headerH, headerV);
+        StatsGrid.Margin = new Thickness(outerH, outerV, outerH, 0);
+        LootSectionBorder.Margin = new Thickness(outerH, outerV, outerH, outerH);
+        ZoneHeaderBorder.Padding = new Thickness(zoneH, zoneV, zoneH, zoneV);
+
+        // Stat box padding and gap margins
+        var pad = new Thickness(statPad);
+        ThisRunBox.Padding = pad;
+        ValuePerHourBox.Padding = pad;
+        ValuePerMapBox.Padding = pad;
+        RunsBox.Padding = pad;
+        AvgTimeBox.Padding = pad;
+        TotalTimeBox.Padding = pad;
+
+        ThisRunBox.Margin = new Thickness(0, 0, statGap, statRowGap);
+        ValuePerHourBox.Margin = new Thickness(statGap, 0, 0, statRowGap);
+        ValuePerMapBox.Margin = new Thickness(0, 0, statGap, statRowGap);
+        RunsBox.Margin = new Thickness(statGap, 0, 0, statRowGap);
+        AvgTimeBox.Margin = new Thickness(0, 0, statGap, 0);
+        TotalTimeBox.Margin = new Thickness(statGap, 0, 0, 0);
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
