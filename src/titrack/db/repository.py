@@ -765,6 +765,37 @@ class Repository:
 
         return summary, total_cost, unpriced
 
+    # --- Hidden Items ---
+
+    def get_hidden_items(self) -> set[int]:
+        """Get set of hidden config_base_ids for current player."""
+        player_id = self._current_player_id or ""
+        rows = self.db.fetchall(
+            "SELECT config_base_id FROM hidden_items WHERE player_id = ?",
+            (player_id,),
+        )
+        return {row["config_base_id"] for row in rows}
+
+    def set_hidden_items(self, hidden_ids: set[int]) -> None:
+        """Replace hidden items list for current player (transactional)."""
+        player_id = self._current_player_id or ""
+        with self.db.transaction() as cursor:
+            cursor.execute(
+                "DELETE FROM hidden_items WHERE player_id = ?", (player_id,)
+            )
+            for config_id in hidden_ids:
+                cursor.execute(
+                    "INSERT INTO hidden_items (player_id, config_base_id) VALUES (?, ?)",
+                    (player_id, config_id),
+                )
+
+    def clear_hidden_items(self) -> None:
+        """Clear all hidden items for current player."""
+        player_id = self._current_player_id or ""
+        self.db.execute(
+            "DELETE FROM hidden_items WHERE player_id = ?", (player_id,)
+        )
+
     # --- Data Management ---
 
     def clear_run_data(self) -> int:

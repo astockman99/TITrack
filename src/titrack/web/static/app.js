@@ -45,6 +45,10 @@ let updateCheckInterval = null;
 let inventorySortBy = 'value';
 let inventorySortOrder = 'desc';
 
+// Hidden items state
+let hiddenItemIds = new Set();
+let hideItemsModalSort = 'value';
+
 // --- API Calls ---
 
 async function fetchJson(endpoint) {
@@ -1498,6 +1502,154 @@ document.addEventListener('keydown', (e) => {
         closePriceHistoryModal();
         closeSettingsModal();
         closeLootReportModal();
+        closeHideItemsModal();
+    }
+});
+
+// --- Hide Items Modal ---
+
+async function fetchHiddenItems() {
+    try {
+        const res = await fetch(`${API_BASE}/inventory/hidden`);
+        if (!res.ok) return new Set();
+        const data = await res.json();
+        return new Set(data.hidden_ids || []);
+    } catch { return new Set(); }
+}
+
+async function saveHiddenItemsToServer(ids) {
+    try {
+        await fetch(`${API_BASE}/inventory/hidden`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hidden_ids: Array.from(ids) }),
+        });
+    } catch (e) { console.error('Failed to save hidden items:', e); }
+}
+
+function updateHideItemsButton() {
+    const btn = document.getElementById('hide-items-btn');
+    if (!btn) return;
+    const count = hiddenItemIds.size;
+    btn.textContent = count > 0 ? `Hide Items (${count})` : 'Hide Items';
+}
+
+async function openHideItemsModal() {
+    const modal = document.getElementById('hide-items-modal');
+    // Fetch full inventory (include hidden items)
+    try {
+        const res = await fetch(`${API_BASE}/inventory?include_hidden=true`);
+        if (!res.ok) return;
+        const data = await res.json();
+        modal._allItems = data.items || [];
+    } catch { return; }
+
+    // Refresh hidden ids from server
+    hiddenItemIds = await fetchHiddenItems();
+    // Store a working copy for the modal
+    modal._pendingHidden = new Set(hiddenItemIds);
+    hideItemsModalSort = 'value';
+    // Reset sortable header state
+    const qtyTh = document.getElementById('hide-sort-quantity').closest('th');
+    const valTh = document.getElementById('hide-sort-value').closest('th');
+    qtyTh.classList.remove('active');
+    valTh.classList.add('active', 'desc');
+    renderHideItemsTable();
+    modal.classList.remove('hidden');
+}
+
+function closeHideItemsModal() {
+    document.getElementById('hide-items-modal').classList.add('hidden');
+}
+
+function sortHideItemsTable(sortBy) {
+    hideItemsModalSort = sortBy;
+    // Update sortable header classes
+    const qtyTh = document.getElementById('hide-sort-quantity').closest('th');
+    const valTh = document.getElementById('hide-sort-value').closest('th');
+    qtyTh.classList.toggle('active', sortBy === 'quantity');
+    qtyTh.classList.add('desc');
+    valTh.classList.toggle('active', sortBy === 'value');
+    valTh.classList.add('desc');
+    renderHideItemsTable();
+}
+
+function renderHideItemsTable() {
+    const modal = document.getElementById('hide-items-modal');
+    const items = [...(modal._allItems || [])];
+    const pending = modal._pendingHidden || new Set();
+
+    // Sort
+    if (hideItemsModalSort === 'value') {
+        items.sort((a, b) => (b.total_value_fe || 0) - (a.total_value_fe || 0));
+    } else {
+        items.sort((a, b) => b.quantity - a.quantity);
+    }
+
+    const tbody = document.getElementById('hide-items-body');
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">No items in inventory</td></tr>';
+        updateHideItemsCount(pending);
+        return;
+    }
+
+    tbody.innerHTML = items.map(item => {
+        const checked = pending.has(item.config_base_id);
+        const iconHtml = getIconHtml(item.config_base_id, 'item-icon');
+        const valueStr = item.total_value_fe ? formatFEValue(item.total_value_fe) : '--';
+        return `
+            <tr class="${checked ? 'hide-items-row-hidden' : ''}">
+                <td><input type="checkbox" data-id="${item.config_base_id}" ${checked ? 'checked' : ''}
+                    onchange="toggleHideItem(${item.config_base_id}, this.checked)"></td>
+                <td><div class="item-name-cell">${iconHtml}<span>${escapeHtml(item.name)}</span></div></td>
+                <td>${formatNumber(item.quantity)}</td>
+                <td>${valueStr}</td>
+            </tr>`;
+    }).join('');
+    updateHideItemsCount(pending);
+}
+
+function toggleHideItem(configBaseId, isChecked) {
+    const modal = document.getElementById('hide-items-modal');
+    const pending = modal._pendingHidden || new Set();
+    if (isChecked) {
+        pending.add(configBaseId);
+    } else {
+        pending.delete(configBaseId);
+    }
+    modal._pendingHidden = pending;
+    // Update row styling
+    const checkbox = document.querySelector(`#hide-items-body input[data-id="${configBaseId}"]`);
+    if (checkbox) {
+        checkbox.closest('tr').classList.toggle('hide-items-row-hidden', isChecked);
+    }
+    updateHideItemsCount(pending);
+}
+
+function updateHideItemsCount(pending) {
+    const el = document.getElementById('hide-items-count');
+    if (el) {
+        const count = pending.size;
+        el.textContent = count > 0 ? `${count} item${count !== 1 ? 's' : ''} hidden` : '';
+    }
+}
+
+async function saveHideItems() {
+    const modal = document.getElementById('hide-items-modal');
+    const pending = modal._pendingHidden || new Set();
+    hiddenItemIds = new Set(pending);
+    await saveHiddenItemsToServer(hiddenItemIds);
+    updateHideItemsButton();
+    closeHideItemsModal();
+    // Force inventory re-render
+    lastInventoryHash = null;
+    refreshAll(true);
+}
+
+// Close hide items modal on outside click
+document.getElementById('hide-items-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'hide-items-modal') {
+        closeHideItemsModal();
     }
 });
 
@@ -2449,6 +2601,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load initial map costs state
     mapCostsEnabled = await fetchMapCostsSetting();
+
+    // Load hidden items
+    hiddenItemIds = await fetchHiddenItems();
+    updateHideItemsButton();
 
     // Set up cloud sync toggle
     const cloudSyncToggle = document.getElementById('cloud-sync-toggle');

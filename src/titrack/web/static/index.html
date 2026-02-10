@@ -119,7 +119,7 @@
             </div>
 
             <section class="panel">
-                <h2>Current Inventory</h2>
+                <h2>Current Inventory <button class="hide-items-btn" id="hide-items-btn" onclick="openHideItemsModal()">Hide Items</button></h2>
                 <table id="inventory-table">
                     <thead>
                         <tr>
@@ -470,6 +470,37 @@
                 <div class="modal-actions" id="update-actions">
                     <button onclick="downloadAndInstallUpdate()" class="save-btn" id="update-download-btn">Download & Install</button>
                     <button onclick="closeUpdateModal()" class="cancel-btn">Later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="hide-items-modal" class="modal hidden">
+        <div class="modal-content hide-items-modal-content">
+            <div class="modal-header">
+                <h3>Hide Items from Inventory</h3>
+                <button class="close-btn" onclick="closeHideItemsModal()">&times;</button>
+            </div>
+            <div class="hide-items-body">
+                <p class="hide-items-hint">Check items to hide from inventory display. Hidden items still count toward net worth.</p>
+                <div class="hide-items-table-container">
+                    <table class="hide-items-table">
+                        <thead>
+                            <tr>
+                                <th class="hide-col-check"></th>
+                                <th>Item</th>
+                                <th class="sortable" onclick="sortHideItemsTable('quantity')">Qty <span class="sort-indicator" id="hide-sort-quantity"></span></th>
+                                <th class="sortable active desc" onclick="sortHideItemsTable('value')">Value <span class="sort-indicator" id="hide-sort-value"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="hide-items-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-actions">
+                    <span class="hide-items-count" id="hide-items-count"></span>
+                    <button onclick="saveHideItems()" class="save-btn">Save</button>
+                    <button onclick="closeHideItemsModal()" class="cancel-btn">Cancel</button>
                 </div>
             </div>
         </div>

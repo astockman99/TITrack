@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Hide Items from Inventory**: New "Hide Items" button on the inventory panel lets you hide items you don't care about (e.g., beacons bought for mapping). Hidden items are removed from the inventory list but still count toward net worth. Per-character, persists across sessions.
+
 ### Fixed
 - **Overlay Resize Snap-Back**: Fixed overlay window snapping back to its default size after the user resized it, caused by the hide-loot setting check resetting the height every 2 seconds
 - **Zone Name**: Added translation for Secret Realm - Sea of Rites (`HD_EMengZhiXia`)

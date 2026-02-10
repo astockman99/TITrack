@@ -335,3 +335,46 @@ class TestLogPositionRepository:
     def test_get_position_when_empty(self, repo):
         result = repo.get_log_position()
         assert result is None
+
+
+class TestHiddenItemsRepository:
+    """Tests for hidden items CRUD."""
+
+    def test_get_hidden_items_empty(self, repo):
+        hidden = repo.get_hidden_items()
+        assert hidden == set()
+
+    def test_set_and_get_hidden_items(self, repo):
+        repo.set_hidden_items({100300, 200001})
+        hidden = repo.get_hidden_items()
+        assert hidden == {100300, 200001}
+
+    def test_set_hidden_items_replaces(self, repo):
+        repo.set_hidden_items({100300, 200001})
+        repo.set_hidden_items({300001})
+        hidden = repo.get_hidden_items()
+        assert hidden == {300001}
+
+    def test_set_empty_clears(self, repo):
+        repo.set_hidden_items({100300})
+        repo.set_hidden_items(set())
+        hidden = repo.get_hidden_items()
+        assert hidden == set()
+
+    def test_clear_hidden_items(self, repo):
+        repo.set_hidden_items({100300, 200001})
+        repo.clear_hidden_items()
+        hidden = repo.get_hidden_items()
+        assert hidden == set()
+
+    def test_hidden_items_per_player(self, db):
+        repo1 = Repository(db)
+        repo1.set_player_context(season_id=1, player_id="player_a")
+        repo1.set_hidden_items({100300})
+
+        repo2 = Repository(db)
+        repo2.set_player_context(season_id=1, player_id="player_b")
+        repo2.set_hidden_items({200001})
+
+        assert repo1.get_hidden_items() == {100300}
+        assert repo2.get_hidden_items() == {200001}

@@ -180,6 +180,7 @@ LevelMgr@ OpenLevel ...
 - `slot_state` - current inventory state per (page_id, slot_id)
 - `items` - item metadata (name, icon_url, category)
 - `prices` - item valuation (price_fe, source, updated_ts)
+- `hidden_items` - items hidden from inventory display per player (player_id, config_base_id)
 
 ## Item Database
 
@@ -363,8 +364,12 @@ In development mode (non-frozen), logs also output to console.
 ### Player
 - `GET /api/player` - Current player/character info (name, season)
 
+### Inventory
+- `GET /api/inventory` - Current inventory state (supports `include_hidden` query param)
+- `GET /api/inventory/hidden` - Get list of hidden item IDs for current player
+- `PUT /api/inventory/hidden` - Replace hidden items list for current player
+
 ### Other
-- `GET /api/inventory` - Current inventory state
 - `GET /api/status` - Server status
 
 ## Dashboard Features
@@ -373,7 +378,7 @@ In development mode (non-frozen), logs also output to console.
 - **Charts**: Cumulative Value, Value/Hour (rolling)
 - **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
-- **Current Inventory**: Sortable by quantity or value
+- **Current Inventory**: Sortable by quantity or value, with "Hide Items" button to hide items from display (hidden items still count toward net worth)
 - **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
 - **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Overlay settings (Hide Loot Pickups), Game Directory configuration (with Browse button in native window mode)
 

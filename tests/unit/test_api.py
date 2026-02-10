@@ -192,6 +192,84 @@ class TestInventoryEndpoint:
         assert data["total_fe"] == 500
 
 
+class TestHiddenItemsEndpoints:
+    def test_get_hidden_items_empty(self, client):
+        response = client.get("/api/inventory/hidden")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["hidden_ids"] == []
+
+    def test_set_and_get_hidden_items(self, client):
+        response = client.put(
+            "/api/inventory/hidden",
+            json={"hidden_ids": [200001, 300001]},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert set(data["hidden_ids"]) == {200001, 300001}
+
+        response = client.get("/api/inventory/hidden")
+        assert response.status_code == 200
+        data = response.json()
+        assert set(data["hidden_ids"]) == {200001, 300001}
+
+    def test_hidden_items_filtered_from_inventory(self, seeded_db):
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+
+        # Add a second item to slot state so we have 2 visible items
+        repo = Repository(seeded_db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, "test_player_123")
+        repo.upsert_slot_state(SlotState(
+            page_id=102, slot_id=1, config_base_id=200001,
+            num=10, updated_at=datetime.now(),
+        ))
+
+        # Verify both items show up
+        response = client.get("/api/inventory")
+        data = response.json()
+        ids = [i["config_base_id"] for i in data["items"]]
+        assert FE_CONFIG_BASE_ID in ids
+        assert 200001 in ids
+        net_worth_before = data["net_worth_fe"]
+
+        # Hide the second item
+        client.put("/api/inventory/hidden", json={"hidden_ids": [200001]})
+
+        # Verify it's filtered out
+        response = client.get("/api/inventory")
+        data = response.json()
+        ids = [i["config_base_id"] for i in data["items"]]
+        assert FE_CONFIG_BASE_ID in ids
+        assert 200001 not in ids
+
+        # Net worth should be unchanged (hidden items still count)
+        assert data["net_worth_fe"] == net_worth_before
+
+    def test_include_hidden_param(self, seeded_db):
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+
+        # Add item to slot state and hide it
+        repo = Repository(seeded_db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, "test_player_123")
+        repo.upsert_slot_state(SlotState(
+            page_id=102, slot_id=1, config_base_id=200001,
+            num=10, updated_at=datetime.now(),
+        ))
+        client.put("/api/inventory/hidden", json={"hidden_ids": [200001]})
+
+        # Without include_hidden: item is filtered
+        response = client.get("/api/inventory")
+        ids = [i["config_base_id"] for i in response.json()["items"]]
+        assert 200001 not in ids
+
+        # With include_hidden=true: item is included
+        response = client.get("/api/inventory?include_hidden=true")
+        ids = [i["config_base_id"] for i in response.json()["items"]]
+        assert 200001 in ids
+
+
 class TestItemsEndpoints:
     def test_list_items_empty(self, client):
         response = client.get("/api/items")

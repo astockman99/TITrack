@@ -101,6 +101,18 @@ class InventoryResponse(BaseModel):
     net_worth_fe: float
 
 
+class HiddenItemsResponse(BaseModel):
+    """Hidden items list."""
+
+    hidden_ids: list[int]
+
+
+class HiddenItemsRequest(BaseModel):
+    """Request to update hidden items."""
+
+    hidden_ids: list[int]
+
+
 class ItemResponse(BaseModel):
     """Item metadata response."""
 

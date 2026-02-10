@@ -363,7 +363,8 @@ tbody tr:last-child td {
 .reset-btn,
 .help-btn,
 .settings-btn,
-.overlay-btn {
+.overlay-btn,
+.hide-items-btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--text-secondary);
@@ -395,6 +396,11 @@ tbody tr:last-child td {
 }
 
 .settings-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.hide-items-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
 }
@@ -1649,4 +1655,93 @@ tr.nightmare .zone-name {
 
 .export-btn:hover {
     opacity: 0.9;
+}
+
+/* Hide Items Modal */
+.hide-items-modal-content {
+    max-width: 550px;
+}
+
+.hide-items-body {
+    padding: 15px 20px 20px;
+}
+
+.hide-items-hint {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.hide-items-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.hide-items-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.hide-items-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 1;
+}
+
+.hide-items-table th,
+.hide-items-table td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+.hide-items-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.hide-col-check {
+    width: 36px;
+    text-align: center !important;
+}
+
+.hide-items-table td:first-child {
+    text-align: center;
+}
+
+.hide-items-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.hide-items-table .item-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hide-items-table .item-name-cell img {
+    width: 20px;
+    height: 20px;
+}
+
+.hide-items-count {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-right: auto;
+}
+
+.hide-items-row-hidden {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+#hide-items-btn {
+    vertical-align: middle;
+    margin-left: 6px;
 }

@@ -4,7 +4,12 @@ from enum import Enum
 
 from fastapi import APIRouter, Depends, Query
 
-from titrack.api.schemas import InventoryItem, InventoryResponse
+from titrack.api.schemas import (
+    HiddenItemsRequest,
+    HiddenItemsResponse,
+    InventoryItem,
+    InventoryResponse,
+)
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
 
@@ -29,10 +34,31 @@ def get_repository() -> Repository:
     raise NotImplementedError("Repository not configured")
 
 
+@router.get("/hidden", response_model=HiddenItemsResponse)
+def get_hidden_items(
+    repo: Repository = Depends(get_repository),
+) -> HiddenItemsResponse:
+    """Get list of hidden item IDs for current player."""
+    hidden = repo.get_hidden_items()
+    return HiddenItemsResponse(hidden_ids=sorted(hidden))
+
+
+@router.put("/hidden", response_model=HiddenItemsResponse)
+def set_hidden_items(
+    request: HiddenItemsRequest,
+    repo: Repository = Depends(get_repository),
+) -> HiddenItemsResponse:
+    """Replace the full list of hidden item IDs for current player."""
+    repo.set_hidden_items(set(request.hidden_ids))
+    hidden = repo.get_hidden_items()
+    return HiddenItemsResponse(hidden_ids=sorted(hidden))
+
+
 @router.get("", response_model=InventoryResponse)
 def get_inventory(
     sort_by: SortField = Query(SortField.VALUE, description="Field to sort by"),
     sort_order: SortOrder = Query(SortOrder.DESC, description="Sort order"),
+    include_hidden: bool = Query(False, description="Include hidden items in the list"),
     repo: Repository = Depends(get_repository),
 ) -> InventoryResponse:
     """Get current inventory state."""
@@ -43,6 +69,9 @@ def get_inventory(
     for state in states:
         if state.num > 0:
             totals[state.config_base_id] = totals.get(state.config_base_id, 0) + state.num
+
+    # Get hidden items for filtering (but always include in net worth)
+    hidden_ids = repo.get_hidden_items() if not include_hidden else set()
 
     # Get trade tax multiplier (1.0 if disabled, 0.875 if enabled)
     tax_multiplier = repo.get_trade_tax_multiplier()
@@ -68,6 +97,10 @@ def get_inventory(
 
         if total_value and config_id != FE_CONFIG_BASE_ID:
             net_worth += total_value
+
+        # Skip hidden items from the display list (but their value is already in net_worth)
+        if config_id in hidden_ids:
+            continue
 
         items.append(
             InventoryItem(

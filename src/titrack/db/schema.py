@@ -1,6 +1,6 @@
 """Database schema - DDL statements for SQLite."""
 
-SCHEMA_VERSION = 3  # Bumped for cloud sync support
+SCHEMA_VERSION = 4  # Bumped for hidden items support
 
 # Settings table - key/value configuration
 CREATE_SETTINGS = """
@@ -151,6 +151,15 @@ CREATE TABLE IF NOT EXISTS cloud_price_history (
 )
 """
 
+# Hidden items - items hidden from inventory display (per-player)
+CREATE_HIDDEN_ITEMS = """
+CREATE TABLE IF NOT EXISTS hidden_items (
+    player_id TEXT NOT NULL DEFAULT '',
+    config_base_id INTEGER NOT NULL,
+    PRIMARY KEY (player_id, config_base_id)
+)
+"""
+
 ALL_CREATE_STATEMENTS = [
     CREATE_SETTINGS,
     CREATE_RUNS,
@@ -165,4 +174,5 @@ ALL_CREATE_STATEMENTS = [
     CREATE_CLOUD_SYNC_QUEUE,
     CREATE_CLOUD_PRICE_CACHE,
     CREATE_CLOUD_PRICE_HISTORY,
+    CREATE_HIDDEN_ITEMS,
 ]
