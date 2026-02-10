@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Fateful Contest (Arcana)**: Added zone name translation for the Arcana league mechanic sub-zone (`SuMingTaLuo`). Entering Fateful Contest from within a map no longer splits the map into two separate runs — the surrounding map segments are recombined, matching existing Nightmare/Twinightmare behavior.
+
 ---
 
 ## [0.4.6] - 2026-02-10
