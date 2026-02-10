@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Overlay Resize Snap-Back**: Fixed overlay window snapping back to its default size after the user resized it, caused by the hide-loot setting check resetting the height every 2 seconds
 - **Zone Name**: Added translation for Secret Realm - Sea of Rites (`HD_EMengZhiXia`)
+- **Auto-Updater File Lock**: Added retry loop to verify `TITrack.exe` is unlocked before overwriting during update, preventing potential update failures on slower systems
 
 ### Improved
 - **Overlay Responsive Padding**: Overlay padding and margins now scale proportionally when the window is resized smaller, allowing a much more compact layout (minimum width reduced from 280px to 180px)
