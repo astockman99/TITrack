@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.4.6] - 2026-02-10
+
 ### Added
 - **Hide Items from Inventory**: New "Hide Items" button on the inventory panel lets you hide items you don't care about (e.g., beacons bought for mapping). Hidden items are removed from the inventory list but still count toward net worth. Per-character, persists across sessions.
 
