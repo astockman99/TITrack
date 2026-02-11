@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Fateful Contest (Arcana)**: Added zone name translation for the Arcana league mechanic sub-zone (`SuMingTaLuo`). Entering Fateful Contest from within a map no longer splits the map into two separate runs — the surrounding map segments are recombined, matching existing Nightmare/Twinightmare behavior.
+- **Path of the Brave support**: Runs now display as "Path of the Brave" instead of the boss arena name. Proof of the Brave item consumption is tracked as map costs (requires Map Costs setting enabled).
 
 ---
 

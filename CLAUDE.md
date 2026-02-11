@@ -435,11 +435,11 @@ The Torchlight trade house takes a 12.5% tax (1 FE per 8 FE). Enable the "Trade 
 
 ## Map Costs
 
-When enabled, TITrack tracks compass/beacon consumption when opening maps and subtracts these costs from run values.
+When enabled, TITrack tracks compass/beacon consumption when opening maps and Proof of the Brave consumption when entering Path of the Brave, and subtracts these costs from run values.
 
 ### How It Works
 
-1. When you open a map with a compass/beacon, the game logs an `ItemChange@ ProtoName=Spv3Open` block
+1. When you open a map with a compass/beacon, the game logs an `ItemChange@ ProtoName=Spv3Open` block. When entering Path of the Brave, the game logs `ProtoName=ClimbTowerOpen` instead.
 2. TITrack captures these consumption events and associates them with the next map run
 3. Run values show net profit (gross loot value minus map cost)
 
@@ -546,7 +546,7 @@ To add a new ambiguous zone:
 2. The last 2 digits of LevelId are the zone suffix
 3. Add the suffix mapping to `AMBIGUOUS_ZONES` in `src/titrack/data/zones.py`
 
-For special zones (bosses, secret realms) that don't follow the XXYY pattern, add exact LevelId mappings to `LEVEL_ID_ZONES`.
+For special zones (bosses, secret realms) that don't follow the XXYY pattern, add exact LevelId mappings to `LEVEL_ID_ZONES`. Path of the Brave uses LevelIds `999901`–`999905` (one per difficulty level) and reuses boss arena maps internally.
 
 ## Inventory Sync
 

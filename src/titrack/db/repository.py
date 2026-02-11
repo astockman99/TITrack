@@ -248,12 +248,12 @@ class Repository:
         Returns:
             Dict mapping config_base_id -> total delta
         """
-        # Always exclude Spv3Open (map costs) from loot summary
+        # Always exclude map costs (Spv3Open, ClimbTowerOpen) from loot summary
         if include_excluded or not EXCLUDED_PAGES:
             rows = self.db.fetchall(
                 """SELECT config_base_id, SUM(delta) as total_delta
                    FROM item_deltas
-                   WHERE run_id = ? AND (proto_name IS NULL OR proto_name != 'Spv3Open')
+                   WHERE run_id = ? AND (proto_name IS NULL OR proto_name NOT IN ('Spv3Open', 'ClimbTowerOpen'))
                    GROUP BY config_base_id""",
                 (run_id,),
             )
@@ -263,7 +263,7 @@ class Repository:
                 f"""SELECT config_base_id, SUM(delta) as total_delta
                    FROM item_deltas
                    WHERE run_id = ? AND page_id NOT IN ({placeholders})
-                   AND (proto_name IS NULL OR proto_name != 'Spv3Open')
+                   AND (proto_name IS NULL OR proto_name NOT IN ('Spv3Open', 'ClimbTowerOpen'))
                    GROUP BY config_base_id""",
                 (run_id, *EXCLUDED_PAGES),
             )
@@ -731,7 +731,7 @@ class Repository:
 
     def get_run_cost(self, run_id: int) -> tuple[dict[int, int], float, list[int]]:
         """
-        Get map costs for a run (Spv3Open consumption).
+        Get map costs for a run (Spv3Open/ClimbTowerOpen consumption).
 
         Args:
             run_id: The run ID to get costs for.
@@ -745,7 +745,7 @@ class Repository:
         rows = self.db.fetchall(
             """SELECT config_base_id, SUM(delta) as total_delta
                FROM item_deltas
-               WHERE run_id = ? AND proto_name = 'Spv3Open'
+               WHERE run_id = ? AND proto_name IN ('Spv3Open', 'ClimbTowerOpen')
                GROUP BY config_base_id""",
             (run_id,),
         )
@@ -866,7 +866,7 @@ class Repository:
         Get cumulative loot statistics across all runs.
 
         Aggregates all item deltas (positive quantities only) grouped by config_base_id.
-        Excludes map costs (proto_name='Spv3Open') and gear page (PageId 100).
+        Excludes map costs (Spv3Open/ClimbTowerOpen) and gear page (PageId 100).
 
         Args:
             season_id: Filter by season (uses context if None)
@@ -889,7 +889,7 @@ class Repository:
             SELECT config_base_id, SUM(delta) as total_quantity
             FROM item_deltas
             WHERE run_id IS NOT NULL
-            AND (proto_name IS NULL OR proto_name != 'Spv3Open')
+            AND (proto_name IS NULL OR proto_name NOT IN ('Spv3Open', 'ClimbTowerOpen'))
         """
 
         params: list = []
@@ -1014,12 +1014,12 @@ class Repository:
         if self._current_player_id is None and player_id is None:
             return 0.0
 
-        # Get all map cost deltas (Spv3Open events with run_id)
+        # Get all map cost deltas (Spv3Open/ClimbTowerOpen events with run_id)
         if season_id is not None:
             rows = self.db.fetchall(
                 """SELECT config_base_id, SUM(delta) as total_delta
                    FROM item_deltas
-                   WHERE run_id IS NOT NULL AND proto_name = 'Spv3Open'
+                   WHERE run_id IS NOT NULL AND proto_name IN ('Spv3Open', 'ClimbTowerOpen')
                    AND (season_id IS NULL OR season_id = ?)
                    AND (player_id IS NULL OR player_id = ?)
                    GROUP BY config_base_id""",
@@ -1029,7 +1029,7 @@ class Repository:
             rows = self.db.fetchall(
                 """SELECT config_base_id, SUM(delta) as total_delta
                    FROM item_deltas
-                   WHERE run_id IS NOT NULL AND proto_name = 'Spv3Open'
+                   WHERE run_id IS NOT NULL AND proto_name IN ('Spv3Open', 'ClimbTowerOpen')
                    GROUP BY config_base_id"""
             )
 

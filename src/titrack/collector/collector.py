@@ -37,6 +37,7 @@ from titrack.data.inventory import EXCLUDED_PAGES
 # These update inventory (slot state) but should NOT create deltas
 # because they are not map loot.
 EXCLUDED_PROTO_NAMES = {"Push2", "XchgReceive", "ExchangeItem"}
+MAP_COST_PROTO_NAMES = {"Spv3Open", "ClimbTowerOpen"}
 
 
 class Collector:
@@ -312,9 +313,9 @@ class Collector:
         if event.is_start:
             if event.proto_name == "PickItems":
                 self._current_context = EventContext.PICK_ITEMS
-            elif event.proto_name == "Spv3Open":
+            elif event.proto_name in MAP_COST_PROTO_NAMES:
                 self._current_context = EventContext.MAP_OPEN
-                # Clear any previous pending costs - only keep costs from the last Spv3Open block
+                # Clear any previous pending costs - only keep costs from the last cost block
                 # This handles cancel-and-retry scenarios where items might be logged multiple times
                 self._pending_map_costs = []
             self._current_proto_name = event.proto_name
@@ -403,7 +404,7 @@ class Collector:
             return
 
         # Buffer map costs to associate with next run
-        if self._current_proto_name == "Spv3Open" and delta:
+        if self._current_proto_name in MAP_COST_PROTO_NAMES and delta:
             self._pending_map_costs.append(delta)
             return  # Don't persist yet - will attach to next run
 
