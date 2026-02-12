@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Abyssal Vault secret realm zone name
 
+### Changed
+- Overlay no longer takes a separate slot in the Windows taskbar
+
+### Fixed
+- Browser fallback crash when WebView2/EdgeChromium is unavailable (affected users with MOTW-blocked DLLs since v0.2.0)
+
 ---
 
 ## [0.4.7] - 2026-02-11
