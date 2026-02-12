@@ -866,6 +866,8 @@ def _launch_overlay_process(url: str, logger) -> Optional[subprocess.Popen]:
 
 def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False, overlay_only: bool = False) -> int:
     """Run server with native window using pywebview."""
+    from titrack.config.paths import is_frozen
+
     # Test pywebview/pythonnet availability early, before starting any resources
     try:
         import webview
