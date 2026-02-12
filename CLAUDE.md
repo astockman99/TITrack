@@ -374,7 +374,7 @@ In development mode (non-frozen), logs also output to console.
 
 ## Dashboard Features
 
-- **Stats Header**: Net Worth, Value/Hour, Value/Map, Runs, Avg Run Time, Total Time
+- **Stats Header**: Net Worth, Cumulative Value, Value/Hour, Value/Map, Runs, Avg Run Time, Total Time
 - **Charts**: Cumulative Value, Value/Hour (rolling)
 - **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)

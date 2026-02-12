@@ -450,6 +450,7 @@ function showToast(message, type = 'info') {
 
 function renderStats(stats, inventory) {
     document.getElementById('net-worth').textContent = formatNumber(Math.round(inventory?.net_worth_fe || 0));
+    document.getElementById('cumulative-value').textContent = formatNumber(Math.round(stats?.total_value || 0));
     document.getElementById('value-per-hour').textContent = formatNumber(Math.round(stats?.value_per_hour || 0));
     document.getElementById('value-per-map').textContent = formatNumber(Math.round(stats?.avg_value_per_run || 0));
     document.getElementById('total-runs').textContent = formatNumber(stats?.total_runs || 0);
