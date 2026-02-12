@@ -70,8 +70,13 @@ def get_inventory(
         if state.num > 0:
             totals[state.config_base_id] = totals.get(state.config_base_id, 0) + state.num
 
-    # Get hidden items for filtering (but always include in net worth)
-    hidden_ids = repo.get_hidden_items() if not include_hidden else set()
+    # Get hidden items for display filtering and optionally for net worth exclusion
+    hidden_ids_all = repo.get_hidden_items()
+    hidden_ids = hidden_ids_all if not include_hidden else set()
+
+    # Check if hidden items should be excluded from net worth
+    exclude_worth = repo.get_setting("hidden_items_exclude_worth") == "true"
+    hidden_ids_for_worth = hidden_ids_all if exclude_worth else set()
 
     # Get trade tax multiplier (1.0 if disabled, 0.875 if enabled)
     tax_multiplier = repo.get_trade_tax_multiplier()
@@ -79,7 +84,8 @@ def get_inventory(
     # Build response with prices
     items = []
     total_fe = totals.get(FE_CONFIG_BASE_ID, 0)
-    net_worth = float(total_fe)
+    # If FE is hidden and exclude_worth is on, don't count it
+    net_worth = float(total_fe) if FE_CONFIG_BASE_ID not in hidden_ids_for_worth else 0.0
 
     for config_id, quantity in totals.items():
         item = repo.get_item(config_id)
@@ -96,9 +102,11 @@ def get_inventory(
             total_value = price_fe * quantity * tax_multiplier if price_fe else None
 
         if total_value and config_id != FE_CONFIG_BASE_ID:
-            net_worth += total_value
+            # Skip hidden items from net worth if setting is enabled
+            if config_id not in hidden_ids_for_worth:
+                net_worth += total_value
 
-        # Skip hidden items from the display list (but their value is already in net_worth)
+        # Skip hidden items from the display list
         if config_id in hidden_ids:
             continue
 

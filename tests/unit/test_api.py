@@ -246,6 +246,50 @@ class TestHiddenItemsEndpoints:
         # Net worth should be unchanged (hidden items still count)
         assert data["net_worth_fe"] == net_worth_before
 
+    def test_hidden_items_exclude_from_net_worth(self, seeded_db):
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+
+        # Add a second item to slot state with known price
+        repo = Repository(seeded_db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, "test_player_123")
+        repo.upsert_slot_state(SlotState(
+            page_id=102, slot_id=1, config_base_id=200001,
+            num=10, updated_at=datetime.now(),
+        ))
+
+        # Hide the item
+        client.put("/api/inventory/hidden", json={"hidden_ids": [200001]})
+
+        # Default: hidden items still count toward net worth
+        response = client.get("/api/inventory")
+        data = response.json()
+        net_worth_default = data["net_worth_fe"]
+        assert net_worth_default > 500  # FE + item value
+
+        # Enable exclude from net worth
+        client.put(
+            "/api/settings/hidden_items_exclude_worth",
+            json={"value": "true"},
+        )
+
+        # Net worth should decrease (hidden item no longer counted)
+        response = client.get("/api/inventory")
+        data = response.json()
+        assert data["net_worth_fe"] < net_worth_default
+        assert data["net_worth_fe"] == 500.0  # Only FE remains
+
+        # Disable the setting again
+        client.put(
+            "/api/settings/hidden_items_exclude_worth",
+            json={"value": "false"},
+        )
+
+        # Net worth should be restored
+        response = client.get("/api/inventory")
+        data = response.json()
+        assert data["net_worth_fe"] == net_worth_default
+
     def test_include_hidden_param(self, seeded_db):
         app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
         client = TestClient(app)

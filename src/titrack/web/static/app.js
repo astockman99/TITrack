@@ -1534,6 +1534,43 @@ function updateHideItemsButton() {
     btn.textContent = count > 0 ? `Hide Items (${count})` : 'Hide Items';
 }
 
+async function fetchHiddenExcludeWorthSetting() {
+    try {
+        const res = await fetch(`${API_BASE}/settings/hidden_items_exclude_worth`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return data.value === 'true';
+    } catch { return false; }
+}
+
+async function updateHiddenExcludeWorthSetting(enabled) {
+    try {
+        await fetch(`${API_BASE}/settings/hidden_items_exclude_worth`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: enabled ? 'true' : 'false' }),
+        });
+    } catch { /* ignore */ }
+}
+
+function updateHideItemsHintText(excludeFromWorth) {
+    const el = document.getElementById('hide-items-hint-text');
+    if (el) {
+        el.textContent = excludeFromWorth
+            ? 'Check items to hide from inventory display. Hidden items are excluded from net worth.'
+            : 'Check items to hide from inventory display. Hidden items still count toward net worth.';
+    }
+}
+
+async function handleHiddenExcludeWorthToggle(event) {
+    const enabled = event.target.checked;
+    await updateHiddenExcludeWorthSetting(enabled);
+    updateHideItemsHintText(enabled);
+    // Refresh to reflect net worth change
+    lastInventoryHash = null;
+    refreshAll(true);
+}
+
 async function openHideItemsModal() {
     const modal = document.getElementById('hide-items-modal');
     // Fetch full inventory (include hidden items)
@@ -1554,6 +1591,12 @@ async function openHideItemsModal() {
     const valTh = document.getElementById('hide-sort-value').closest('th');
     qtyTh.classList.remove('active');
     valTh.classList.add('active', 'desc');
+
+    // Load exclude-from-worth setting
+    const excludeWorth = await fetchHiddenExcludeWorthSetting();
+    document.getElementById('settings-hidden-exclude-worth').checked = excludeWorth;
+    updateHideItemsHintText(excludeWorth);
+
     renderHideItemsTable();
     modal.classList.remove('hidden');
 }
@@ -1652,6 +1695,9 @@ document.getElementById('hide-items-modal').addEventListener('click', (e) => {
         closeHideItemsModal();
     }
 });
+
+// Exclude from net worth toggle
+document.getElementById('settings-hidden-exclude-worth').addEventListener('change', handleHiddenExcludeWorthToggle);
 
 // --- Price History Modal ---
 

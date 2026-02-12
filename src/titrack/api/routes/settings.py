@@ -26,6 +26,7 @@ ALLOWED_SETTINGS = {
     "overlay_font_scale",
     "overlay_hide_loot",
     "realtime_tracking_enabled",
+    "hidden_items_exclude_worth",
 }
 
 # Settings that are read-only via API (can be read but not written)

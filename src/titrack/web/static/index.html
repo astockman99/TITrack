@@ -482,7 +482,16 @@
                 <button class="close-btn" onclick="closeHideItemsModal()">&times;</button>
             </div>
             <div class="hide-items-body">
-                <p class="hide-items-hint">Check items to hide from inventory display. Hidden items still count toward net worth.</p>
+                <p class="hide-items-hint" id="hide-items-hint-text">Check items to hide from inventory display. Hidden items still count toward net worth.</p>
+                <div class="hide-items-worth-toggle">
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settings-hidden-exclude-worth">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Exclude from Net Worth</span>
+                            <span class="toggle-desc">Hidden items will not count toward net worth</span>
+                        </div>
+                    </label>
+                </div>
                 <div class="hide-items-table-container">
                     <table class="hide-items-table">
                         <thead>

@@ -1672,6 +1672,12 @@ tr.nightmare .zone-name {
     margin-bottom: 12px;
 }
 
+.hide-items-worth-toggle {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
 .hide-items-table-container {
     max-height: 400px;
     overflow-y: auto;
