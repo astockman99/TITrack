@@ -8,7 +8,7 @@
         AllowsTransparency="True"
         Topmost="True"
         ResizeMode="CanResizeWithGrip"
-        ShowInTaskbar="True"
+        ShowInTaskbar="False"
         Background="Transparent"
         SizeChanged="Window_SizeChanged">
 
