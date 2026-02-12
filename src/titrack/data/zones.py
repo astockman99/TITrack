@@ -146,6 +146,8 @@ LEVEL_ID_ZONES = {
     3046: "Voidlands - Dreamless Abyss",
     # Secret Realm
     234020: "Secret Realm - Sea of Rites",
+    # Trial of Divinity
+    212023: "Trial of Divinity",
     # Path of the Brave (rooms use 999901-999905, one per difficulty level)
     999901: "Path of the Brave",
     999902: "Path of the Brave",
