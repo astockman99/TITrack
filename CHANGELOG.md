@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.4.7] - 2026-02-11
+
 ### Added
+- **Cumulative Value stat**: New stat in the dashboard header between Net Worth and Value/Hour showing total loot value across all runs.
 - **Exclude Hidden Items from Net Worth**: New toggle in the "Hide Items" modal lets you choose whether hidden items count toward net worth. Off by default (existing behavior preserved). When enabled, hidden items are excluded from net worth calculations.
 - **Fateful Contest (Arcana)**: Added zone name translation for the Arcana league mechanic sub-zone (`SuMingTaLuo`). Entering Fateful Contest from within a map no longer splits the map into two separate runs — the surrounding map segments are recombined, matching existing Nightmare/Twinightmare behavior.
 - **Path of the Brave support**: Runs now display as "Path of the Brave" instead of the boss arena name. Proof of the Brave item consumption is tracked as map costs (requires Map Costs setting enabled).
