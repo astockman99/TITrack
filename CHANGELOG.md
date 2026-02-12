@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Abyssal Vault secret realm zone name
+
 ---
 
 ## [0.4.7] - 2026-02-11

@@ -93,6 +93,7 @@ ZONE_NAMES = {
     "HD_YingGuangDianTang": "Secret Realm - Invaluable Time",
     "HD_EMengZhiXia": "Secret Realm - Sea of Rites",
     "BZ_NaGouZhiXi": "Secret Realm - Unholy Pedestal",
+    "BZ_JiangShengChao": "Secret Realm - Abyssal Vault",
 
     # Arcana (league mechanic sub-zone)
     "SuMingTaLuo": "Fateful Contest",
