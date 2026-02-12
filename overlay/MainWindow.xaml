@@ -125,17 +125,30 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Net Worth -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock x:Name="NetWorthLabel"
-                                   Text="Net Worth"
-                                   Foreground="#a0a0a0"
-                                   FontSize="10" />
-                        <TextBlock x:Name="NetWorthText"
-                                   Text="--"
-                                   Foreground="#e94560"
-                                   FontSize="16"
-                                   FontWeight="Bold" />
+                    <!-- Net Worth + Cumulative Value -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel>
+                            <TextBlock x:Name="NetWorthLabel"
+                                       Text="Net Worth"
+                                       Foreground="#a0a0a0"
+                                       FontSize="10" />
+                            <TextBlock x:Name="NetWorthText"
+                                       Text="--"
+                                       Foreground="#e94560"
+                                       FontSize="16"
+                                       FontWeight="Bold" />
+                        </StackPanel>
+                        <StackPanel Margin="12,0,0,0">
+                            <TextBlock x:Name="CumulativeValueLabel"
+                                       Text="Cumul. Value"
+                                       Foreground="#a0a0a0"
+                                       FontSize="10" />
+                            <TextBlock x:Name="CumulativeValueText"
+                                       Text="--"
+                                       Foreground="#eaeaea"
+                                       FontSize="16"
+                                       FontWeight="Bold" />
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Font scale decrease -->

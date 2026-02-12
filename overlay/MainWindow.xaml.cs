@@ -422,6 +422,8 @@ public partial class MainWindow : Window
         // Header
         NetWorthLabel.Foreground = brightLabel;
         NetWorthText.Foreground = brightRed;
+        CumulativeValueLabel.Foreground = brightLabel;
+        CumulativeValueText.Foreground = brightValue;
 
         // Stat labels
         ThisRunLabel.Foreground = brightLabel;
@@ -456,6 +458,8 @@ public partial class MainWindow : Window
         // Header
         NetWorthLabel.Foreground = mutedLabel;
         NetWorthText.Foreground = accentRed;
+        CumulativeValueLabel.Foreground = mutedLabel;
+        CumulativeValueText.Foreground = normalValue;
 
         // Stat labels
         ThisRunLabel.Foreground = mutedLabel;
@@ -486,6 +490,8 @@ public partial class MainWindow : Window
         // Header text
         NetWorthLabel.Effect = effect;
         NetWorthText.Effect = effect;
+        CumulativeValueLabel.Effect = effect;
+        CumulativeValueText.Effect = effect;
 
         // Stat labels and values
         ThisRunLabel.Effect = effect;
@@ -556,6 +562,11 @@ public partial class MainWindow : Window
         // Net Worth (rounded to whole number)
         NetWorthText.Text = inventory != null
             ? Math.Round(inventory.net_worth_fe).ToString("N0")
+            : "--";
+
+        // Cumulative Value (rounded to whole number)
+        CumulativeValueText.Text = stats != null
+            ? Math.Round(stats.total_value).ToString("N0")
             : "--";
 
         if (stats == null)
