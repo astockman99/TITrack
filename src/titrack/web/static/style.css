@@ -364,6 +364,7 @@ tbody tr:last-child td {
 .help-btn,
 .settings-btn,
 .overlay-btn,
+.economy-btn,
 .hide-items-btn {
     background: none;
     border: 1px solid var(--border);
@@ -395,6 +396,11 @@ tbody tr:last-child td {
     color: var(--positive);
 }
 
+.economy-btn:hover {
+    border-color: #64b5f6;
+    color: #64b5f6;
+}
+
 .settings-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
@@ -408,7 +414,8 @@ tbody tr:last-child td {
 .reset-btn:disabled,
 .help-btn:disabled,
 .settings-btn:disabled,
-.overlay-btn:disabled {
+.overlay-btn:disabled,
+.economy-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -556,6 +563,24 @@ footer {
 .item-name.fe {
     color: var(--accent);
     font-weight: bold;
+}
+
+.item-name-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.item-name-link:hover {
+    color: #64b5f6;
+}
+
+.item-name-link.fe {
+    color: var(--accent);
+}
+
+.item-name-link.fe:hover {
+    color: var(--accent-secondary);
 }
 
 /* Duration format */
@@ -753,56 +778,6 @@ tr.nightmare .zone-name {
     max-width: 800px;
 }
 
-#price-history-body {
-    padding: 20px;
-}
-
-.price-history-chart-container {
-    height: 300px;
-    margin-bottom: 20px;
-}
-
-.price-history-chart-container canvas {
-    max-height: 300px;
-}
-
-.price-history-stats {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-    padding: 15px;
-    background: var(--bg-card);
-    border-radius: 8px;
-}
-
-.price-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 100px;
-}
-
-.price-stat-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.price-stat-value {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--text-primary);
-}
-
-.price-history-note {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-style: italic;
-    text-align: center;
-}
-
 /* Cloud price indicator in inventory */
 .cloud-price-indicator {
     display: inline-block;
@@ -972,6 +947,20 @@ tr.nightmare .zone-name {
 
 .discord-link:hover {
     color: #5865F2;
+}
+
+.kofi-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+}
+
+.kofi-link:hover {
+    color: #ff5e5b;
 }
 
 .update-btn {

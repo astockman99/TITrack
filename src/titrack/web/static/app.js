@@ -15,7 +15,6 @@ const failedIcons = new Set(); // Track icons that failed to load
 // Chart instances
 let cumulativeValueChart = null;
 let valueRateChart = null;
-let priceHistoryChart = null;
 let lootReportChart = null;
 
 // Loot report data cache
@@ -343,10 +342,6 @@ async function togglePause() {
     } catch (error) {
         console.error('Error toggling pause:', error);
     }
-}
-
-async function fetchCloudPriceHistory(configBaseId) {
-    return fetchJson(`/cloud/prices/${configBaseId}/history`);
 }
 
 async function fetchLootReport() {
@@ -688,7 +683,7 @@ function renderInventory(data, forceRender = false) {
         // Sparkline cell (only if cloud sync enabled)
         // Note: Canvas needs explicit width/height attributes (not just CSS) to render correctly
         const sparklineCell = cloudSyncEnabled
-            ? `<td class="sparkline-cell" onclick="showPriceHistory(${item.config_base_id}, '${escapeHtml(item.name).replace(/'/g, "\\'")}')">
+            ? `<td class="sparkline-cell" onclick="window.open('https://titrack.ninja/item/${item.config_base_id}', '_blank')">
                 ${hasAnyCloudPrice ? '<canvas class="sparkline" data-config-id="' + item.config_base_id + '" width="60" height="24"></canvas>' : '<div class="sparkline-placeholder"></div>'}
                </td>`
             : '';
@@ -698,7 +693,7 @@ function renderInventory(data, forceRender = false) {
                 <td>
                     <div class="item-row">
                         ${iconHtml}
-                        <span class="item-name ${isFE ? 'fe' : ''}">${escapeHtml(item.name)}${cloudIndicator}</span>
+                        <a href="https://titrack.ninja/item/${item.config_base_id}" target="_blank" class="item-name item-name-link ${isFE ? 'fe' : ''}">${escapeHtml(item.name)}${cloudIndicator}</a>
                     </div>
                 </td>
                 <td>${formatNumber(item.quantity)}</td>
@@ -1500,7 +1495,6 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeModal();
         closeHelpModal();
-        closePriceHistoryModal();
         closeSettingsModal();
         closeLootReportModal();
         closeHideItemsModal();
@@ -1700,139 +1694,11 @@ document.getElementById('hide-items-modal').addEventListener('click', (e) => {
 // Exclude from net worth toggle
 document.getElementById('settings-hidden-exclude-worth').addEventListener('change', handleHiddenExcludeWorthToggle);
 
-// --- Price History Modal ---
+// --- Economy Website ---
 
-async function showPriceHistory(configBaseId, itemName) {
-    const modal = document.getElementById('price-history-modal');
-    const title = document.getElementById('price-history-title');
-    const chartCanvas = document.getElementById('price-history-chart');
-
-    title.textContent = `Price History: ${itemName}`;
-
-    // Show loading state
-    document.getElementById('price-stat-median').textContent = '...';
-    document.getElementById('price-stat-p10').textContent = '...';
-    document.getElementById('price-stat-p90').textContent = '...';
-    document.getElementById('price-stat-contributors').textContent = '...';
-
-    modal.classList.remove('hidden');
-
-    // Fetch history data
-    const data = await fetchCloudPriceHistory(configBaseId);
-
-    if (!data || !data.history || data.history.length === 0) {
-        // No history available
-        if (priceHistoryChart) {
-            priceHistoryChart.destroy();
-            priceHistoryChart = null;
-        }
-        document.getElementById('price-stat-median').textContent = 'No data';
-        document.getElementById('price-stat-p10').textContent = '--';
-        document.getElementById('price-stat-p90').textContent = '--';
-        document.getElementById('price-stat-contributors').textContent = '--';
-        return;
-    }
-
-    // Prepare chart data
-    const chartData = data.history.map(h => ({
-        x: new Date(h.hour_bucket),
-        y: h.price_fe_median
-    }));
-
-    const p10Data = data.history.map(h => ({
-        x: new Date(h.hour_bucket),
-        y: h.price_fe_p10 || h.price_fe_median
-    }));
-
-    const p90Data = data.history.map(h => ({
-        x: new Date(h.hour_bucket),
-        y: h.price_fe_p90 || h.price_fe_median
-    }));
-
-    // Update stats from latest point
-    const latest = data.history[data.history.length - 1];
-    document.getElementById('price-stat-median').textContent = formatFEValue(latest.price_fe_median);
-    document.getElementById('price-stat-p10').textContent = latest.price_fe_p10 ? formatFEValue(latest.price_fe_p10) : '--';
-    document.getElementById('price-stat-p90').textContent = latest.price_fe_p90 ? formatFEValue(latest.price_fe_p90) : '--';
-
-    // Get contributors from cloud cache
-    const cloudPrice = cloudPricesCache[configBaseId];
-    document.getElementById('price-stat-contributors').textContent = cloudPrice?.unique_devices || '--';
-
-    // Create or update chart
-    if (priceHistoryChart) {
-        priceHistoryChart.destroy();
-    }
-
-    priceHistoryChart = new Chart(chartCanvas, {
-        type: 'line',
-        data: {
-            datasets: [
-                {
-                    label: 'Median',
-                    data: chartData,
-                    borderColor: '#e94560',
-                    backgroundColor: 'rgba(233, 69, 96, 0.1)',
-                    fill: false,
-                    tension: 0.3,
-                    pointRadius: 2,
-                    pointHoverRadius: 5,
-                },
-                {
-                    label: 'P10 (Low)',
-                    data: p10Data,
-                    borderColor: 'rgba(78, 204, 163, 0.5)',
-                    backgroundColor: 'rgba(78, 204, 163, 0.1)',
-                    fill: '+1',
-                    tension: 0.3,
-                    pointRadius: 0,
-                    borderDash: [5, 5],
-                },
-                {
-                    label: 'P90 (High)',
-                    data: p90Data,
-                    borderColor: 'rgba(255, 107, 107, 0.5)',
-                    backgroundColor: 'transparent',
-                    fill: false,
-                    tension: 0.3,
-                    pointRadius: 0,
-                    borderDash: [5, 5],
-                }
-            ],
-        },
-        options: {
-            ...chartOptions,
-            plugins: {
-                ...chartOptions.plugins,
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: '#a0a0a0',
-                        usePointStyle: true,
-                    }
-                },
-                tooltip: {
-                    ...chartOptions.plugins.tooltip,
-                    callbacks: {
-                        label: (ctx) => `${ctx.dataset.label}: ${formatFEValue(ctx.parsed.y)} FE`,
-                    },
-                },
-            },
-        },
-    });
+function openEconomy() {
+    window.open('https://titrack.ninja', '_blank');
 }
-
-function closePriceHistoryModal() {
-    document.getElementById('price-history-modal').classList.add('hidden');
-}
-
-// Close price history modal on outside click
-document.addEventListener('click', (e) => {
-    if (e.target.id === 'price-history-modal') {
-        closePriceHistoryModal();
-    }
-});
 
 // --- Loot Report Modal ---
 
@@ -1913,7 +1779,7 @@ async function showLootReport() {
                 <td>
                     <div class="item-col">
                         ${iconHtml}
-                        <span>${escapeHtml(item.name)}</span>
+                        <a href="https://titrack.ninja/item/${item.config_base_id}" target="_blank" class="item-name-link">${escapeHtml(item.name)}</a>
                     </div>
                 </td>
                 <td>${formatNumber(item.quantity)}</td>
