@@ -379,7 +379,7 @@ In development mode (non-frozen), logs also output to console.
 - **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
 - **Current Inventory**: Sortable by quantity or value, with "Hide Items" button to hide items from display (hidden items count toward net worth by default; toggle "Exclude from Net Worth" in the Hide Items modal to exclude them)
-- **Controls**: Cloud Sync toggle, Settings button, Reset Stats, Auto-refresh toggle
+- **Controls**: Cloud Sync toggle, Economy button (opens titrack.ninja), Settings button, Reset Stats, Auto-refresh toggle
 - **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Overlay settings (Hide Loot Pickups), Game Directory configuration (with Browse button in native window mode)
 
 ## Loot Report
@@ -699,7 +699,7 @@ The inventory panel shows sparkline charts in the "Trend" column when cloud sync
 - **Sparklines** appear for any item with a cloud price (even single contributor)
 - **Community indicator** (dot next to item name) only appears for prices with 3+ contributors
 
-Click any sparkline to open the full price history modal with detailed chart.
+Click any sparkline to open the item's page on titrack.ninja in the browser. Item names in the inventory and loot report are also clickable links to titrack.ninja.
 
 ### Supabase Backend (Not Configured)
 

@@ -9,9 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Abyssal Vault secret realm zone name
+- **Economy button**: Opens titrack.ninja economy website from the dashboard header
+- **Clickable item names**: Inventory and loot report item names now link to titrack.ninja/item/{id} for detailed price data
+- **Ko-fi link**: Footer link to help cover server costs
 
 ### Changed
 - Overlay no longer takes a separate slot in the Windows taskbar
+- Sparkline clicks now open titrack.ninja item page in browser instead of local price history modal
+
+### Removed
+- Local price history modal (replaced by titrack.ninja economy website)
 
 ### Fixed
 - Browser fallback crash when WebView2/EdgeChromium is unavailable (affected users with MOTW-blocked DLLs since v0.2.0)
@@ -207,7 +214,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cloud Sync toggle with connection status indicator
 - Instructions modal updated with Cloud Sync documentation
 - Sparkline column in inventory (when cloud sync enabled)
-- Price history modal with charts
 
 #### Supabase Backend
 - `supabase/migrations/001_initial_schema.sql` with:
