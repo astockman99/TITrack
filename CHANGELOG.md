@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.4.8] - 2026-02-13
+
 ### Added
 - Abyssal Vault secret realm zone name
 - **Economy button**: Opens titrack.ninja economy website from the dashboard header
