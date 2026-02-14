@@ -5,6 +5,13 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Supreme Showdown zone name**: Floors now display as "Supreme Showdown" instead of raw internal paths
+
+---
+
 ## [0.4.9] - 2026-02-14
 
 ### Added
