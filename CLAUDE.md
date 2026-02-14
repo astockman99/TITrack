@@ -170,7 +170,7 @@ LevelMgr@ OpenLevel ...
 - Handle unknown ConfigBaseIds gracefully (show as "Unknown <id>")
 - `InitBagData` events update slot state but don't create deltas (used for inventory sync)
 - `RemoveBagItem` events fire when a slot is fully emptied (last item consumed). Has no ConfigBaseId/Num — lookup existing slot state to determine what was removed, then treat as Num=0.
-- Non-loot proto names (`Push2`, `XchgReceive`, `ExchangeItem`) update slot state but don't create deltas. These are trade house sales and item recycling — not map loot.
+- Non-loot proto names (`Push2`, `XchgReceive`, `ExchangeItem`, `XchgRecall`) update slot state but don't create deltas. These are trade house sales, item recycling, and cancelled listings — not map loot.
 
 ## Database Schema (Core Tables)
 

@@ -287,7 +287,7 @@ class TestCollectorIntegration:
         assert misc_state.num == 2
 
     def test_exchange_events_update_state_without_delta(self, test_env):
-        """Test that Push2/XchgReceive/ExchangeItem events update slot state but don't create deltas."""
+        """Test that Push2/XchgReceive/ExchangeItem/XchgRecall events update slot state but don't create deltas."""
         db = test_env["db"]
         tmpdir = test_env["tmpdir"]
         repo = Repository(db)
@@ -297,6 +297,7 @@ class TestCollectorIntegration:
         log_content = """\
 [2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
 [2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 41 ConfigBaseId = 5144 Num = 10
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 103 SlotId = 5 ConfigBaseId = 6001 Num = 3
 [2026.01.28-10.01.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 start
 [2026.01.28-10.01.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 1500
 [2026.01.28-10.01.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 end
@@ -306,6 +307,9 @@ class TestCollectorIntegration:
 [2026.01.28-10.02.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=ExchangeItem start
 [2026.01.28-10.02.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 41 ConfigBaseId = 5144 Num = 14
 [2026.01.28-10.02.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=ExchangeItem end
+[2026.01.28-10.03.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=XchgRecall start
+[2026.01.28-10.03.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 103 SlotId = 5 ConfigBaseId = 6001 Num = 10
+[2026.01.28-10.03.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=XchgRecall end
 """
         log_path = tmpdir / "exchange_test.log"
         log_path.write_text(log_content)
@@ -334,6 +338,12 @@ class TestCollectorIntegration:
         assert recycle_state is not None
         assert recycle_state.config_base_id == 5144
         assert recycle_state.num == 14
+
+        # Slot state should reflect recalled (cancelled listing) items
+        recall_state = repo.get_slot_state(103, 5)
+        assert recall_state is not None
+        assert recall_state.config_base_id == 6001
+        assert recall_state.num == 10
 
     def test_exchange_events_during_map_run_no_delta(self, test_env):
         """Test that exchange events inside a map run don't create deltas."""

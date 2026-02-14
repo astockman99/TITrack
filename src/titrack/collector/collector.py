@@ -36,7 +36,7 @@ from titrack.data.inventory import EXCLUDED_PAGES, is_gear_excluded
 # Proto names for non-loot inventory changes (trade house, recycling, etc.).
 # These update inventory (slot state) but should NOT create deltas
 # because they are not map loot.
-EXCLUDED_PROTO_NAMES = {"Push2", "XchgReceive", "ExchangeItem"}
+EXCLUDED_PROTO_NAMES = {"Push2", "XchgReceive", "ExchangeItem", "XchgRecall"}
 MAP_COST_PROTO_NAMES = {"Spv3Open", "ClimbTowerOpen"}
 
 
