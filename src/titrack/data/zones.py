@@ -95,6 +95,9 @@ ZONE_NAMES = {
     "BZ_NaGouZhiXi": "Secret Realm - Unholy Pedestal",
     "BZ_JiangShengChao": "Secret Realm - Abyssal Vault",
 
+    # Supreme Showdown (floor prefix varies by map reuse, e.g. JH_, YJ_)
+    "MuBiaoTiaoZhan": "Supreme Showdown",
+
     # Arcana (league mechanic sub-zone)
     "SuMingTaLuo": "Fateful Contest",
 
