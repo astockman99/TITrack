@@ -5,7 +5,7 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.9] - 2026-02-14
 
 ### Added
 - **Gear tab allowlist**: Destiny items (Fates, Kismets), Prisms, and Divinity items (Pacts, Fragments, God Divinities) are now tracked from the Gear tab despite the general gear exclusion. These item types have stable, tradeable prices. Configured via `ALLOWED_GEAR_TYPE_CN` in `inventory.py` — 263 items across 14 type categories.
