@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Deep Space zone names**: Boundless Hunting Ground, Core Mine, Desert Pasture, Barren Wilderness, Vast Wasteland
+
+### Fixed
+- **Active run continuity across sub-zones**: When returning from Nightmare or Arcana (Fateful Contest) sub-zones, the Current Run panel now correctly resumes the original map's timer and loot instead of starting fresh. Timer only counts time in the normal map (excludes sub-zone time). Entering a sub-zone still shows it as a separate active run with its own timer and loot.
+- **Active run timer not resetting between maps**: Running the same zone consecutively no longer carries over the previous run's timer into the new run
+
 ---
 
 ## [0.4.8] - 2026-02-13

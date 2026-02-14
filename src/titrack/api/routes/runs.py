@@ -435,7 +435,13 @@ def get_stats(
 def get_active_run(
     repo: Repository = Depends(get_repository),
 ) -> Optional[ActiveRunResponse]:
-    """Get the currently active run with live loot drops."""
+    """Get the currently active run with live loot drops.
+
+    When a player enters a sub-zone (Arcana/Nightmare) from inside a map and returns,
+    the run segmenter creates a new run. This endpoint aggregates the active run with
+    any prior completed runs sharing the same level_uid, so the timer and loot display
+    are continuous across sub-zone interruptions.
+    """
     from datetime import datetime
 
     active_run = repo.get_active_run()
@@ -450,26 +456,69 @@ def get_active_run(
     # Check if map costs are enabled
     map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
 
-    # Get loot for this run
-    summary = repo.get_run_summary(active_run.id)
-    fe_gained, total_value = repo.get_run_value(active_run.id)
+    # Find prior completed normal runs with the same level_uid (split by sub-zone visits).
+    # Only aggregate when the active run itself is a normal run (returning from a sub-zone).
+    # If the active run IS a sub-zone (Nightmare/Arcana), show it standalone.
+    prior_run_ids = []
+    prior_duration = 0.0  # Sum of completed normal run durations (excludes sub-zone time)
+    is_active_subzone = (
+        active_run.level_type in SUB_ZONE_LEVEL_TYPES
+        or active_run.level_type == LEVEL_TYPE_NIGHTMARE
+    )
 
-    # Get costs if enabled
+    if active_run.level_uid is not None and not is_active_subzone:
+        # Only look at runs after the last hub visit — a hub break means a new session
+        last_hub_ts = repo.get_last_hub_end_ts()
+        prior_runs = repo.get_completed_runs_by_level_uid(
+            active_run.level_uid, after_ts=last_hub_ts
+        )
+        for run in prior_runs:
+            # Only merge normal runs — skip sub-zone runs (Arcana, Nightmare)
+            if run.level_type in SUB_ZONE_LEVEL_TYPES or run.level_type == LEVEL_TYPE_NIGHTMARE:
+                continue
+            prior_run_ids.append(run.id)
+            if run.duration_seconds:
+                prior_duration += run.duration_seconds
+
+    # Aggregate loot, values, and costs across all run parts
+    all_run_ids = prior_run_ids + [active_run.id]
+    combined_summary: dict[int, int] = defaultdict(int)
+    combined_cost_summary: dict[int, int] = defaultdict(int)
+    total_fe = 0
+    total_value = 0.0
+    total_cost = 0.0
+    has_unpriced_costs = False
+
+    for run_id in all_run_ids:
+        summary = repo.get_run_summary(run_id)
+        for config_id, qty in summary.items():
+            combined_summary[config_id] += qty
+        fe, value = repo.get_run_value(run_id)
+        total_fe += fe
+        total_value += value
+
+        if map_costs_enabled:
+            cost_summary_part, cost_value_part, unpriced = repo.get_run_cost(run_id)
+            for config_id, qty in cost_summary_part.items():
+                combined_cost_summary[config_id] += qty
+            total_cost += cost_value_part
+            if unpriced:
+                has_unpriced_costs = True
+
+    # Build cost items if enabled
     cost_items = None
     cost_fe = None
     net_value = None
-    has_unpriced_costs = False
-    if map_costs_enabled:
-        cost_summary, cost_value, unpriced = repo.get_run_cost(active_run.id)
-        if cost_summary:
-            cost_items = _build_cost_items(cost_summary, repo)
-            cost_fe = round(cost_value, 2)
-            net_value = round(total_value - cost_value, 2)
-            has_unpriced_costs = bool(unpriced)
+    if map_costs_enabled and combined_cost_summary:
+        cost_items = _build_cost_items(dict(combined_cost_summary), repo)
+        cost_fe = round(total_cost, 2)
+        net_value = round(total_value - total_cost, 2)
 
-    # Calculate duration since run started (use naive datetime to match DB)
+    # Duration = completed normal run time + active run's live elapsed time
+    # This excludes time spent in sub-zones (Arcana/Nightmare)
     now = datetime.now()
-    duration = (now - active_run.start_ts).total_seconds()
+    active_elapsed = (now - active_run.start_ts).total_seconds()
+    duration = prior_duration + active_elapsed
 
     zone_name = get_zone_display_name(active_run.zone_signature, active_run.level_id)
 
@@ -479,9 +528,9 @@ def get_active_run(
         zone_signature=active_run.zone_signature,
         start_ts=active_run.start_ts,
         duration_seconds=round(duration, 1),
-        fe_gained=fe_gained,
+        fe_gained=total_fe,
         total_value=round(total_value, 2),
-        loot=_build_loot(summary, repo),
+        loot=_build_loot(dict(combined_summary), repo),
         map_cost_items=cost_items,
         map_cost_fe=cost_fe,
         map_cost_has_unpriced=has_unpriced_costs,

@@ -104,6 +104,13 @@ ZONE_NAMES = {
     # Void Sea
     "XuHaiZhongGang": "Void Sea Terminal",
 
+    # Deep Space (exclusive zones not in the regular 5 regions)
+    "SD_GuangMaoLieChang": "Deep Space - Boundless Hunting Ground",
+    "KD_DiXinKuangChang": "Deep Space - Core Mine",
+    "SQ_ShaZhongMuYuan": "Deep Space - Desert Pasture",
+    "SD_DaHuangZhiYe": "Deep Space - Barren Wilderness",
+    "YL_WanQingHuangLin": "Deep Space - Vast Wasteland",
+
     # Voidlands (remaining zones without conflicts)
     "DD_QunLangJieXiang": "Voidlands - Grim Alleys",
     "YL_MaNeiLaYuLin": "Voidlands - Filthy Forest",

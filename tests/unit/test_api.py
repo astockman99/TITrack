@@ -426,6 +426,260 @@ class TestPricesEndpoints:
         assert data["name"] == "Flame Elementium"
 
 
+class TestActiveRunAggregation:
+    """Test that active run aggregates loot from prior runs with same level_uid."""
+
+    def test_active_run_no_subzone(self, db, repo):
+        """Active run with no prior splits returns normal data."""
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID, name_en="Flame Elementium",
+            name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+
+        # Single active run
+        run_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone", start_ts=now - timedelta(minutes=3),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=50, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=now,
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/active")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["fe_gained"] == 50
+        assert len(data["loot"]) == 1
+
+    def test_active_run_aggregates_after_arcana(self, db, repo):
+        """After returning from Arcana sub-zone, active run includes prior loot."""
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID, name_en="Flame Elementium",
+            name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+
+        # Run part 1: in map before Arcana (completed)
+        run1_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=10), end_ts=now - timedelta(minutes=6),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=200, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run1_id, timestamp=now - timedelta(minutes=8),
+        ))
+
+        # Arcana sub-zone run (completed, different level_uid, level_type=19)
+        repo.insert_run(Run(
+            id=None, zone_signature="SuMingTaLuo",
+            start_ts=now - timedelta(minutes=6), end_ts=now - timedelta(minutes=4),
+            is_hub=False, level_uid=200, level_type=19,
+        ))
+
+        # Run part 2: back in map after Arcana (active)
+        run3_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=4),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=150, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run3_id, timestamp=now - timedelta(minutes=2),
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/active")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should aggregate: 200 + 150 = 350 FE
+        assert data["fe_gained"] == 350
+        # Duration = part1 (4 min) + active elapsed (~4 min), excludes Arcana time
+        assert 400 < data["duration_seconds"] < 550
+
+    def test_active_run_aggregates_after_nightmare(self, db, repo):
+        """After returning from Nightmare, active run includes prior loot."""
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID, name_en="Flame Elementium",
+            name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+
+        # Run part 1: in map before Nightmare (completed)
+        run1_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=8), end_ts=now - timedelta(minutes=5),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=100, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run1_id, timestamp=now - timedelta(minutes=7),
+        ))
+
+        # Nightmare run (completed, same level_uid, level_type=11)
+        nm_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=5), end_ts=now - timedelta(minutes=3),
+            is_hub=False, level_uid=100, level_type=11,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=75, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=nm_id, timestamp=now - timedelta(minutes=4),
+        ))
+
+        # Run part 2: back in map after Nightmare (active)
+        run3_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=3),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=50, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run3_id, timestamp=now - timedelta(minutes=1),
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/active")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should aggregate normal runs only: 100 + 50 = 150 (Nightmare run excluded)
+        assert data["fe_gained"] == 150
+        # Duration = part1 (3 min) + active elapsed (~3 min), excludes Nightmare time
+        assert 300 < data["duration_seconds"] < 420
+
+    def test_active_run_no_level_uid(self, db, repo):
+        """Active run without level_uid doesn't aggregate."""
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID, name_en="Flame Elementium",
+            name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+
+        run_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone", start_ts=now - timedelta(minutes=2),
+            is_hub=False, level_uid=None, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=30, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=now,
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/active")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["fe_gained"] == 30
+
+    def test_active_subzone_shows_standalone(self, db, repo):
+        """When inside Nightmare/Arcana, show only that sub-zone's data."""
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID, name_en="Flame Elementium",
+            name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+
+        # Prior normal run (completed, same level_uid)
+        run1_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=8), end_ts=now - timedelta(minutes=5),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=200, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run1_id, timestamp=now - timedelta(minutes=7),
+        ))
+
+        # Currently inside Nightmare (active, same level_uid)
+        nm_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=2),
+            is_hub=False, level_uid=100, level_type=11,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=25, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=nm_id, timestamp=now - timedelta(minutes=1),
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/active")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should show only Nightmare loot, NOT aggregated with prior normal run
+        assert data["fe_gained"] == 25
+        # Duration should be ~2 minutes (just the Nightmare), not ~8
+        assert data["duration_seconds"] < 180
+
+    def test_active_run_not_aggregated_after_hub(self, db, repo):
+        """Running the same zone twice with a hub visit in between should NOT aggregate."""
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID, name_en="Flame Elementium",
+            name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+
+        # First run of zone (completed, level_uid=100)
+        run1_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=10), end_ts=now - timedelta(minutes=8),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=300, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run1_id, timestamp=now - timedelta(minutes=9),
+        ))
+
+        # Hub visit (completed)
+        repo.insert_run(Run(
+            id=None, zone_signature="Hideout",
+            start_ts=now - timedelta(minutes=8), end_ts=now - timedelta(minutes=5),
+            is_hub=True,
+        ))
+
+        # Second run of same zone (active, same level_uid=100)
+        run2_id = repo.insert_run(Run(
+            id=None, zone_signature="TestZone",
+            start_ts=now - timedelta(minutes=2),
+            is_hub=False, level_uid=100, level_type=3,
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            delta=40, context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run2_id, timestamp=now - timedelta(minutes=1),
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/active")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should show only the second run's loot (40 FE), not aggregated (340)
+        assert data["fe_gained"] == 40
+        # Duration should be ~2 minutes, not ~10
+        assert data["duration_seconds"] < 180
+
+
 class TestIconsEndpoint:
     def test_get_icon_no_item(self, client):
         """Test getting icon for non-existent item returns 404."""

@@ -140,6 +140,41 @@ class Repository:
             )
         return [self._row_to_run(row) for row in rows]
 
+    def get_completed_runs_by_level_uid(self, level_uid: int, after_ts: Optional[datetime] = None) -> list[Run]:
+        """Get completed runs with a given level_uid, optionally after a timestamp.
+
+        Args:
+            level_uid: The level_uid to match.
+            after_ts: If provided, only return runs that started after this time.
+                      Used to scope results to the current session (after last hub visit).
+        """
+        if after_ts is not None:
+            rows = self.db.fetchall(
+                """SELECT * FROM runs
+                   WHERE level_uid = ? AND end_ts IS NOT NULL AND start_ts > ?
+                   ORDER BY start_ts ASC""",
+                (level_uid, after_ts.isoformat()),
+            )
+        else:
+            rows = self.db.fetchall(
+                """SELECT * FROM runs
+                   WHERE level_uid = ? AND end_ts IS NOT NULL
+                   ORDER BY start_ts ASC""",
+                (level_uid,),
+            )
+        return [self._row_to_run(row) for row in rows]
+
+    def get_last_hub_end_ts(self) -> Optional[datetime]:
+        """Get the end timestamp of the most recent completed hub run."""
+        row = self.db.fetchone(
+            """SELECT end_ts FROM runs
+               WHERE is_hub = 1 AND end_ts IS NOT NULL
+               ORDER BY end_ts DESC LIMIT 1"""
+        )
+        if not row or not row["end_ts"]:
+            return None
+        return datetime.fromisoformat(row["end_ts"])
+
     def get_max_run_id(self) -> int:
         """Get the maximum run ID."""
         row = self.db.fetchone("SELECT MAX(id) as max_id FROM runs")
