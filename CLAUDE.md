@@ -683,7 +683,7 @@ This means:
 | Key | Default | Description |
 |-----|---------|-------------|
 | `cloud_sync_enabled` | `"false"` | Master toggle |
-| `cloud_device_id` | (generated) | Anonymous device UUID |
+| `cloud_device_id` | (generated) | Anonymous device UUID (generated once per database, persists across updates/restarts; only registered in Supabase `device_registry` when a price is submitted) |
 | `cloud_upload_enabled` | `"true"` | Upload prices to cloud |
 | `cloud_download_enabled` | `"true"` | Download prices from cloud |
 
