@@ -8,6 +8,7 @@ import pytest
 
 from titrack.collector.collector import Collector
 from titrack.core.models import ItemDelta, Run
+from titrack.data.inventory import set_gear_allowlist
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
@@ -422,3 +423,109 @@ class TestCollectorIntegration:
         # Final state should be 550
         fe_state = repo.get_slot_state(102, 0)
         assert fe_state.num == 550
+
+    def test_gear_items_excluded_by_default(self, test_env):
+        """Test that gear page items (PageId 100) are excluded when not in allowlist."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        log_content = """\
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/02KD/KD_YuanSuKuangDong000/KD_YuanSuKuangDong000
+[2026.01.28-10.00.30:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
+[2026.01.28-10.00.30:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 100 SlotId = 5 ConfigBaseId = 999001 Num = 1
+[2026.01.28-10.00.30:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
+[2026.01.28-10.05.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200
+"""
+        log_path = tmpdir / "gear_excluded.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # No deltas — gear page is excluded
+        assert len(deltas_received) == 0
+
+        # Slot state should NOT be tracked
+        states = repo.get_all_slot_states()
+        gear_states = [s for s in states if s.page_id == 100]
+        assert len(gear_states) == 0
+
+    def test_allowed_gear_items_tracked(self, test_env):
+        """Test that allowlisted gear items (PageId 100) create deltas."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        # Add item 999001 to allowlist
+        set_gear_allowlist(frozenset([999001]))
+
+        log_content = """\
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/02KD/KD_YuanSuKuangDong000/KD_YuanSuKuangDong000
+[2026.01.28-10.00.30:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
+[2026.01.28-10.00.30:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 100 SlotId = 5 ConfigBaseId = 999001 Num = 1
+[2026.01.28-10.00.30:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
+[2026.01.28-10.05.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200
+"""
+        log_path = tmpdir / "gear_allowed.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Delta should be created for the allowlisted gear item
+        assert len(deltas_received) == 1
+        assert deltas_received[0].config_base_id == 999001
+        assert deltas_received[0].page_id == 100
+        assert deltas_received[0].delta == 1
+
+    def test_gear_non_allowed_items_still_excluded(self, test_env):
+        """Test that non-allowlisted gear items are still excluded even when allowlist is populated."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        # Only 999001 is allowed, not 999002
+        set_gear_allowlist(frozenset([999001]))
+
+        log_content = """\
+[2026.01.28-10.00.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/02KD/KD_YuanSuKuangDong000/KD_YuanSuKuangDong000
+[2026.01.28-10.00.30:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems start
+[2026.01.28-10.00.30:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 100 SlotId = 5 ConfigBaseId = 999001 Num = 1
+[2026.01.28-10.00.30:002][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 100 SlotId = 6 ConfigBaseId = 999002 Num = 1
+[2026.01.28-10.00.30:003][  0]GameLog: Display: [Game] ItemChange@ ProtoName=PickItems end
+[2026.01.28-10.05.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200
+"""
+        log_path = tmpdir / "gear_mixed.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Only the allowlisted item should create a delta
+        assert len(deltas_received) == 1
+        assert deltas_received[0].config_base_id == 999001

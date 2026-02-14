@@ -31,7 +31,7 @@ from titrack.parser.exchange_parser import (
     calculate_reference_price,
 )
 from titrack.parser.player_parser import PlayerInfo, get_effective_player_id
-from titrack.data.inventory import EXCLUDED_PAGES
+from titrack.data.inventory import EXCLUDED_PAGES, is_gear_excluded
 
 # Proto names for non-loot inventory changes (trade house, recycling, etc.).
 # These update inventory (slot state) but should NOT create deltas
@@ -330,14 +330,14 @@ class Collector:
         synthesizes a regular bag event with Num=0 so the delta calculator
         can compute the correct negative delta.
         """
-        if event.page_id in EXCLUDED_PAGES:
-            return
-
-        # Look up what was in this slot
+        # Look up what was in this slot (need config_base_id for allowlist check)
         key = SlotKey(event.page_id, event.slot_id)
         old_state = self.delta_calc.get_state(key)
         if old_state is None:
             return  # Unknown slot, nothing to do
+
+        if is_gear_excluded(event.page_id, old_state.config_base_id):
+            return
 
         # Synthesize a regular bag event with Num=0
         synthetic = ParsedBagEvent(
@@ -352,8 +352,8 @@ class Collector:
 
     def _handle_bag_event(self, event: ParsedBagEvent, timestamp: datetime) -> None:
         """Handle BagMgr modification and init events."""
-        # Skip excluded inventory pages (e.g., Gear tab - prices not reliable)
-        if event.page_id in EXCLUDED_PAGES:
+        # Skip excluded inventory pages (e.g., Gear tab) unless item is allowlisted
+        if is_gear_excluded(event.page_id, event.config_base_id):
             return
 
         # Handle InitBagData batch detection - clear stale slots when new batch starts
@@ -659,8 +659,8 @@ class Collector:
         states = self.delta_calc.get_all_states()
         totals: dict[int, int] = {}
         for state in states:
-            # Skip excluded pages (e.g., Gear)
-            if state.page_id in EXCLUDED_PAGES:
+            # Skip excluded pages (e.g., Gear) unless item is allowlisted
+            if is_gear_excluded(state.page_id, state.config_base_id):
                 continue
             if state.num > 0:
                 totals[state.config_base_id] = totals.get(state.config_base_id, 0) + state.num

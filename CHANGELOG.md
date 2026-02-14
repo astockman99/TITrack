@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Gear tab allowlist**: Destiny items (Fates, Kismets), Prisms, and Divinity items (Pacts, Fragments, God Divinities) are now tracked from the Gear tab despite the general gear exclusion. These item types have stable, tradeable prices. Configured via `ALLOWED_GEAR_TYPE_CN` in `inventory.py` — 263 items across 14 type categories.
 - **Deep Space zone names**: Boundless Hunting Ground, Core Mine, Desert Pasture, Barren Wilderness, Vast Wasteland
 
 ### Fixed

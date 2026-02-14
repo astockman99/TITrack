@@ -14,6 +14,7 @@ from titrack.core.models import (
     Run,
     SlotState,
 )
+from titrack.data.inventory import set_gear_allowlist
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 
@@ -378,3 +379,131 @@ class TestHiddenItemsRepository:
 
         assert repo1.get_hidden_items() == {100300}
         assert repo2.get_hidden_items() == {200001}
+
+
+class TestGearAllowlistRepository:
+    """Tests for gear allowlist filtering in repository queries."""
+
+    def test_slot_states_exclude_gear_by_default(self, repo):
+        """Gear-page slot states are excluded when allowlist is empty."""
+        # Insert gear and non-gear slot states
+        repo.upsert_slot_state(SlotState(
+            page_id=100, slot_id=0, config_base_id=999001, num=1, updated_at=datetime.now(),
+        ))
+        repo.upsert_slot_state(SlotState(
+            page_id=102, slot_id=0, config_base_id=100300, num=500, updated_at=datetime.now(),
+        ))
+
+        states = repo.get_all_slot_states()
+        assert len(states) == 1
+        assert states[0].page_id == 102
+
+    def test_slot_states_include_allowlisted_gear(self, repo):
+        """Allowlisted gear items pass through in slot state queries."""
+        set_gear_allowlist(frozenset([999001]))
+
+        repo.upsert_slot_state(SlotState(
+            page_id=100, slot_id=0, config_base_id=999001, num=1, updated_at=datetime.now(),
+        ))
+        repo.upsert_slot_state(SlotState(
+            page_id=100, slot_id=1, config_base_id=999002, num=1, updated_at=datetime.now(),
+        ))
+        repo.upsert_slot_state(SlotState(
+            page_id=102, slot_id=0, config_base_id=100300, num=500, updated_at=datetime.now(),
+        ))
+
+        states = repo.get_all_slot_states()
+        # Should include 999001 (allowlisted) and 100300 (non-gear), but NOT 999002
+        assert len(states) == 2
+        config_ids = {s.config_base_id for s in states}
+        assert 999001 in config_ids
+        assert 100300 in config_ids
+        assert 999002 not in config_ids
+
+    def test_run_summary_includes_allowlisted_gear(self, repo):
+        """Allowlisted gear items appear in run summaries."""
+        set_gear_allowlist(frozenset([999001]))
+
+        run = Run(
+            id=None, zone_signature="Map_Test",
+            start_ts=datetime(2026, 1, 26, 10, 0, 0), end_ts=None, is_hub=False,
+        )
+        run_id = repo.insert_run(run)
+
+        # Allowlisted gear delta
+        repo.insert_delta(ItemDelta(
+            page_id=100, slot_id=0, config_base_id=999001, delta=1,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+        # Non-allowlisted gear delta
+        repo.insert_delta(ItemDelta(
+            page_id=100, slot_id=1, config_base_id=999002, delta=1,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+        # Normal commodity delta
+        repo.insert_delta(ItemDelta(
+            page_id=102, slot_id=0, config_base_id=100300, delta=50,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+
+        summary = repo.get_run_summary(run_id)
+        assert 999001 in summary  # allowlisted gear
+        assert 999002 not in summary  # non-allowlisted gear
+        assert 100300 in summary  # commodity
+
+    def test_deltas_for_run_includes_allowlisted_gear(self, repo):
+        """Allowlisted gear items appear in run delta queries."""
+        set_gear_allowlist(frozenset([999001]))
+
+        run = Run(
+            id=None, zone_signature="Map_Test",
+            start_ts=datetime(2026, 1, 26, 10, 0, 0), end_ts=None, is_hub=False,
+        )
+        run_id = repo.insert_run(run)
+
+        repo.insert_delta(ItemDelta(
+            page_id=100, slot_id=0, config_base_id=999001, delta=1,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=100, slot_id=1, config_base_id=999002, delta=1,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+
+        deltas = repo.get_deltas_for_run(run_id)
+        config_ids = {d.config_base_id for d in deltas}
+        assert 999001 in config_ids
+        assert 999002 not in config_ids
+
+    def test_cumulative_loot_includes_allowlisted_gear(self, repo):
+        """Allowlisted gear items appear in cumulative loot report."""
+        set_gear_allowlist(frozenset([999001]))
+
+        run = Run(
+            id=None, zone_signature="Map_Test",
+            start_ts=datetime(2026, 1, 26, 10, 0, 0),
+            end_ts=datetime(2026, 1, 26, 10, 5, 0), is_hub=False,
+        )
+        run_id = repo.insert_run(run)
+
+        repo.insert_delta(ItemDelta(
+            page_id=100, slot_id=0, config_base_id=999001, delta=3,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+        repo.insert_delta(ItemDelta(
+            page_id=100, slot_id=1, config_base_id=999002, delta=2,
+            context=EventContext.PICK_ITEMS, proto_name="PickItems",
+            run_id=run_id, timestamp=datetime.now(),
+        ))
+
+        loot = repo.get_cumulative_loot()
+        loot_map = {item["config_base_id"]: item["total_quantity"] for item in loot}
+        assert 999001 in loot_map
+        assert loot_map[999001] == 3
+        assert 999002 not in loot_map

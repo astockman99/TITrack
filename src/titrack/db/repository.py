@@ -13,7 +13,7 @@ from titrack.core.models import (
     SlotState,
 )
 from titrack.db.connection import Database
-from titrack.data.inventory import EXCLUDED_PAGES
+from titrack.data.inventory import EXCLUDED_PAGES, get_gear_allowlist
 
 
 class Repository:
@@ -33,6 +33,30 @@ class Repository:
     def has_player_context(self) -> bool:
         """Return True if a player context has been set."""
         return self._current_player_id is not None
+
+    def _build_page_exclusion_clause(self, params: list) -> str:
+        """Build SQL clause to exclude gear-page items unless they're in the allowlist.
+
+        Appends bind values to `params` and returns the SQL fragment.
+        When the allowlist is populated:
+            AND (page_id NOT IN (?) OR config_base_id IN (?, ?, ...))
+        When empty:
+            AND page_id NOT IN (?)
+        """
+        if not EXCLUDED_PAGES:
+            return ""
+
+        allowlist = get_gear_allowlist()
+        excl_placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+
+        if allowlist:
+            allow_placeholders = ",".join("?" * len(allowlist))
+            params.extend(EXCLUDED_PAGES)
+            params.extend(allowlist)
+            return f" AND (page_id NOT IN ({excl_placeholders}) OR config_base_id IN ({allow_placeholders}))"
+        else:
+            params.extend(EXCLUDED_PAGES)
+            return f" AND page_id NOT IN ({excl_placeholders})"
 
     # --- Settings ---
 
@@ -265,10 +289,11 @@ class Repository:
                 (run_id,),
             )
         else:
-            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            params: list = [run_id]
+            clause = self._build_page_exclusion_clause(params)
             rows = self.db.fetchall(
-                f"SELECT * FROM item_deltas WHERE run_id = ? AND page_id NOT IN ({placeholders}) ORDER BY timestamp",
-                (run_id, *EXCLUDED_PAGES),
+                f"SELECT * FROM item_deltas WHERE run_id = ?{clause} ORDER BY timestamp",
+                tuple(params),
             )
         return [self._row_to_delta(row) for row in rows]
 
@@ -294,14 +319,15 @@ class Repository:
                 (run_id,),
             )
         else:
-            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            params: list = [run_id]
+            clause = self._build_page_exclusion_clause(params)
             rows = self.db.fetchall(
                 f"""SELECT config_base_id, SUM(delta) as total_delta
                    FROM item_deltas
-                   WHERE run_id = ? AND page_id NOT IN ({placeholders})
+                   WHERE run_id = ?{clause}
                    AND (proto_name IS NULL OR proto_name NOT IN ('Spv3Open', 'ClimbTowerOpen'))
                    GROUP BY config_base_id""",
-                (run_id, *EXCLUDED_PAGES),
+                tuple(params),
             )
         return {row["config_base_id"]: row["total_delta"] for row in rows}
 
@@ -370,16 +396,21 @@ class Repository:
             else:
                 rows = self.db.fetchall("SELECT * FROM slot_state")
         else:
-            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
+            params: list = []
             if player_id is not None:
+                params.append(player_id_filter)
+                clause = self._build_page_exclusion_clause(params)
                 rows = self.db.fetchall(
-                    f"SELECT * FROM slot_state WHERE player_id = ? AND page_id NOT IN ({placeholders})",
-                    (player_id_filter, *EXCLUDED_PAGES),
+                    f"SELECT * FROM slot_state WHERE player_id = ?{clause}",
+                    tuple(params),
                 )
             else:
+                clause = self._build_page_exclusion_clause(params)
+                # Strip leading " AND " since there's no preceding WHERE condition with a column
+                where_clause = clause.replace(" AND ", " WHERE ", 1)
                 rows = self.db.fetchall(
-                    f"SELECT * FROM slot_state WHERE page_id NOT IN ({placeholders})",
-                    tuple(EXCLUDED_PAGES),
+                    f"SELECT * FROM slot_state{where_clause}",
+                    tuple(params),
                 )
         return [self._row_to_slot_state(row) for row in rows]
 
@@ -937,11 +968,9 @@ class Repository:
             base_query += " AND (player_id IS NULL OR player_id = ?)"
             params.append(player_id or '')
 
-        # Exclude gear page
+        # Exclude gear page (unless item is in gear allowlist)
         if EXCLUDED_PAGES:
-            placeholders = ",".join("?" * len(EXCLUDED_PAGES))
-            base_query += f" AND page_id NOT IN ({placeholders})"
-            params.extend(EXCLUDED_PAGES)
+            base_query += self._build_page_exclusion_clause(params)
 
         # Group and filter for positive quantities only
         base_query += " GROUP BY config_base_id HAVING SUM(delta) > 0"

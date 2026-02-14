@@ -423,7 +423,7 @@ Click "Export CSV" to save the report. A native "Save As" dialog lets you choose
 - Only includes items picked up during map runs (excludes trade house purchases, crafting, etc.)
 - Excludes non-loot events: trade house sales (`Push2`, `XchgReceive`) and item recycling (`ExchangeItem`) — these update inventory/net worth but don't create deltas
 - Excludes map costs (Spv3Open events) from loot totals
-- Excludes gear page items (PageId 100)
+- Excludes gear page items (PageId 100), except allowlisted types (Destiny, Prisms, Divinity)
 - Respects Trade Tax setting when calculating values
 
 ## Trade Tax
@@ -605,16 +605,24 @@ Run this while logged in as the character whose economy should receive the price
 ## Inventory Tab Filtering
 
 The game inventory has 4 tabs identified by PageId:
-- **PageId 100**: Gear (equipment) - **EXCLUDED from tracking**
+- **PageId 100**: Gear (equipment) - **EXCLUDED from tracking** (with exceptions below)
 - **PageId 101**: Skill
 - **PageId 102**: Commodity (currency, crafting materials)
 - **PageId 103**: Misc
 
-The Gear tab is excluded because gear prices are too dependent on specific affixes to be reliably tracked. This filtering is defined in `src/titrack/data/inventory.py` and applied at:
-- Collector level (bag events from excluded pages are skipped)
-- Repository queries (slot states and deltas filtered by default)
+The Gear tab is excluded because most gear prices depend on specific affixes. However, certain gear-tab item types with stable, tradeable prices are **allowlisted** and tracked normally:
 
-To modify which tabs are tracked, edit `EXCLUDED_PAGES` in `src/titrack/data/inventory.py`.
+- **Destiny**: Fates (Micro/Medium/Dual), Kismets, Undetermined Fate, Star Net, Wandering Star
+- **Prisms**: Ethereal Prisms, Inverse Image, Prism Levels/Gauges/Repairer
+- **Divinity**: Divinity Pacts, Divinity Fragments, God Divinities (Might, War, Machines, Deception)
+
+The allowlist is defined by `type_cn` values in `ALLOWED_GEAR_TYPE_CN` in `src/titrack/data/inventory.py`. At startup, `initialize_gear_allowlist(db)` queries the items table to build a ConfigBaseId set. The `is_gear_excluded()` function checks both page exclusion and the allowlist.
+
+Filtering is applied at:
+- Collector level (bag events from excluded pages are skipped unless allowlisted)
+- Repository queries (slot states, deltas, and loot reports filtered by default)
+
+To add new allowlisted types, add `type_cn` values to `ALLOWED_GEAR_TYPE_CN` in `src/titrack/data/inventory.py`.
 
 ## Cloud Sync (Crowd-Sourced Pricing)
 
