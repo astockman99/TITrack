@@ -1667,6 +1667,22 @@ tr.nightmare .zone-name {
     border-bottom: 1px solid var(--border);
 }
 
+.hide-items-search {
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.hide-items-search::placeholder {
+    color: var(--text-secondary);
+}
+
 .hide-items-table-container {
     max-height: 400px;
     overflow-y: auto;

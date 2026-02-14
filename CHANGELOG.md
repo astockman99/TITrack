@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Gear tab allowlist**: Destiny items (Fates, Kismets), Prisms, and Divinity items (Pacts, Fragments, God Divinities) are now tracked from the Gear tab despite the general gear exclusion. These item types have stable, tradeable prices. Configured via `ALLOWED_GEAR_TYPE_CN` in `inventory.py` — 263 items across 14 type categories.
 - **Deep Space zone names**: Boundless Hunting Ground, Core Mine, Desert Pasture, Barren Wilderness, Vast Wasteland
+- **Hide Items search**: Search bar in the Hide Items modal to quickly filter items by name
 
 ### Fixed
 - **Active run continuity across sub-zones**: When returning from Nightmare or Arcana (Fateful Contest) sub-zones, the Current Run panel now correctly resumes the original map's timer and loot instead of starting fresh. Timer only counts time in the normal map (excludes sub-zone time). Entering a sub-zone still shows it as a separate active run with its own timer and loot.

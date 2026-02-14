@@ -1581,6 +1581,9 @@ async function openHideItemsModal() {
     // Store a working copy for the modal
     modal._pendingHidden = new Set(hiddenItemIds);
     hideItemsModalSort = 'value';
+    // Clear search
+    const searchInput = document.getElementById('hide-items-search');
+    if (searchInput) searchInput.value = '';
     // Reset sortable header state
     const qtyTh = document.getElementById('hide-sort-quantity').closest('th');
     const valTh = document.getElementById('hide-sort-value').closest('th');
@@ -1614,8 +1617,13 @@ function sortHideItemsTable(sortBy) {
 
 function renderHideItemsTable() {
     const modal = document.getElementById('hide-items-modal');
-    const items = [...(modal._allItems || [])];
+    const searchTerm = (document.getElementById('hide-items-search')?.value || '').toLowerCase();
+    let items = [...(modal._allItems || [])];
     const pending = modal._pendingHidden || new Set();
+
+    if (searchTerm) {
+        items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
+    }
 
     // Sort
     if (hideItemsModalSort === 'value') {

@@ -378,7 +378,7 @@ In development mode (non-frozen), logs also output to console.
 - **Charts**: Cumulative Value, Value/Hour (rolling)
 - **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
 - **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
-- **Current Inventory**: Sortable by quantity or value, with "Hide Items" button to hide items from display (hidden items count toward net worth by default; toggle "Exclude from Net Worth" in the Hide Items modal to exclude them)
+- **Current Inventory**: Sortable by quantity or value, with "Hide Items" button to hide items from display (hidden items count toward net worth by default; toggle "Exclude from Net Worth" in the Hide Items modal to exclude them). Hide Items modal includes a search bar to filter items by name.
 - **Controls**: Cloud Sync toggle, Economy button (opens titrack.ninja), Settings button, Reset Stats, Auto-refresh toggle
 - **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Overlay settings (Hide Loot Pickups), Game Directory configuration (with Browse button in native window mode)
 
