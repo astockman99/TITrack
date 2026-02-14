@@ -145,13 +145,14 @@ class Repository:
 
         Args:
             level_uid: The level_uid to match.
-            after_ts: If provided, only return runs that started after this time.
+            after_ts: If provided, only return runs that started at or after this time.
                       Used to scope results to the current session (after last hub visit).
+                      Uses >= because the first map run starts at the same timestamp the hub ends.
         """
         if after_ts is not None:
             rows = self.db.fetchall(
                 """SELECT * FROM runs
-                   WHERE level_uid = ? AND end_ts IS NOT NULL AND start_ts > ?
+                   WHERE level_uid = ? AND end_ts IS NOT NULL AND start_ts >= ?
                    ORDER BY start_ts ASC""",
                 (level_uid, after_ts.isoformat()),
             )

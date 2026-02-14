@@ -464,10 +464,18 @@ class TestActiveRunAggregation:
             name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
         ))
 
+        # Hub before the map (ends at same timestamp map starts — real gameplay)
+        map_start = now - timedelta(minutes=10)
+        repo.insert_run(Run(
+            id=None, zone_signature="Hideout",
+            start_ts=now - timedelta(minutes=15), end_ts=map_start,
+            is_hub=True,
+        ))
+
         # Run part 1: in map before Arcana (completed)
         run1_id = repo.insert_run(Run(
             id=None, zone_signature="TestZone",
-            start_ts=now - timedelta(minutes=10), end_ts=now - timedelta(minutes=6),
+            start_ts=map_start, end_ts=now - timedelta(minutes=6),
             is_hub=False, level_uid=100, level_type=3,
         ))
         repo.insert_delta(ItemDelta(
@@ -514,10 +522,18 @@ class TestActiveRunAggregation:
             name_cn=None, type_cn=None, icon_url=None, url_en=None, url_cn=None,
         ))
 
+        # Hub before the map (ends at same timestamp map starts — real gameplay)
+        map_start = now - timedelta(minutes=8)
+        repo.insert_run(Run(
+            id=None, zone_signature="Hideout",
+            start_ts=now - timedelta(minutes=12), end_ts=map_start,
+            is_hub=True,
+        ))
+
         # Run part 1: in map before Nightmare (completed)
         run1_id = repo.insert_run(Run(
             id=None, zone_signature="TestZone",
-            start_ts=now - timedelta(minutes=8), end_ts=now - timedelta(minutes=5),
+            start_ts=map_start, end_ts=now - timedelta(minutes=5),
             is_hub=False, level_uid=100, level_type=3,
         ))
         repo.insert_delta(ItemDelta(
@@ -649,17 +665,18 @@ class TestActiveRunAggregation:
             run_id=run1_id, timestamp=now - timedelta(minutes=9),
         ))
 
-        # Hub visit (completed)
+        # Hub visit (completed — ends at same timestamp second map starts)
+        map2_start = now - timedelta(minutes=2)
         repo.insert_run(Run(
             id=None, zone_signature="Hideout",
-            start_ts=now - timedelta(minutes=8), end_ts=now - timedelta(minutes=5),
+            start_ts=now - timedelta(minutes=8), end_ts=map2_start,
             is_hub=True,
         ))
 
         # Second run of same zone (active, same level_uid=100)
         run2_id = repo.insert_run(Run(
             id=None, zone_signature="TestZone",
-            start_ts=now - timedelta(minutes=2),
+            start_ts=map2_start,
             is_hub=False, level_uid=100, level_type=3,
         ))
         repo.insert_delta(ItemDelta(
