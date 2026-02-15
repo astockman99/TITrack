@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Font size slider (70%–160%)
   - Clickable chips to select and drag-to-reorder visible stats (Time, FE/hr, Total, NW, Run, Val/Map, Runs, Avg)
   - Transparency toggle, lock (click-through), and close buttons
+- **Overlay lock (click-through)**: New lock button on the full overlay makes the entire window click-through, passing all clicks to the game underneath. A floating unlock button appears to restore interactivity.
 - **Supreme Showdown zone name**: Floors now display as "Supreme Showdown" instead of raw internal paths
 
 ---
