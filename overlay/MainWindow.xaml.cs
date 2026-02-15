@@ -81,6 +81,9 @@ public partial class MainWindow : Window
     private DateTime _tickBaseTimestamp;
     private bool _tickRunning = false;
 
+    // Size save debounce
+    private DispatcherTimer? _sizeDebounceTimer;
+
     // Colors for opaque mode
     private static readonly Color OpaqueMainBg = Color.FromArgb(0xF0, 0x1a, 0x1a, 0x2e);
     private static readonly Color OpaqueHeaderBg = Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a);
@@ -171,6 +174,7 @@ public partial class MainWindow : Window
 
         Loaded += async (s, e) =>
         {
+            await LoadTransparencyAsync();
             await LoadFontScaleAsync();
             await LoadHideLootAsync();
             await LoadMicroModeAsync();
@@ -180,14 +184,26 @@ public partial class MainWindow : Window
                 await LoadMicroStatsAsync();
                 await LoadMicroFontScaleAsync();
             }
+            await LoadPositionAsync();
+            await LoadSizeAsync();
             await RefreshDataAsync();
             _refreshTimer.Start();
         };
 
-        Closed += (s, e) =>
+        Closed += async (s, e) =>
         {
             _refreshTimer.Stop();
             _unlockWindow?.Close();
+            // Save position and size before disposing
+            try
+            {
+                await SavePositionAsync();
+                await SaveSizeAsync();
+            }
+            catch
+            {
+                // Best-effort save on close
+            }
             _httpClient.Dispose();
         };
     }
@@ -199,10 +215,12 @@ public partial class MainWindow : Window
             // Double-click to reset position
             Left = 100;
             Top = 100;
+            _ = SavePositionAsync();
         }
         else
         {
             DragMove();
+            _ = SavePositionAsync();
         }
     }
 
@@ -210,6 +228,16 @@ public partial class MainWindow : Window
     {
         // No padding scaling in micro mode
         if (_microMode) return;
+
+        // Debounce size save to avoid spamming API during resize
+        _sizeDebounceTimer?.Stop();
+        _sizeDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _sizeDebounceTimer.Tick += (_, _) =>
+        {
+            _sizeDebounceTimer.Stop();
+            _ = SaveSizeAsync();
+        };
+        _sizeDebounceTimer.Start();
 
         // Scale padding proportionally as window shrinks below default width
         double scale = Math.Clamp(ActualWidth / DefaultWidth, MinPaddingScale, 1.0);
@@ -485,18 +513,132 @@ public partial class MainWindow : Window
 
     private async Task SaveFontScaleAsync()
     {
+        await SaveSettingAsync("overlay_font_scale",
+            _fontScale.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    // Generic settings helpers
+    private async Task SaveSettingAsync(string key, string value)
+    {
         try
         {
             var content = new StringContent(
-                JsonSerializer.Serialize(new { value = _fontScale.ToString(System.Globalization.CultureInfo.InvariantCulture) }),
+                JsonSerializer.Serialize(new { value }),
                 System.Text.Encoding.UTF8,
                 "application/json");
-            await _httpClient.PutAsync($"{App.BaseUrl}/api/settings/overlay_font_scale", content);
+            await _httpClient.PutAsync($"{App.BaseUrl}/api/settings/{key}", content);
         }
         catch
         {
             // Silently ignore save errors
         }
+    }
+
+    private async Task<string?> LoadSettingStringAsync(string key)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/{key}");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    return valueElement.GetString();
+                }
+            }
+        }
+        catch
+        {
+            // Return null on error
+        }
+        return null;
+    }
+
+    // Position/size persistence
+    private async Task SavePositionAsync()
+    {
+        var key = _microMode ? "overlay_micro_position" : "overlay_position";
+        var value = $"{Left.ToString(System.Globalization.CultureInfo.InvariantCulture)},{Top.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        await SaveSettingAsync(key, value);
+    }
+
+    private async Task LoadPositionAsync()
+    {
+        var key = _microMode ? "overlay_micro_position" : "overlay_position";
+        var value = await LoadSettingStringAsync(key);
+        if (value != null)
+        {
+            var parts = value.Split(',');
+            if (parts.Length == 2 &&
+                double.TryParse(parts[0], System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var left) &&
+                double.TryParse(parts[1], System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var top))
+            {
+                // Validate position is on-screen
+                var screenLeft = SystemParameters.VirtualScreenLeft;
+                var screenTop = SystemParameters.VirtualScreenTop;
+                var screenRight = screenLeft + SystemParameters.VirtualScreenWidth;
+                var screenBottom = screenTop + SystemParameters.VirtualScreenHeight;
+
+                if (left >= screenLeft && left < screenRight - 50 &&
+                    top >= screenTop && top < screenBottom - 50)
+                {
+                    Left = left;
+                    Top = top;
+                }
+            }
+        }
+    }
+
+    private async Task SaveSizeAsync()
+    {
+        // Only save size in normal mode (micro auto-sizes)
+        if (_microMode) return;
+        var value = $"{Width.ToString(System.Globalization.CultureInfo.InvariantCulture)},{Height.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        await SaveSettingAsync("overlay_size", value);
+    }
+
+    private async Task LoadSizeAsync()
+    {
+        // Only load size in normal mode
+        if (_microMode) return;
+        var value = await LoadSettingStringAsync("overlay_size");
+        if (value != null)
+        {
+            var parts = value.Split(',');
+            if (parts.Length == 2 &&
+                double.TryParse(parts[0], System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var width) &&
+                double.TryParse(parts[1], System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var height))
+            {
+                if (width >= MinWidth && height >= MinHeight)
+                {
+                    Width = width;
+                    Height = height;
+                }
+            }
+        }
+    }
+
+    // Transparency persistence
+    private async Task LoadTransparencyAsync()
+    {
+        var value = await LoadSettingStringAsync("overlay_transparent");
+        if (value == "true")
+        {
+            _isTransparent = true;
+            ApplyTransparency();
+        }
+    }
+
+    private async Task SaveTransparencyAsync()
+    {
+        await SaveSettingAsync("overlay_transparent", _isTransparent ? "true" : "false");
     }
 
     private async Task LoadMicroModeAsync()
@@ -853,10 +995,12 @@ public partial class MainWindow : Window
         {
             Left = 100;
             Top = 100;
+            _ = SavePositionAsync();
         }
         else
         {
             DragMove();
+            _ = SavePositionAsync();
         }
     }
 
@@ -864,6 +1008,7 @@ public partial class MainWindow : Window
     {
         _isTransparent = !_isTransparent;
         ApplyTransparency();
+        _ = SaveTransparencyAsync();
     }
 
     private void ApplyTransparency()

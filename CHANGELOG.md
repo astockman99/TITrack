@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Overlay state persistence**: Overlay remembers its position, size, and transparency across restarts
+  - Normal and micro overlay positions saved independently
+  - Position validated against screen bounds on restore (falls back to default if off-screen)
+
 ---
 
 ## [0.5.1] - 2026-02-15

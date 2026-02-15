@@ -29,6 +29,9 @@ ALLOWED_SETTINGS = {
     "overlay_micro_stats",
     "overlay_micro_orientation",
     "overlay_micro_font_scale",
+    "overlay_position",
+    "overlay_size",
+    "overlay_micro_position",
     "realtime_tracking_enabled",
     "hidden_items_exclude_worth",
 }

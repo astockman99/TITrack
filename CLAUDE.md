@@ -297,6 +297,22 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 
 Font scale setting is persisted and restored when the overlay reopens.
 
+### State Persistence
+
+The overlay remembers its position, size, and transparency across restarts. State is saved to the settings API and restored on launch.
+
+| State | Settings key | Format |
+|-------|-------------|--------|
+| Normal overlay position | `overlay_position` | `"left,top"` |
+| Normal overlay size | `overlay_size` | `"width,height"` |
+| Micro overlay position | `overlay_micro_position` | `"left,top"` |
+| Transparency | `overlay_transparent` | `"true"/"false"` |
+
+- Position is saved after every drag and double-click reset
+- Size is saved with a 500ms debounce during resize, and on close
+- Position is validated against virtual screen bounds on load (falls back to default if off-screen)
+- Micro overlay size is not persisted (auto-sized by content)
+
 ### Micro Overlay Mode
 
 A compact alternative to the full overlay that shows only selected stats in a minimal bar. Configured entirely from Settings → Overlay.
@@ -316,7 +332,7 @@ A compact alternative to the full overlay that shows only selected stats in a mi
 - **Bar area**: Drag to move, double-click to reset position
 - **Stats area**: Click-through (passes clicks to game)
 
-**Settings keys:** `overlay_micro_mode`, `overlay_micro_stats` (JSON array), `overlay_micro_orientation`, `overlay_micro_font_scale`
+**Settings keys:** `overlay_micro_mode`, `overlay_micro_stats` (JSON array), `overlay_micro_orientation`, `overlay_micro_font_scale`, `overlay_micro_position`
 
 ## Single Instance Enforcement
 
