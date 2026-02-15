@@ -89,9 +89,15 @@ Each release includes two files:
    git tag vx.x.x && git push origin master && git push origin vx.x.x
    ```
 
-8. **Create GitHub release** with both files:
+8. **Create GitHub release** with both files. Release notes MUST end with a download footer:
    ```bash
    gh release create vx.x.x setup/publish/TITrack-Setup.exe dist/TITrack-x.x.x-windows.zip --title "vx.x.x" --notes "Release notes here"
+   ```
+   **Required footer** (append to all release notes):
+   ```
+   ---
+
+   **Download:** Use `TITrack-Setup.exe` (recommended) or extract `TITrack-x.x.x-windows.zip` manually.
    ```
 
 ### Code Signing (Optional)
