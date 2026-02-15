@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.5.0] - 2026-02-15
+
 ### Added
+- **Micro Overlay Mode**: Compact alternative to the full overlay showing only selected stats in a minimal bar
+  - Toggle between full and micro overlay in Settings → Overlay
+  - Horizontal (wide bar) or Vertical (narrow column) layout options
+  - Font size slider (70%–160%)
+  - Clickable chips to select and drag-to-reorder visible stats (Time, FE/hr, Total, NW, Run, Val/Map, Runs, Avg)
+  - Transparency toggle, lock (click-through), and close buttons
 - **Supreme Showdown zone name**: Floors now display as "Supreme Showdown" instead of raw internal paths
 
 ---
