@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Micro overlay horizontal mode**: Window now auto-sizes to fit all stats instead of cutting them off at a fixed width
+- **Overlay total time**: Timer now counts smoothly second-by-second while inside a map, instead of only updating when leaving a map
+
 ---
 
 ## [0.5.0] - 2026-02-15

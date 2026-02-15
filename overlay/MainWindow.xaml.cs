@@ -645,10 +645,10 @@ public partial class MainWindow : Window
             DockPanel.SetDock(MicroButtonsPanel, Dock.Right);
             MicroButtonsPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
             MicroDockPanel.Margin = new Thickness(8, 4, 8, 4);
-            // Horizontal: wide bar, auto-size height
-            SizeToContent = SizeToContent.Height;
-            Width = 450;
-            MinWidth = 200;
+            // Horizontal: auto-size both dimensions to fit all stats
+            SizeToContent = SizeToContent.WidthAndHeight;
+            Width = double.NaN;
+            MinWidth = 100;
         }
         RebuildMicroStats();
     }
@@ -796,7 +796,11 @@ public partial class MainWindow : Window
             switch (key)
             {
                 case "total_time":
-                    block.Text = stats != null ? FormatDurationLong(stats.total_duration_seconds) : "--";
+                    // Use tick timer value when ticking (avoids overwriting smooth count)
+                    if (_tickRunning && stats != null)
+                        block.Text = FormatDurationLong(_tickBaseSeconds);
+                    else
+                        block.Text = stats != null ? FormatDurationLong(stats.total_duration_seconds) : "--";
                     break;
                 case "value_per_hour":
                     block.Text = stats != null ? FormatNumber(stats.value_per_hour) : "--";
@@ -1180,10 +1184,24 @@ public partial class MainWindow : Window
             AvgTimeText.Text = "--";
         }
 
-        // Total Time - with local ticker for smooth realtime updates
+        // Total Time - with local ticker for smooth second counting
+        bool shouldTick = false;
+
         if (stats.realtime_tracking && !stats.realtime_paused && stats.total_duration_seconds > 0)
         {
+            // Realtime mode: wall-clock time from API, tick smoothly between polls
             _tickBaseSeconds = stats.total_duration_seconds;
+            shouldTick = true;
+        }
+        else if (!stats.realtime_tracking && activeRun != null)
+        {
+            // Non-realtime with active run: completed runs + active run's live duration
+            _tickBaseSeconds = stats.total_duration_seconds + activeRun.duration_seconds;
+            shouldTick = true;
+        }
+
+        if (shouldTick)
+        {
             _tickBaseTimestamp = DateTime.UtcNow;
             _tickRunning = true;
             _tickTimer.Start();
