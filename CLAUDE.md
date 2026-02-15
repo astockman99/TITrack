@@ -297,6 +297,27 @@ The PyInstaller spec automatically includes `overlay/publish/TITrackOverlay.exe`
 
 Font scale setting is persisted and restored when the overlay reopens.
 
+### Micro Overlay Mode
+
+A compact alternative to the full overlay that shows only selected stats in a minimal bar. Configured entirely from Settings → Overlay.
+
+**Settings:**
+- **Micro Overlay toggle**: Switches between full and micro overlay (polled every 2 seconds)
+- **Layout**: Horizontal (wide bar) or Vertical (narrow column with buttons on top)
+- **Font size**: Slider from 70% to 160%, applied via ScaleTransform
+- **Visible stats**: Clickable chips to select which stats appear; drag to reorder
+
+**Available stats:** Time, FE/hr, Total, NW, Run, Val/Map, Runs, Avg
+
+**Micro overlay controls:**
+- **◐ button**: Toggle transparency
+- **🔒 button**: Lock overlay (click-through)
+- **✕ button**: Close overlay
+- **Bar area**: Drag to move, double-click to reset position
+- **Stats area**: Click-through (passes clicks to game)
+
+**Settings keys:** `overlay_micro_mode`, `overlay_micro_stats` (JSON array), `overlay_micro_orientation`, `overlay_micro_font_scale`
+
 ## Single Instance Enforcement
 
 TITrack prevents multiple instances from running simultaneously to avoid duplicate data (e.g., map costs being recorded twice).

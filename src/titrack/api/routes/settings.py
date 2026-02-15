@@ -25,6 +25,10 @@ ALLOWED_SETTINGS = {
     "overlay_transparent",
     "overlay_font_scale",
     "overlay_hide_loot",
+    "overlay_micro_mode",
+    "overlay_micro_stats",
+    "overlay_micro_orientation",
+    "overlay_micro_font_scale",
     "realtime_tracking_enabled",
     "hidden_items_exclude_worth",
 }

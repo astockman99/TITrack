@@ -1,8 +1,10 @@
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
@@ -12,12 +14,24 @@ namespace TITrackOverlay;
 
 public partial class MainWindow : Window
 {
+    // Win32 interop for click-through lock
+    private const int GWL_EXSTYLE = -20;
+    private const int WS_EX_TRANSPARENT = 0x00000020;
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowLong(IntPtr hwnd, int index);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
+
     private readonly HttpClient _httpClient;
     private readonly DispatcherTimer _refreshTimer;
     private readonly Dictionary<int, BitmapImage?> _iconCache = new();
     private readonly HashSet<int> _failedIcons = new();
 
     private bool _isTransparent = false;
+    private bool _isLocked = false;
+    private Window? _unlockWindow;
     private double _fontScale = 1.0;
     private const double MinFontScale = 0.7;
     private const double MaxFontScale = 1.6;
@@ -30,6 +44,32 @@ public partial class MainWindow : Window
     private const double CompactMinHeight = 120;
     private const double DefaultWidth = 320;
     private const double MinPaddingScale = 0.25;
+
+    // Micro mode state
+    private bool _microMode = false;
+    private bool _microModeInitialized = false;
+    private List<string> _microStats = new() { "total_time", "value_per_hour", "total_value" };
+    private string _microStatsJson = "";
+    private string _microOrientation = "horizontal";
+    private double _microFontScale = 1.0;
+    private readonly Dictionary<string, TextBlock> _microValueBlocks = new();
+    private double _savedNormalWidth = 320;
+    private double _savedNormalHeight = 500;
+    private double _savedNormalLeft = double.NaN;
+    private double _savedNormalTop = double.NaN;
+
+    // Micro stat display config
+    private static readonly Dictionary<string, string> MicroStatLabels = new()
+    {
+        { "total_time", "Time" },
+        { "value_per_hour", "FE/hr" },
+        { "total_value", "Total" },
+        { "net_worth", "NW" },
+        { "this_run", "Run" },
+        { "value_per_map", "Val/Map" },
+        { "runs", "Runs" },
+        { "avg_time", "Avg" },
+    };
 
     // Track previous run to show after map ends
     private ActiveRunResponse? _previousRun = null;
@@ -118,7 +158,14 @@ public partial class MainWindow : Window
             if (_tickRunning)
             {
                 var elapsed = (DateTime.UtcNow - _tickBaseTimestamp).TotalSeconds;
-                TotalTimeText.Text = FormatDurationLong(_tickBaseSeconds + elapsed);
+                var formatted = FormatDurationLong(_tickBaseSeconds + elapsed);
+                TotalTimeText.Text = formatted;
+
+                // Also update micro mode total_time if active
+                if (_microMode && _microValueBlocks.TryGetValue("total_time", out var microBlock))
+                {
+                    microBlock.Text = formatted;
+                }
             }
         };
 
@@ -126,6 +173,13 @@ public partial class MainWindow : Window
         {
             await LoadFontScaleAsync();
             await LoadHideLootAsync();
+            await LoadMicroModeAsync();
+            if (_microMode)
+            {
+                await LoadMicroOrientationAsync();
+                await LoadMicroStatsAsync();
+                await LoadMicroFontScaleAsync();
+            }
             await RefreshDataAsync();
             _refreshTimer.Start();
         };
@@ -133,6 +187,7 @@ public partial class MainWindow : Window
         Closed += (s, e) =>
         {
             _refreshTimer.Stop();
+            _unlockWindow?.Close();
             _httpClient.Dispose();
         };
     }
@@ -153,6 +208,9 @@ public partial class MainWindow : Window
 
     private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
     {
+        // No padding scaling in micro mode
+        if (_microMode) return;
+
         // Scale padding proportionally as window shrinks below default width
         double scale = Math.Clamp(ActualWidth / DefaultWidth, MinPaddingScale, 1.0);
 
@@ -193,11 +251,111 @@ public partial class MainWindow : Window
         Close();
     }
 
-    private void PinButton_Click(object sender, RoutedEventArgs e)
+    private void LockButton_Click(object sender, RoutedEventArgs e)
     {
-        Topmost = !Topmost;
-        PinIcon.Text = Topmost ? "📌" : "📍";
-        PinIcon.Opacity = Topmost ? 1.0 : 0.5;
+        if (_isLocked)
+            UnlockOverlay();
+        else
+            LockOverlay();
+    }
+
+    private void LockOverlay()
+    {
+        _isLocked = true;
+
+        // Make entire window click-through via Win32
+        var hwnd = new WindowInteropHelper(this).Handle;
+        var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
+
+        // Ensure always on top when locked
+        Topmost = true;
+
+        // Update icons in both layouts
+        LockIcon.Text = "🔒";
+        MicroLockIcon.Text = "🔒";
+
+        // Show floating unlock button at the lock button's position
+        ShowUnlockButton();
+    }
+
+    private void UnlockOverlay()
+    {
+        _isLocked = false;
+
+        // Remove click-through
+        var hwnd = new WindowInteropHelper(this).Handle;
+        var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT);
+
+        // Update icons in both layouts
+        LockIcon.Text = "🔓";
+        MicroLockIcon.Text = "🔓";
+
+        // Hide floating unlock button
+        _unlockWindow?.Hide();
+    }
+
+    private void ShowUnlockButton()
+    {
+        if (_unlockWindow == null)
+            CreateUnlockWindow();
+
+        PositionUnlockButton();
+        _unlockWindow!.Show();
+        _unlockWindow.Activate();
+    }
+
+    private void PositionUnlockButton()
+    {
+        if (_unlockWindow == null) return;
+
+        // Use the appropriate lock button based on current mode
+        var targetButton = _microMode ? MicroLockButton : LockButton;
+
+        // Position relative to main window to avoid DPI coordinate mismatches
+        var relativePoint = targetButton.TransformToAncestor(this).Transform(new Point(0, 0));
+        _unlockWindow.Left = Left + relativePoint.X;
+        _unlockWindow.Top = Top + relativePoint.Y;
+        _unlockWindow.Width = targetButton.ActualWidth;
+        _unlockWindow.Height = targetButton.ActualHeight;
+    }
+
+    private void CreateUnlockWindow()
+    {
+        _unlockWindow = new Window
+        {
+            WindowStyle = WindowStyle.None,
+            AllowsTransparency = true,
+            Background = Brushes.Transparent,
+            Topmost = true,
+            ShowInTaskbar = false,
+            ResizeMode = ResizeMode.NoResize,
+        };
+
+        var border = new Border
+        {
+            Background = new SolidColorBrush(Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a)),
+            CornerRadius = new CornerRadius(4),
+            Cursor = Cursors.Hand,
+            ToolTip = "Unlock overlay",
+        };
+
+        var text = new TextBlock
+        {
+            Text = "🔒",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Color.FromRgb(0xa0, 0xa0, 0xa0)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        border.Child = text;
+        border.MouseLeftButtonDown += (s, e) => UnlockOverlay();
+        border.MouseEnter += (s, e) => border.Background = new SolidColorBrush(Color.FromRgb(0x3a, 0x3a, 0x5a));
+        border.MouseLeave += (s, e) => border.Background = new SolidColorBrush(Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a));
+
+        _unlockWindow.Content = border;
     }
 
     private async void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -341,6 +499,363 @@ public partial class MainWindow : Window
         }
     }
 
+    private async Task LoadMicroModeAsync()
+    {
+        bool newMicroMode = _microMode;
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_micro_mode");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    newMicroMode = valueElement.GetString() == "true";
+                }
+            }
+        }
+        catch
+        {
+            // Use default on error
+        }
+
+        if (newMicroMode == _microMode && _microModeInitialized)
+            return;
+
+        _microMode = newMicroMode;
+        _microModeInitialized = true;
+        ApplyMicroMode();
+    }
+
+    private async Task LoadMicroStatsAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_micro_stats");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    var valueStr = valueElement.GetString();
+                    if (!string.IsNullOrEmpty(valueStr) && valueStr != _microStatsJson)
+                    {
+                        _microStatsJson = valueStr;
+                        var parsed = JsonSerializer.Deserialize<List<string>>(valueStr);
+                        if (parsed != null && parsed.Count > 0)
+                        {
+                            _microStats = parsed;
+                            RebuildMicroStats();
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Use defaults on error
+        }
+    }
+
+    private async Task LoadMicroOrientationAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_micro_orientation");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    var newOrientation = valueElement.GetString() ?? "horizontal";
+                    if (newOrientation != _microOrientation)
+                    {
+                        _microOrientation = newOrientation;
+                        ApplyMicroOrientation();
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Use default on error
+        }
+    }
+
+    private async Task LoadMicroFontScaleAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/overlay_micro_font_scale");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("value", out var valueElement) &&
+                    valueElement.ValueKind != JsonValueKind.Null)
+                {
+                    var valueStr = valueElement.GetString();
+                    if (int.TryParse(valueStr, out var percent))
+                    {
+                        var newScale = Math.Clamp(percent / 100.0, 0.7, 1.6);
+                        if (Math.Abs(newScale - _microFontScale) > 0.01)
+                        {
+                            _microFontScale = newScale;
+                            ApplyMicroFontScale();
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Use default on error
+        }
+    }
+
+    private void ApplyMicroFontScale()
+    {
+        MicroStatsPanel.LayoutTransform = new ScaleTransform(_microFontScale, _microFontScale);
+    }
+
+    private void ApplyMicroOrientation()
+    {
+        if (_microOrientation == "vertical")
+        {
+            MicroStatsPanel.Orientation = Orientation.Vertical;
+            // Buttons dock to top, right-aligned
+            DockPanel.SetDock(MicroButtonsPanel, Dock.Top);
+            MicroButtonsPanel.HorizontalAlignment = HorizontalAlignment.Right;
+            MicroDockPanel.Margin = new Thickness(8, 4, 8, 6);
+            // Vertical: auto-size both dimensions
+            SizeToContent = SizeToContent.WidthAndHeight;
+            Width = double.NaN;
+            MinWidth = 100;
+        }
+        else
+        {
+            MicroStatsPanel.Orientation = Orientation.Horizontal;
+            // Buttons dock to right
+            DockPanel.SetDock(MicroButtonsPanel, Dock.Right);
+            MicroButtonsPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            MicroDockPanel.Margin = new Thickness(8, 4, 8, 4);
+            // Horizontal: wide bar, auto-size height
+            SizeToContent = SizeToContent.Height;
+            Width = 450;
+            MinWidth = 200;
+        }
+        RebuildMicroStats();
+    }
+
+    private void ApplyMicroMode()
+    {
+        if (_microMode)
+        {
+            // Save normal mode geometry
+            _savedNormalWidth = Width;
+            _savedNormalHeight = Height;
+            _savedNormalLeft = Left;
+            _savedNormalTop = Top;
+
+            // Switch to micro layout
+            MainBorder.Visibility = Visibility.Collapsed;
+            MicroBorder.Visibility = Visibility.Visible;
+            ResizeMode = ResizeMode.NoResize;
+            MinHeight = 0;
+
+            // Apply orientation-specific sizing
+            ApplyMicroOrientation();
+        }
+        else
+        {
+            // Switch back to normal layout
+            MicroBorder.Visibility = Visibility.Collapsed;
+            MainBorder.Visibility = Visibility.Visible;
+
+            // Restore normal window properties
+            SizeToContent = SizeToContent.Manual;
+            ResizeMode = ResizeMode.CanResizeWithGrip;
+            MinWidth = 180;
+            MinHeight = _hideLoot ? CompactMinHeight : 200;
+
+            if (!double.IsNaN(_savedNormalLeft))
+            {
+                Left = _savedNormalLeft;
+                Top = _savedNormalTop;
+            }
+            Width = _savedNormalWidth;
+            Height = _savedNormalHeight;
+        }
+    }
+
+    private void RebuildMicroStats()
+    {
+        MicroStatsPanel.Children.Clear();
+        _microValueBlocks.Clear();
+
+        bool isVertical = _microOrientation == "vertical";
+
+        for (int i = 0; i < _microStats.Count; i++)
+        {
+            var key = _microStats[i];
+            if (!MicroStatLabels.TryGetValue(key, out var label))
+                continue;
+
+            if (isVertical)
+            {
+                // Vertical: each stat is a horizontal row with label left, value right
+                var row = new DockPanel { Margin = new Thickness(0, 1, 0, 1) };
+
+                var labelBlock = new TextBlock
+                {
+                    Text = label,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xa0, 0xa0, 0xa0)),
+                    FontSize = 12,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                DockPanel.SetDock(labelBlock, Dock.Left);
+                row.Children.Add(labelBlock);
+
+                var valueBlock = new TextBlock
+                {
+                    Text = "--",
+                    Foreground = key == "this_run"
+                        ? (Brush)FindResource("AccentGreenBrush")
+                        : key == "net_worth"
+                            ? (Brush)FindResource("AccentRedBrush")
+                            : new SolidColorBrush(Color.FromRgb(0xea, 0xea, 0xea)),
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(12, 0, 0, 0)
+                };
+                _microValueBlocks[key] = valueBlock;
+                row.Children.Add(valueBlock);
+
+                MicroStatsPanel.Children.Add(row);
+            }
+            else
+            {
+                // Horizontal: inline label: value · label: value
+                if (i > 0)
+                {
+                    var dot = new TextBlock
+                    {
+                        Text = "\u00B7",
+                        Foreground = new SolidColorBrush(Color.FromRgb(0x60, 0x60, 0x80)),
+                        FontSize = 12,
+                        FontWeight = FontWeights.Bold,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(6, 0, 6, 0)
+                    };
+                    MicroStatsPanel.Children.Add(dot);
+                }
+
+                var labelBlock = new TextBlock
+                {
+                    Text = label + ":",
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xa0, 0xa0, 0xa0)),
+                    FontSize = 12,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 4, 0)
+                };
+                MicroStatsPanel.Children.Add(labelBlock);
+
+                var valueBlock = new TextBlock
+                {
+                    Text = "--",
+                    Foreground = key == "this_run"
+                        ? (Brush)FindResource("AccentGreenBrush")
+                        : key == "net_worth"
+                            ? (Brush)FindResource("AccentRedBrush")
+                            : new SolidColorBrush(Color.FromRgb(0xea, 0xea, 0xea)),
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                _microValueBlocks[key] = valueBlock;
+                MicroStatsPanel.Children.Add(valueBlock);
+            }
+        }
+    }
+
+    private void UpdateMicroStats(StatsResponse? stats, ActiveRunResponse? activeRun, InventoryResponse? inventory)
+    {
+        foreach (var kvp in _microValueBlocks)
+        {
+            var key = kvp.Key;
+            var block = kvp.Value;
+
+            switch (key)
+            {
+                case "total_time":
+                    block.Text = stats != null ? FormatDurationLong(stats.total_duration_seconds) : "--";
+                    break;
+                case "value_per_hour":
+                    block.Text = stats != null ? FormatNumber(stats.value_per_hour) : "--";
+                    break;
+                case "total_value":
+                    block.Text = stats != null ? FormatNumber(stats.total_value) : "--";
+                    break;
+                case "net_worth":
+                    block.Text = inventory != null ? Math.Round(inventory.net_worth_fe).ToString("N0") : "--";
+                    break;
+                case "this_run":
+                    var displayRun = activeRun ?? _previousRun;
+                    if (displayRun != null)
+                    {
+                        var runValue = displayRun.net_value_fe ?? displayRun.total_value;
+                        block.Text = FormatNumber(runValue);
+                        block.Foreground = runValue >= 0
+                            ? (Brush)FindResource("AccentGreenBrush")
+                            : (Brush)FindResource("AccentRedBrush");
+                    }
+                    else
+                    {
+                        block.Text = "--";
+                    }
+                    break;
+                case "value_per_map":
+                    block.Text = stats != null ? FormatNumber(stats.avg_value_per_run) : "--";
+                    break;
+                case "runs":
+                    block.Text = stats != null ? stats.total_runs.ToString("N0") : "--";
+                    break;
+                case "avg_time":
+                    if (stats != null && stats.total_runs > 0)
+                    {
+                        var mapDur = stats.map_duration_seconds > 0 ? stats.map_duration_seconds : stats.total_duration_seconds;
+                        block.Text = FormatDuration(mapDur / stats.total_runs);
+                    }
+                    else
+                    {
+                        block.Text = "--";
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void MicroHeader_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            Left = 100;
+            Top = 100;
+        }
+        else
+        {
+            DragMove();
+        }
+    }
+
     private void TransparencyButton_Click(object sender, RoutedEventArgs e)
     {
         _isTransparent = !_isTransparent;
@@ -373,9 +888,16 @@ public partial class MainWindow : Window
             // Add text shadows for visibility
             ApplyTextShadows(true);
 
-            // Update icon
+            // Update icons
             TransparencyIcon.Text = "◑";
             TransparencyIcon.Opacity = 0.7;
+            MicroTransparencyIcon.Text = "◑";
+            MicroTransparencyIcon.Opacity = 0.7;
+
+            // Micro overlay transparency
+            MicroBorder.Background = Brushes.Transparent;
+            MicroBorder.BorderBrush = Brushes.Transparent;
+            ApplyMicroTextShadows(true);
         }
         else
         {
@@ -402,9 +924,16 @@ public partial class MainWindow : Window
             // Remove text shadows
             ApplyTextShadows(false);
 
-            // Update icon
+            // Update icons
             TransparencyIcon.Text = "◐";
             TransparencyIcon.Opacity = 1.0;
+            MicroTransparencyIcon.Text = "◐";
+            MicroTransparencyIcon.Opacity = 1.0;
+
+            // Micro overlay opaque
+            MicroBorder.Background = new SolidColorBrush(OpaqueMainBg);
+            MicroBorder.BorderBrush = new SolidColorBrush(OpaqueBorderColor);
+            ApplyMicroTextShadows(false);
         }
     }
 
@@ -507,6 +1036,32 @@ public partial class MainWindow : Window
         NoRunText.Effect = effect;
     }
 
+    private void ApplyMicroTextShadows(bool enabled)
+    {
+        var effect = enabled ? TextShadow : null;
+        foreach (var child in MicroStatsPanel.Children)
+        {
+            if (child is TextBlock tb)
+            {
+                tb.Effect = effect;
+                if (enabled)
+                    tb.Foreground = new SolidColorBrush(Colors.White);
+            }
+            else if (child is DockPanel dp)
+            {
+                foreach (var inner in dp.Children)
+                {
+                    if (inner is TextBlock itb)
+                    {
+                        itb.Effect = effect;
+                        if (enabled)
+                            itb.Foreground = new SolidColorBrush(Colors.White);
+                    }
+                }
+            }
+        }
+    }
+
     private async Task RefreshDataAsync()
     {
         try
@@ -523,7 +1078,26 @@ public partial class MainWindow : Window
 
             UpdateStats(stats, activeRun, inventory);
             UpdateActiveRun(activeRun);
-            await LoadHideLootAsync();
+            await LoadMicroModeAsync();
+            if (_microMode)
+            {
+                await LoadMicroStatsAsync();
+                await LoadMicroOrientationAsync();
+                await LoadMicroFontScaleAsync();
+                UpdateMicroStats(stats, activeRun, inventory);
+            }
+            else
+            {
+                await LoadHideLootAsync();
+            }
+
+            // Safety: ensure unlock button stays visible when locked
+            if (_isLocked && _unlockWindow != null && !_unlockWindow.IsVisible)
+            {
+                PositionUnlockButton();
+                _unlockWindow.Show();
+                _unlockWindow.Activate();
+            }
         }
         catch (Exception ex)
         {

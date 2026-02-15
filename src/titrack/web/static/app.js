@@ -325,6 +325,231 @@ async function handleOverlayHideLootToggle(event) {
     toggle.disabled = false;
 }
 
+// --- Overlay Micro Mode Setting ---
+
+const MICRO_STAT_OPTIONS = [
+    { key: 'total_time', label: 'Time' },
+    { key: 'value_per_hour', label: 'FE/hr' },
+    { key: 'total_value', label: 'Total' },
+    { key: 'net_worth', label: 'NW' },
+    { key: 'this_run', label: 'Run' },
+    { key: 'value_per_map', label: 'Val/Map' },
+    { key: 'runs', label: 'Runs' },
+    { key: 'avg_time', label: 'Avg' },
+];
+const DEFAULT_MICRO_STATS = ['total_time', 'value_per_hour', 'total_value'];
+
+async function fetchOverlayMicroModeSetting() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_micro_mode`);
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.value === 'true';
+    } catch (error) {
+        console.error('Error fetching overlay micro mode setting:', error);
+        return false;
+    }
+}
+
+async function updateOverlayMicroModeSetting(enabled) {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_micro_mode`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: enabled ? 'true' : 'false' })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error updating overlay micro mode setting:', error);
+        return false;
+    }
+}
+
+async function handleOverlayMicroModeToggle(event) {
+    const enabled = event.target.checked;
+    const toggle = event.target;
+    toggle.disabled = true;
+
+    const success = await updateOverlayMicroModeSetting(enabled);
+    if (!success) {
+        toggle.checked = !enabled;
+        alert('Failed to update overlay micro mode setting');
+    } else {
+        // Show/hide stat picker
+        document.getElementById('micro-stats-picker').classList.toggle('hidden', !enabled);
+        if (enabled) {
+            await renderMicroStatsChips();
+            const orientation = await fetchMicroOrientation();
+            document.getElementById('micro-orient-horizontal').classList.toggle('active', orientation === 'horizontal');
+            document.getElementById('micro-orient-vertical').classList.toggle('active', orientation === 'vertical');
+        }
+    }
+
+    toggle.disabled = false;
+}
+
+async function fetchOverlayMicroStats() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_micro_stats`);
+        if (!response.ok) return DEFAULT_MICRO_STATS;
+        const data = await response.json();
+        if (data.value) {
+            return JSON.parse(data.value);
+        }
+        return DEFAULT_MICRO_STATS;
+    } catch (error) {
+        console.error('Error fetching overlay micro stats:', error);
+        return DEFAULT_MICRO_STATS;
+    }
+}
+
+async function updateOverlayMicroStats(stats) {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_micro_stats`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: JSON.stringify(stats) })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error updating overlay micro stats:', error);
+        return false;
+    }
+}
+
+let _microChipDragKey = null;
+
+async function renderMicroStatsChips() {
+    const container = document.getElementById('micro-stats-chips');
+    const selectedStats = await fetchOverlayMicroStats();
+
+    // Show selected stats first (in saved order), then unselected
+    const selectedOptions = selectedStats
+        .map(key => MICRO_STAT_OPTIONS.find(o => o.key === key))
+        .filter(Boolean);
+    const unselectedOptions = MICRO_STAT_OPTIONS.filter(o => !selectedStats.includes(o.key));
+    const orderedOptions = [...selectedOptions, ...unselectedOptions];
+
+    container.innerHTML = '';
+    orderedOptions.forEach(opt => {
+        const isSelected = selectedStats.includes(opt.key);
+        const chip = document.createElement('span');
+        chip.className = 'micro-stat-chip' + (isSelected ? ' active' : '');
+        chip.textContent = opt.label;
+        chip.dataset.key = opt.key;
+        chip.draggable = isSelected;
+
+        // Click to toggle selection
+        chip.addEventListener('click', async () => {
+            let current = await fetchOverlayMicroStats();
+            if (current.includes(opt.key)) {
+                if (current.length <= 1) return;
+                current = current.filter(k => k !== opt.key);
+            } else {
+                current.push(opt.key);
+            }
+            await updateOverlayMicroStats(current);
+            await renderMicroStatsChips();
+        });
+
+        // Drag-to-reorder (selected chips only)
+        if (isSelected) {
+            chip.addEventListener('dragstart', (e) => {
+                _microChipDragKey = opt.key;
+                chip.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            chip.addEventListener('dragend', () => {
+                chip.classList.remove('dragging');
+                container.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+                _microChipDragKey = null;
+            });
+
+            chip.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (_microChipDragKey && _microChipDragKey !== opt.key) {
+                    chip.classList.add('drag-over');
+                }
+            });
+
+            chip.addEventListener('dragleave', () => {
+                chip.classList.remove('drag-over');
+            });
+
+            chip.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                chip.classList.remove('drag-over');
+                if (!_microChipDragKey || _microChipDragKey === opt.key) return;
+
+                // Reorder: remove dragged key, insert at drop position
+                let current = [...selectedStats];
+                const fromIdx = current.indexOf(_microChipDragKey);
+                const toIdx = current.indexOf(opt.key);
+                if (fromIdx === -1 || toIdx === -1) return;
+                current.splice(fromIdx, 1);
+                current.splice(toIdx, 0, _microChipDragKey);
+
+                await updateOverlayMicroStats(current);
+                _microChipDragKey = null;
+                await renderMicroStatsChips();
+            });
+        }
+
+        container.appendChild(chip);
+    });
+}
+
+// --- Micro Overlay Font Scale ---
+
+async function fetchMicroFontScale() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_micro_font_scale`);
+        if (!response.ok) return 100;
+        const data = await response.json();
+        return data.value ? parseInt(data.value, 10) : 100;
+    } catch (error) {
+        return 100;
+    }
+}
+
+async function updateMicroFontScale(percent) {
+    try {
+        await fetch(`${API_BASE}/settings/overlay_micro_font_scale`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: String(percent) })
+        });
+    } catch (error) {
+        console.error('Error updating micro font scale:', error);
+    }
+}
+
+async function fetchMicroOrientation() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/overlay_micro_orientation`);
+        if (!response.ok) return 'horizontal';
+        const data = await response.json();
+        return data.value || 'horizontal';
+    } catch (error) {
+        return 'horizontal';
+    }
+}
+
+async function setMicroOrientation(orientation) {
+    try {
+        await fetch(`${API_BASE}/settings/overlay_micro_orientation`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: orientation })
+        });
+    } catch (error) {
+        console.error('Error updating micro orientation:', error);
+    }
+    document.getElementById('micro-orient-horizontal').classList.toggle('active', orientation === 'horizontal');
+    document.getElementById('micro-orient-vertical').classList.toggle('active', orientation === 'vertical');
+}
+
 async function togglePause() {
     try {
         const response = await fetch(`${API_BASE}/runs/pause`, {
@@ -1059,6 +1284,19 @@ async function openSettingsModal() {
     realtimeToggle.checked = await fetchRealtimeTrackingSetting();
     realtimeTrackingEnabled = realtimeToggle.checked;
     overlayHideLootToggle.checked = await fetchOverlayHideLootSetting();
+
+    const overlayMicroModeToggle = document.getElementById('settings-overlay-micro-mode');
+    overlayMicroModeToggle.checked = await fetchOverlayMicroModeSetting();
+    document.getElementById('micro-stats-picker').classList.toggle('hidden', !overlayMicroModeToggle.checked);
+    // Always render chips, orientation, and font scale so they're ready when toggled on
+    await renderMicroStatsChips();
+    const microOrientation = await fetchMicroOrientation();
+    document.getElementById('micro-orient-horizontal').classList.toggle('active', microOrientation === 'horizontal');
+    document.getElementById('micro-orient-vertical').classList.toggle('active', microOrientation === 'vertical');
+    const microFontScale = await fetchMicroFontScale();
+    const fontSlider = document.getElementById('micro-font-scale-slider');
+    fontSlider.value = microFontScale;
+    document.getElementById('micro-font-scale-value').textContent = microFontScale + '%';
 
     // Fetch current log path from status
     try {
@@ -2519,6 +2757,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const settingsOverlayHideLootToggle = document.getElementById('settings-overlay-hide-loot');
     settingsOverlayHideLootToggle.addEventListener('change', handleOverlayHideLootToggle);
+
+    const settingsOverlayMicroModeToggle = document.getElementById('settings-overlay-micro-mode');
+    settingsOverlayMicroModeToggle.addEventListener('change', handleOverlayMicroModeToggle);
+
+    document.getElementById('micro-font-scale-slider').addEventListener('input', (e) => {
+        document.getElementById('micro-font-scale-value').textContent = e.target.value + '%';
+    });
+    document.getElementById('micro-font-scale-slider').addEventListener('change', (e) => {
+        updateMicroFontScale(parseInt(e.target.value, 10));
+    });
 
     // Load initial map costs state
     mapCostsEnabled = await fetchMapCostsSetting();

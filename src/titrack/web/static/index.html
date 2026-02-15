@@ -330,6 +330,29 @@
                             <span class="toggle-desc">Hide the loot section in the overlay for a more compact view (stats only)</span>
                         </div>
                     </label>
+                    <label class="settings-toggle">
+                        <input type="checkbox" id="settings-overlay-micro-mode">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Micro Overlay</span>
+                            <span class="toggle-desc">Show a compact overlay with only key stats instead of the full overlay</span>
+                        </div>
+                    </label>
+                    <div id="micro-stats-picker" class="micro-stats-picker hidden">
+                        <div class="micro-orientation-row">
+                            <span class="micro-stats-label">Layout:</span>
+                            <div class="micro-orientation-buttons">
+                                <button class="micro-orientation-btn active" id="micro-orient-horizontal" onclick="setMicroOrientation('horizontal')">Horizontal</button>
+                                <button class="micro-orientation-btn" id="micro-orient-vertical" onclick="setMicroOrientation('vertical')">Vertical</button>
+                            </div>
+                        </div>
+                        <div class="micro-font-scale-row">
+                            <span class="micro-stats-label">Font size:</span>
+                            <input type="range" id="micro-font-scale-slider" min="70" max="160" value="100" step="10">
+                            <span id="micro-font-scale-value">100%</span>
+                        </div>
+                        <span class="micro-stats-label">Visible stats: <span class="micro-stats-hint">(drag to reorder)</span></span>
+                        <div id="micro-stats-chips" class="micro-stats-chips"></div>
+                    </div>
                 </section>
 
                 <!-- Game Directory Section -->

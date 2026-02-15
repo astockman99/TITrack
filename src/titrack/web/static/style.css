@@ -1756,3 +1756,131 @@ tr.nightmare .zone-name {
     vertical-align: middle;
     margin-left: 6px;
 }
+
+/* Micro Overlay Stats Picker */
+.micro-stats-picker {
+    margin-top: 8px;
+    padding: 8px 0 0 28px;
+}
+
+.micro-stats-picker.hidden {
+    display: none;
+}
+
+.micro-stats-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 6px;
+}
+
+.micro-stats-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.micro-stat-chip {
+    padding: 4px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.micro-stat-chip:hover {
+    border-color: var(--text-secondary);
+}
+
+.micro-stat-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    cursor: grab;
+}
+
+.micro-stat-chip.active:active {
+    cursor: grabbing;
+}
+
+.micro-stat-chip.dragging {
+    opacity: 0.4;
+}
+
+.micro-stat-chip.drag-over {
+    box-shadow: -2px 0 0 0 var(--accent);
+}
+
+.micro-stats-hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.micro-font-scale-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.micro-font-scale-row .micro-stats-label {
+    margin-bottom: 0;
+}
+
+#micro-font-scale-slider {
+    flex: 1;
+    max-width: 160px;
+    accent-color: var(--accent);
+}
+
+#micro-font-scale-value {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    min-width: 36px;
+}
+
+.micro-orientation-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.micro-orientation-row .micro-stats-label {
+    margin-bottom: 0;
+}
+
+.micro-orientation-buttons {
+    display: flex;
+    gap: 0;
+}
+
+.micro-orientation-btn {
+    padding: 3px 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.micro-orientation-btn:first-child {
+    border-radius: 4px 0 0 4px;
+}
+
+.micro-orientation-btn:last-child {
+    border-radius: 0 4px 4px 0;
+    border-left: none;
+}
+
+.micro-orientation-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}

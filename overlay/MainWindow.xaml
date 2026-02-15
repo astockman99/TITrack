@@ -95,283 +95,329 @@
         </Style>
     </Window.Resources>
 
-    <!-- Main container with rounded corners -->
-    <Border x:Name="MainBorder"
-            Background="#f01a1a2e"
-            CornerRadius="8"
-            BorderBrush="#3a3a5a"
-            BorderThickness="1">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!-- Header (draggable) -->
-            <Border x:Name="HeaderBorder"
-                    Grid.Row="0"
-                    Background="#e02a2a4a"
-                    CornerRadius="8,8,0,0"
-                    MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <Grid x:Name="HeaderGrid" Margin="10,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Net Worth -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock x:Name="NetWorthLabel"
-                                   Text="Net Worth"
-                                   Foreground="#a0a0a0"
-                                   FontSize="10" />
-                        <TextBlock x:Name="NetWorthText"
-                                   Text="--"
-                                   Foreground="#e94560"
-                                   FontSize="16"
-                                   FontWeight="Bold" />
-                    </StackPanel>
-
-                    <!-- Font scale decrease -->
-                    <Button x:Name="FontDecreaseButton"
-                            Grid.Column="1"
-                            Style="{StaticResource OverlayButton}"
-                            Click="FontDecreaseButton_Click"
-                            ToolTip="Decrease text size"
-                            Padding="4,4"
-                            Margin="0,0,0,0">
-                        <TextBlock Text="A" FontSize="10" FontWeight="Bold" />
-                    </Button>
-
-                    <!-- Font scale increase -->
-                    <Button x:Name="FontIncreaseButton"
-                            Grid.Column="2"
-                            Style="{StaticResource OverlayButton}"
-                            Click="FontIncreaseButton_Click"
-                            ToolTip="Increase text size"
-                            Padding="4,4"
-                            Margin="0,0,4,0">
-                        <TextBlock Text="A" FontSize="14" FontWeight="Bold" />
-                    </Button>
-
-                    <!-- Transparency toggle -->
-                    <Button x:Name="TransparencyButton"
-                            Grid.Column="3"
-                            Style="{StaticResource OverlayButton}"
-                            Click="TransparencyButton_Click"
-                            ToolTip="Toggle transparency"
-                            Padding="6,4"
-                            Margin="0,0,4,0">
-                        <TextBlock x:Name="TransparencyIcon" Text="◐" FontSize="14" />
-                    </Button>
-
-                    <!-- Pause button (realtime tracking) -->
-                    <Button x:Name="PauseButton"
-                            Grid.Column="4"
-                            Style="{StaticResource OverlayButton}"
-                            Click="PauseButton_Click"
-                            ToolTip="Pause/resume tracking"
-                            Visibility="Collapsed"
-                            Padding="6,4"
-                            Margin="0,0,4,0">
-                        <TextBlock x:Name="PauseIcon" Text="⏸" FontSize="12" />
-                    </Button>
-
-                    <!-- Pin toggle -->
-                    <Button x:Name="PinButton"
-                            Grid.Column="5"
-                            Style="{StaticResource OverlayButton}"
-                            Click="PinButton_Click"
-                            ToolTip="Toggle always-on-top"
-                            Padding="6,4"
-                            Margin="0,0,4,0">
-                        <TextBlock x:Name="PinIcon" Text="📌" FontSize="12" />
-                    </Button>
-
-                    <!-- Close button -->
-                    <Button Grid.Column="6"
-                            Style="{StaticResource OverlayButton}"
-                            Click="CloseButton_Click"
-                            ToolTip="Close overlay"
-                            Padding="6,4">
-                        <TextBlock Text="✕" FontSize="12" />
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- Stats Grid (click-through) -->
-            <Grid x:Name="StatsGrid" Grid.Row="1" Margin="8,6,8,0" IsHitTestVisible="False">
-                <Grid.LayoutTransform>
-                    <ScaleTransform x:Name="StatsScaleTransform" ScaleX="1.0" ScaleY="1.0" />
-                </Grid.LayoutTransform>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+    <Grid>
+        <!-- Main (full) overlay -->
+        <Border x:Name="MainBorder"
+                Background="#f01a1a2e"
+                CornerRadius="8"
+                BorderBrush="#3a3a5a"
+                BorderThickness="1">
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- This Run -->
-                <Border x:Name="ThisRunBox" Grid.Row="0" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
-                    <StackPanel>
-                        <TextBlock x:Name="ThisRunLabel" Text="This Run" Foreground="#a0a0a0" FontSize="9" />
-                        <TextBlock x:Name="ThisRunText" Text="--" Foreground="#4ecca3" FontSize="13" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
+                <!-- Header (draggable) -->
+                <Border x:Name="HeaderBorder"
+                        Grid.Row="0"
+                        Background="#e02a2a4a"
+                        CornerRadius="8,8,0,0"
+                        MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <Grid x:Name="HeaderGrid" Margin="10,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                <!-- Value/Hour -->
-                <Border x:Name="ValuePerHourBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
-                    <StackPanel>
-                        <TextBlock x:Name="ValuePerHourLabel" Text="Value/Hour" Foreground="#a0a0a0" FontSize="9" />
-                        <TextBlock x:Name="ValuePerHourText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
+                        <!-- Net Worth -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock x:Name="NetWorthLabel"
+                                       Text="Net Worth"
+                                       Foreground="#a0a0a0"
+                                       FontSize="10" />
+                            <TextBlock x:Name="NetWorthText"
+                                       Text="--"
+                                       Foreground="#e94560"
+                                       FontSize="16"
+                                       FontWeight="Bold" />
+                        </StackPanel>
 
-                <!-- Value/Map -->
-                <Border x:Name="ValuePerMapBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
-                    <StackPanel>
-                        <TextBlock x:Name="ValuePerMapLabel" Text="Value/Map" Foreground="#a0a0a0" FontSize="9" />
-                        <TextBlock x:Name="ValuePerMapText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
+                        <!-- Font scale decrease -->
+                        <Button x:Name="FontDecreaseButton"
+                                Grid.Column="1"
+                                Style="{StaticResource OverlayButton}"
+                                Click="FontDecreaseButton_Click"
+                                ToolTip="Decrease text size"
+                                Padding="4,4"
+                                Margin="0,0,0,0">
+                            <TextBlock Text="A" FontSize="10" FontWeight="Bold" />
+                        </Button>
 
-                <!-- Runs -->
-                <Border x:Name="RunsBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
-                    <StackPanel>
-                        <TextBlock x:Name="RunsLabel" Text="Runs" Foreground="#a0a0a0" FontSize="9" />
-                        <TextBlock x:Name="RunsText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
+                        <!-- Font scale increase -->
+                        <Button x:Name="FontIncreaseButton"
+                                Grid.Column="2"
+                                Style="{StaticResource OverlayButton}"
+                                Click="FontIncreaseButton_Click"
+                                ToolTip="Increase text size"
+                                Padding="4,4"
+                                Margin="0,0,4,0">
+                            <TextBlock Text="A" FontSize="14" FontWeight="Bold" />
+                        </Button>
 
-                <!-- Avg Time -->
-                <Border x:Name="AvgTimeBox" Grid.Row="2" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,0">
-                    <StackPanel>
-                        <TextBlock x:Name="AvgTimeLabel" Text="Avg Time" Foreground="#a0a0a0" FontSize="9" />
-                        <TextBlock x:Name="AvgTimeText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
+                        <!-- Transparency toggle -->
+                        <Button x:Name="TransparencyButton"
+                                Grid.Column="3"
+                                Style="{StaticResource OverlayButton}"
+                                Click="TransparencyButton_Click"
+                                ToolTip="Toggle transparency"
+                                Padding="6,4"
+                                Margin="0,0,4,0">
+                            <TextBlock x:Name="TransparencyIcon" Text="◐" FontSize="14" />
+                        </Button>
 
-                <!-- Total Time -->
-                <Border x:Name="TotalTimeBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,0">
-                    <StackPanel>
-                        <TextBlock x:Name="TotalTimeLabel" Text="Total Time" Foreground="#a0a0a0" FontSize="9" />
-                        <TextBlock x:Name="TotalTimeText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
-            </Grid>
+                        <!-- Pause button (realtime tracking) -->
+                        <Button x:Name="PauseButton"
+                                Grid.Column="4"
+                                Style="{StaticResource OverlayButton}"
+                                Click="PauseButton_Click"
+                                ToolTip="Pause/resume tracking"
+                                Visibility="Collapsed"
+                                Padding="6,4"
+                                Margin="0,0,4,0">
+                            <TextBlock x:Name="PauseIcon" Text="⏸" FontSize="12" />
+                        </Button>
 
-            <!-- Current Run / Loot Section (content click-through, scrollbar interactive) -->
-            <Border x:Name="LootSectionBorder"
-                    Grid.Row="2"
-                    Background="#c02a2a4a"
-                    CornerRadius="4"
-                    Margin="8,6,8,8">
-                <Border.LayoutTransform>
-                    <ScaleTransform x:Name="LootScaleTransform" ScaleX="1.0" ScaleY="1.0" />
-                </Border.LayoutTransform>
-                <Grid>
-                    <!-- Active run content -->
-                    <Grid x:Name="ActiveRunPanel">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                        <!-- Lock toggle (click-through) -->
+                        <Button x:Name="LockButton"
+                                Grid.Column="5"
+                                Style="{StaticResource OverlayButton}"
+                                Click="LockButton_Click"
+                                ToolTip="Lock overlay (click-through)"
+                                Padding="6,4"
+                                Margin="0,0,4,0">
+                            <TextBlock x:Name="LockIcon" Text="🔓" FontSize="12" />
+                        </Button>
 
-                        <!-- Zone header (click-through) -->
-                        <Border x:Name="ZoneHeaderBorder"
-                                Grid.Row="0"
-                                Background="#a02a2a4a"
-                                CornerRadius="4,4,0,0"
-                                Padding="8,6"
-                                IsHitTestVisible="False">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Pulsing indicator -->
-                                <Ellipse x:Name="PulseIndicator"
-                                         Grid.Column="0"
-                                         Width="8" Height="8"
-                                         Fill="#4ecca3"
-                                         Margin="0,0,6,0"
-                                         VerticalAlignment="Center">
-                                    <Ellipse.Triggers>
-                                        <EventTrigger RoutedEvent="Loaded">
-                                            <BeginStoryboard>
-                                                <Storyboard RepeatBehavior="Forever">
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="Opacity"
-                                                        From="0.4" To="1.0"
-                                                        Duration="0:0:0.6"
-                                                        AutoReverse="True" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </Ellipse.Triggers>
-                                </Ellipse>
-
-                                <TextBlock x:Name="ZoneNameText"
-                                           Grid.Column="1"
-                                           Text="Zone Name"
-                                           Foreground="#eaeaea"
-                                           FontSize="11"
-                                           FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Center" />
-
-                                <TextBlock x:Name="RunDurationText"
-                                           Grid.Column="2"
-                                           Text="(0:00)"
-                                           Foreground="#a0a0a0"
-                                           FontSize="11"
-                                           Margin="6,0,0,0"
-                                           VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <!-- Loot list -->
-                        <ScrollViewer Grid.Row="1"
-                                      Style="{StaticResource SlimScrollViewer}"
-                                      VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
-                            <StackPanel x:Name="LootList" Margin="4,4,4,4" />
-                        </ScrollViewer>
+                        <!-- Close button -->
+                        <Button Grid.Column="6"
+                                Style="{StaticResource OverlayButton}"
+                                Click="CloseButton_Click"
+                                ToolTip="Close overlay"
+                                Padding="6,4">
+                            <TextBlock Text="✕" FontSize="12" />
+                        </Button>
                     </Grid>
+                </Border>
 
-                    <!-- No active run message (click-through) -->
-                    <Grid x:Name="NoRunPanel" Visibility="Collapsed" IsHitTestVisible="False">
-                        <TextBlock x:Name="NoRunText"
-                                   Text="No active run"
-                                   Foreground="#a0a0a0"
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Grid>
+                <!-- Stats Grid (click-through) -->
+                <Grid x:Name="StatsGrid" Grid.Row="1" Margin="8,6,8,0" IsHitTestVisible="False">
+                    <Grid.LayoutTransform>
+                        <ScaleTransform x:Name="StatsScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                    </Grid.LayoutTransform>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- This Run -->
+                    <Border x:Name="ThisRunBox" Grid.Row="0" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
+                        <StackPanel>
+                            <TextBlock x:Name="ThisRunLabel" Text="This Run" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="ThisRunText" Text="--" Foreground="#4ecca3" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Value/Hour -->
+                    <Border x:Name="ValuePerHourBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
+                        <StackPanel>
+                            <TextBlock x:Name="ValuePerHourLabel" Text="Value/Hour" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="ValuePerHourText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Value/Map -->
+                    <Border x:Name="ValuePerMapBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
+                        <StackPanel>
+                            <TextBlock x:Name="ValuePerMapLabel" Text="Value/Map" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="ValuePerMapText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Runs -->
+                    <Border x:Name="RunsBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
+                        <StackPanel>
+                            <TextBlock x:Name="RunsLabel" Text="Runs" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="RunsText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Avg Time -->
+                    <Border x:Name="AvgTimeBox" Grid.Row="2" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,0">
+                        <StackPanel>
+                            <TextBlock x:Name="AvgTimeLabel" Text="Avg Time" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="AvgTimeText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Total Time -->
+                    <Border x:Name="TotalTimeBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="TotalTimeLabel" Text="Total Time" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="TotalTimeText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
                 </Grid>
-            </Border>
 
-            <!-- Resize grip visual hint -->
-            <Path x:Name="ResizeGrip"
-                  Grid.Row="2"
-                  Data="M 0,12 L 12,0 M 0,8 L 8,0 M 0,4 L 4,0"
-                  Stroke="#3a3a5a"
-                  StrokeThickness="1"
-                  HorizontalAlignment="Right"
-                  VerticalAlignment="Bottom"
-                  Margin="0,0,4,4"
-                  IsHitTestVisible="False" />
-        </Grid>
-    </Border>
+                <!-- Current Run / Loot Section (content click-through, scrollbar interactive) -->
+                <Border x:Name="LootSectionBorder"
+                        Grid.Row="2"
+                        Background="#c02a2a4a"
+                        CornerRadius="4"
+                        Margin="8,6,8,8">
+                    <Border.LayoutTransform>
+                        <ScaleTransform x:Name="LootScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                    </Border.LayoutTransform>
+                    <Grid>
+                        <!-- Active run content -->
+                        <Grid x:Name="ActiveRunPanel">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Zone header (click-through) -->
+                            <Border x:Name="ZoneHeaderBorder"
+                                    Grid.Row="0"
+                                    Background="#a02a2a4a"
+                                    CornerRadius="4,4,0,0"
+                                    Padding="8,6"
+                                    IsHitTestVisible="False">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Pulsing indicator -->
+                                    <Ellipse x:Name="PulseIndicator"
+                                             Grid.Column="0"
+                                             Width="8" Height="8"
+                                             Fill="#4ecca3"
+                                             Margin="0,0,6,0"
+                                             VerticalAlignment="Center">
+                                        <Ellipse.Triggers>
+                                            <EventTrigger RoutedEvent="Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0.4" To="1.0"
+                                                            Duration="0:0:0.6"
+                                                            AutoReverse="True" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+
+                                    <TextBlock x:Name="ZoneNameText"
+                                               Grid.Column="1"
+                                               Text="Zone Name"
+                                               Foreground="#eaeaea"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+
+                                    <TextBlock x:Name="RunDurationText"
+                                               Grid.Column="2"
+                                               Text="(0:00)"
+                                               Foreground="#a0a0a0"
+                                               FontSize="11"
+                                               Margin="6,0,0,0"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Loot list -->
+                            <ScrollViewer Grid.Row="1"
+                                          Style="{StaticResource SlimScrollViewer}"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel x:Name="LootList" Margin="4,4,4,4" />
+                            </ScrollViewer>
+                        </Grid>
+
+                        <!-- No active run message (click-through) -->
+                        <Grid x:Name="NoRunPanel" Visibility="Collapsed" IsHitTestVisible="False">
+                            <TextBlock x:Name="NoRunText"
+                                       Text="No active run"
+                                       Foreground="#a0a0a0"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Resize grip visual hint -->
+                <Path x:Name="ResizeGrip"
+                      Grid.Row="2"
+                      Data="M 0,12 L 12,0 M 0,8 L 8,0 M 0,4 L 4,0"
+                      Stroke="#3a3a5a"
+                      StrokeThickness="1"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Bottom"
+                      Margin="0,0,4,4"
+                      IsHitTestVisible="False" />
+            </Grid>
+        </Border>
+
+        <!-- Micro overlay (horizontal bar) -->
+        <Border x:Name="MicroBorder"
+                Background="#f01a1a2e"
+                CornerRadius="6"
+                BorderBrush="#3a3a5a"
+                BorderThickness="1"
+                Visibility="Collapsed"
+                MouseLeftButtonDown="MicroHeader_MouseLeftButtonDown">
+            <DockPanel x:Name="MicroDockPanel" Margin="8,4">
+                <!-- Buttons (dock position changed by code for vertical mode) -->
+                <StackPanel x:Name="MicroButtonsPanel" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="MicroTransparencyButton"
+                            Style="{StaticResource OverlayButton}"
+                            Click="TransparencyButton_Click"
+                            ToolTip="Toggle transparency"
+                            Padding="4,2"
+                            Margin="4,0,0,0">
+                        <TextBlock x:Name="MicroTransparencyIcon" Text="◐" FontSize="12" />
+                    </Button>
+                    <Button x:Name="MicroLockButton"
+                            Style="{StaticResource OverlayButton}"
+                            Click="LockButton_Click"
+                            ToolTip="Lock overlay (click-through)"
+                            Padding="4,2"
+                            Margin="4,0,0,0">
+                        <TextBlock x:Name="MicroLockIcon" Text="🔓" FontSize="11" />
+                    </Button>
+                    <Button Style="{StaticResource OverlayButton}"
+                            Click="CloseButton_Click"
+                            ToolTip="Close overlay"
+                            Padding="4,2"
+                            Margin="4,0,0,0">
+                        <TextBlock Text="✕" FontSize="11" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Stats panel fills remaining space (click-through) -->
+                <StackPanel x:Name="MicroStatsPanel"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            IsHitTestVisible="False" />
+            </DockPanel>
+        </Border>
+    </Grid>
 </Window>
