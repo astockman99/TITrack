@@ -5,7 +5,7 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.2] - 2026-02-16
 
 ### Added
 - **Ignore Runs & Items**: Exclude outlier runs or specific items from all calculations (FE/Hour, FE/Map, charts, loot report)
