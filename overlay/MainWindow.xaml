@@ -78,7 +78,7 @@
 
         <!-- Stat box style -->
         <Style x:Key="StatBox" TargetType="Border">
-            <Setter Property="Background" Value="#e02a2a4a" />
+            <Setter Property="Background" Value="#ff2a2a4a" />
             <Setter Property="CornerRadius" Value="4" />
             <Setter Property="Padding" Value="6" />
         </Style>
@@ -98,7 +98,7 @@
     <Grid>
         <!-- Main (full) overlay -->
         <Border x:Name="MainBorder"
-                Background="#f01a1a2e"
+                Background="#ff1a1a2e"
                 CornerRadius="8"
                 BorderBrush="#3a3a5a"
                 BorderThickness="1">
@@ -112,7 +112,7 @@
                 <!-- Header (draggable) -->
                 <Border x:Name="HeaderBorder"
                         Grid.Row="0"
-                        Background="#e02a2a4a"
+                        Background="#ff2a2a4a"
                         CornerRadius="8,8,0,0"
                         MouseLeftButtonDown="Header_MouseLeftButtonDown">
                     <Grid x:Name="HeaderGrid" Margin="10,8">
@@ -229,18 +229,18 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Value/Hour -->
+                    <!-- FE/Hour -->
                     <Border x:Name="ValuePerHourBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource StatBox}" Margin="3,0,0,6">
                         <StackPanel>
-                            <TextBlock x:Name="ValuePerHourLabel" Text="Value/Hour" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="ValuePerHourLabel" Text="FE/Hour" Foreground="#a0a0a0" FontSize="9" />
                             <TextBlock x:Name="ValuePerHourText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
                         </StackPanel>
                     </Border>
 
-                    <!-- Value/Map -->
+                    <!-- FE/Map -->
                     <Border x:Name="ValuePerMapBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource StatBox}" Margin="0,0,3,6">
                         <StackPanel>
-                            <TextBlock x:Name="ValuePerMapLabel" Text="Value/Map" Foreground="#a0a0a0" FontSize="9" />
+                            <TextBlock x:Name="ValuePerMapLabel" Text="FE/Map" Foreground="#a0a0a0" FontSize="9" />
                             <TextBlock x:Name="ValuePerMapText" Text="--" Foreground="#eaeaea" FontSize="13" FontWeight="SemiBold" />
                         </StackPanel>
                     </Border>
@@ -273,7 +273,7 @@
                 <!-- Current Run / Loot Section (content click-through, scrollbar interactive) -->
                 <Border x:Name="LootSectionBorder"
                         Grid.Row="2"
-                        Background="#c02a2a4a"
+                        Background="#ff2a2a4a"
                         CornerRadius="4"
                         Margin="8,6,8,8">
                     <Border.LayoutTransform>
@@ -290,7 +290,7 @@
                             <!-- Zone header (click-through) -->
                             <Border x:Name="ZoneHeaderBorder"
                                     Grid.Row="0"
-                                    Background="#a02a2a4a"
+                                    Background="#ff2a2a4a"
                                     CornerRadius="4,4,0,0"
                                     Padding="8,6"
                                     IsHitTestVisible="False">
@@ -378,7 +378,7 @@
 
         <!-- Micro overlay (horizontal bar) -->
         <Border x:Name="MicroBorder"
-                Background="#f01a1a2e"
+                Background="#ff1a1a2e"
                 CornerRadius="6"
                 BorderBrush="#3a3a5a"
                 BorderThickness="1"

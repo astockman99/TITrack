@@ -10,6 +10,9 @@ from datetime import date
 
 from titrack.api.schemas import (
     ActiveRunResponse,
+    IgnoreRunRequest,
+    IgnoreRunItemsRequest,
+    IgnoredItemsResponse,
     LootItem,
     LootReportItem,
     LootReportResponse,
@@ -107,6 +110,8 @@ def _consolidate_runs(
     all_runs_including_hubs: list[Run],
     repo: Repository,
     map_costs_enabled: bool = False,
+    ignored_run_ids: Optional[set[int]] = None,
+    all_ignored_items: Optional[dict[int, set[int]]] = None,
 ) -> list[RunResponse]:
     """
     Consolidate runs from the same map instance.
@@ -203,6 +208,10 @@ def _consolidate_runs(
                 for config_id, qty in summary.items():
                     combined_summary[config_id] += qty
                 fe, value = repo.get_run_value(run.id)
+                # Subtract ignored item values
+                run_ignored = (all_ignored_items or {}).get(run.id)
+                if run_ignored:
+                    value -= repo.get_ignored_item_value(run.id, run_ignored)
                 total_fe += fe
                 total_value += value
                 if run.duration_seconds:
@@ -226,6 +235,10 @@ def _consolidate_runs(
                 cost_fe = round(total_cost, 2)
                 net_value = round(total_value - total_cost, 2)
 
+            # Check ignored state: a consolidated run is ignored if its primary ID is ignored
+            run_is_ignored = first_run.id in (ignored_run_ids or set())
+            run_ignored_items = list((all_ignored_items or {}).get(first_run.id, set()))
+
             result.append(
                 RunResponse(
                     id=first_run.id,  # Use first run's ID as primary
@@ -244,6 +257,8 @@ def _consolidate_runs(
                     map_cost_fe=cost_fe,
                     map_cost_has_unpriced=has_unpriced_costs,
                     net_value_fe=net_value,
+                    is_ignored=run_is_ignored,
+                    ignored_items=run_ignored_items,
                 )
             )
 
@@ -251,6 +266,10 @@ def _consolidate_runs(
         for run in sub_zone_runs:
             summary = repo.get_run_summary(run.id)
             fe_gained, total_value = repo.get_run_value(run.id)
+            # Subtract ignored item values
+            run_ignored = (all_ignored_items or {}).get(run.id)
+            if run_ignored:
+                total_value -= repo.get_ignored_item_value(run.id, run_ignored)
 
             # Get costs if enabled
             cost_items = None
@@ -269,6 +288,9 @@ def _consolidate_runs(
             if run.level_type == LEVEL_TYPE_NIGHTMARE:
                 zone_name += " (Nightmare)"
 
+            sub_is_ignored = run.id in (ignored_run_ids or set())
+            sub_ignored_items = list((all_ignored_items or {}).get(run.id, set()))
+
             result.append(
                 RunResponse(
                     id=run.id,
@@ -286,6 +308,8 @@ def _consolidate_runs(
                     map_cost_fe=cost_fe,
                     map_cost_has_unpriced=has_unpriced_costs,
                     net_value_fe=net_value,
+                    is_ignored=sub_is_ignored,
+                    ignored_items=sub_ignored_items,
                 )
             )
 
@@ -327,9 +351,18 @@ def list_runs(
     # Fetch all runs INCLUDING hubs for session detection
     all_runs = repo.get_recent_runs(limit=fetch_limit + offset * 2)
 
+    # Load ignored state (single queries instead of per-run)
+    ignored_run_ids = repo.get_ignored_run_ids()
+    all_ignored_items = repo.get_all_ignored_items()
+
     # Consolidate runs (merges normal runs in same map instance, uses hubs to detect session breaks)
     # This function receives all runs including hubs but only returns non-hub consolidated results
-    consolidated = _consolidate_runs(all_runs, repo, map_costs_enabled=map_costs_enabled)
+    consolidated = _consolidate_runs(
+        all_runs, repo,
+        map_costs_enabled=map_costs_enabled,
+        ignored_run_ids=ignored_run_ids,
+        all_ignored_items=all_ignored_items,
+    )
 
     # Apply pagination to consolidated results
     paginated = consolidated[offset : offset + page_size]
@@ -358,13 +391,28 @@ def get_stats(
     if exclude_hubs:
         all_runs = [r for r in all_runs if not r.is_hub]
 
+    # Load ignored state (bulk queries)
+    ignored_run_ids = repo.get_ignored_run_ids()
+    all_ignored_items = repo.get_all_ignored_items()
+
     total_fe = 0
     total_value = 0.0
     total_cost = 0.0
     total_duration = 0.0
 
     for run in all_runs:
+        # Skip fully ignored runs
+        if run.id in ignored_run_ids:
+            continue
+
         fe_gained, run_value = repo.get_run_value(run.id)
+
+        # Subtract value of ignored items within this run
+        ignored_items = all_ignored_items.get(run.id)
+        if ignored_items:
+            ignored_value = repo.get_ignored_item_value(run.id, ignored_items)
+            run_value -= ignored_value
+
         total_fe += fe_gained
         total_value += run_value
         if run.duration_seconds:
@@ -385,9 +433,12 @@ def get_stats(
     realtime_enabled = repo.get_setting("realtime_tracking_enabled") == "true"
     realtime_paused = repo.get_setting("realtime_paused") == "true"
 
-    if realtime_enabled and all_runs:
+    # Filter out ignored runs for realtime calculation and total_runs count
+    non_ignored_runs = [r for r in all_runs if r.id not in ignored_run_ids]
+
+    if realtime_enabled and non_ignored_runs:
         # Compute wall-clock elapsed time from first run start to now
-        first_run_start = min(r.start_ts for r in all_runs)
+        first_run_start = min(r.start_ts for r in non_ignored_runs)
         now = datetime.now()
         elapsed = (now - first_run_start).total_seconds()
 
@@ -410,7 +461,7 @@ def get_stats(
 
         total_duration = max(elapsed - paused_seconds, 0.0)
 
-    total_runs = len(all_runs)
+    total_runs = len(non_ignored_runs)
     avg_fe = total_fe / total_runs if total_runs > 0 else 0
     avg_value = net_value / total_runs if total_runs > 0 else 0
     fe_per_hour = (total_fe / total_duration * 3600) if total_duration > 0 else 0
@@ -608,6 +659,9 @@ def reset_stats(
     repo.set_setting("realtime_total_paused_seconds", "0")
     repo.set_setting("realtime_pause_start", "")
 
+    # Clear ignored runs/items data
+    repo.clear_ignored_data()
+
     return ResetResponse(
         success=True,
         runs_deleted=runs_deleted,
@@ -615,13 +669,60 @@ def reset_stats(
     )
 
 
+@router.post("/{run_id}/ignore")
+def toggle_run_ignored(
+    run_id: int,
+    body: IgnoreRunRequest,
+    repo: Repository = Depends(get_repository),
+) -> dict:
+    """Toggle whether a run is ignored from calculations."""
+    run = repo.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    repo.set_run_ignored(run_id, body.ignored)
+    return {"run_id": run_id, "ignored": body.ignored}
+
+
+@router.get("/{run_id}/ignored-items", response_model=IgnoredItemsResponse)
+def get_ignored_items(
+    run_id: int,
+    repo: Repository = Depends(get_repository),
+) -> IgnoredItemsResponse:
+    """Get ignored item types for a run."""
+    ignored_ids = repo.get_ignored_items_for_run(run_id)
+    return IgnoredItemsResponse(run_id=run_id, ignored_ids=list(ignored_ids))
+
+
+@router.put("/{run_id}/ignored-items", response_model=IgnoredItemsResponse)
+def set_ignored_items(
+    run_id: int,
+    body: IgnoreRunItemsRequest,
+    repo: Repository = Depends(get_repository),
+) -> IgnoredItemsResponse:
+    """Set ignored item types for a run."""
+    run = repo.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    repo.set_ignored_items_for_run(run_id, set(body.ignored_ids))
+    return IgnoredItemsResponse(run_id=run_id, ignored_ids=body.ignored_ids)
+
+
 @router.get("/report", response_model=LootReportResponse)
 def get_loot_report(
     repo: Repository = Depends(get_repository),
 ) -> LootReportResponse:
     """Get cumulative loot statistics across all runs since last reset."""
-    # Get aggregated loot data
-    cumulative_loot = repo.get_cumulative_loot()
+    # Load ignored state
+    ignored_run_ids = repo.get_ignored_run_ids()
+
+    # Load all ignored items (bulk query)
+    all_ignored_items = repo.get_all_ignored_items()
+
+    # Get aggregated loot data (excluding ignored runs and items)
+    cumulative_loot = repo.get_cumulative_loot(
+        ignored_run_ids=ignored_run_ids if ignored_run_ids else None,
+        ignored_run_items=all_ignored_items if all_ignored_items else None,
+    )
 
     # Check if map costs are enabled
     map_costs_enabled = repo.get_setting("map_costs_enabled") == "true"
@@ -675,12 +776,12 @@ def get_loot_report(
     # Sort by total value (highest first), unpriced items at the end
     items.sort(key=lambda x: (x.total_value_fe is None, -(x.total_value_fe or 0)))
 
-    # Get run stats
-    run_count = repo.get_completed_run_count()
-    total_duration = repo.get_total_run_duration()
+    # Get run stats (excluding ignored runs)
+    run_count = repo.get_completed_run_count(ignored_run_ids=ignored_run_ids if ignored_run_ids else None)
+    total_duration = repo.get_total_run_duration(ignored_run_ids=ignored_run_ids if ignored_run_ids else None)
 
-    # Get map costs if enabled
-    total_map_cost = repo.get_total_map_costs() if map_costs_enabled else 0.0
+    # Get map costs if enabled (excluding ignored runs)
+    total_map_cost = repo.get_total_map_costs(ignored_run_ids=ignored_run_ids if ignored_run_ids else None) if map_costs_enabled else 0.0
 
     # Calculate profit
     profit = total_value - total_map_cost

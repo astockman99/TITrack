@@ -1071,6 +1071,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
         # Create and run the native window
         def on_closing():
             logger.info("Window closed, initiating shutdown...")
+            save_window_state()
             # Close overlay subprocess if running
             if overlay_ref[0] is not None:
                 process = overlay_ref[0]
@@ -1169,6 +1170,108 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
         overlay_ref = [None]
         api = Api(window_ref, overlay_ref)
 
+        # Get DPI scale factor — pywebview's get_position() returns raw device
+        # coordinates, but move()/create_window() multiply by scale_factor.
+        # We store logical coordinates so they round-trip correctly.
+        try:
+            import ctypes
+            _dpi_scale = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+        except Exception:
+            _dpi_scale = 1.0
+
+        # Load saved window state from DB
+        win_repo = Repository(api_db)
+        saved_width, saved_height = 1280, 800
+        saved_x, saved_y = None, None
+        saved_maximized = False
+
+        try:
+            size_str = win_repo.get_setting("window_size")
+            if size_str:
+                w, h = size_str.split(",")
+                w, h = int(float(w)), int(float(h))
+                if w >= 800 and h >= 600:
+                    saved_width, saved_height = w, h
+
+            pos_str = win_repo.get_setting("window_position")
+            if pos_str:
+                x, y = pos_str.split(",")
+                saved_x, saved_y = int(float(x)), int(float(y))
+
+            max_str = win_repo.get_setting("window_maximized")
+            saved_maximized = max_str == "true"
+            logger.debug(f"Loaded window state: pos=({saved_x},{saved_y}) size=({saved_width},{saved_height}) maximized={saved_maximized}")
+        except Exception as e:
+            logger.debug(f"Could not load window state: {e}")
+
+        # Track whether window is maximized (updated via events)
+        is_maximized = [saved_maximized]
+
+        def on_window_shown():
+            """Restore maximized state after window is visible."""
+            try:
+                w = window_ref[0]
+                if w is None:
+                    return
+                logger.debug(f"Window shown at ({w.x},{w.y}), restoring maximized={saved_maximized}")
+                if saved_maximized:
+                    w.maximize()
+            except Exception as e:
+                logger.debug(f"Could not restore window state: {e}")
+
+        def on_window_maximized():
+            is_maximized[0] = True
+
+        def on_window_restored():
+            is_maximized[0] = False
+
+        def on_window_moved():
+            """Save position when window is moved (only in normal state)."""
+            if is_maximized[0]:
+                return
+            try:
+                w = window_ref[0]
+                if w is None:
+                    return
+                # Convert device coords to logical coords for round-trip with move()/create_window()
+                lx, ly = w.x / _dpi_scale, w.y / _dpi_scale
+                Repository(api_db).set_setting("window_position", f"{lx},{ly}")
+            except Exception:
+                pass
+
+        def on_window_resized():
+            """Save size when window is resized (only in normal state)."""
+            if is_maximized[0]:
+                return
+            try:
+                w = window_ref[0]
+                if w is None:
+                    return
+                Repository(api_db).set_setting("window_size", f"{w.width},{w.height}")
+            except Exception:
+                pass
+
+        def save_window_state():
+            """Save current window position, size, and maximized state to DB."""
+            try:
+                w = window_ref[0]
+                if w is None:
+                    return
+                repo = Repository(api_db)
+                # Convert device coords to logical coords for round-trip
+                lx, ly = w.x / _dpi_scale, w.y / _dpi_scale
+                logger.debug(f"Saving window state: raw=({w.x},{w.y}) logical=({lx},{ly}) scale={_dpi_scale} maximized={is_maximized[0]}")
+                repo.set_setting("window_maximized", "true" if is_maximized[0] else "false")
+                # Always save position so we know which monitor to restore to
+                # (even when maximized, x/y tells us which monitor it's on).
+                repo.set_setting("window_position", f"{lx},{ly}")
+                # Only save size when not maximized (maximized dimensions
+                # are the full monitor size, not the user's preferred size).
+                if not is_maximized[0]:
+                    repo.set_setting("window_size", f"{w.width},{w.height}")
+            except Exception as e:
+                logger.debug(f"Could not save window state: {e}")
+
         logger.info("Opening native window...")
         try:
             # Create main window unless overlay-only mode
@@ -1176,13 +1279,20 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 window = webview.create_window(
                     "TITrack - Torchlight Infinite Loot Tracker",
                     url,
-                    width=1280,
-                    height=800,
+                    width=saved_width,
+                    height=saved_height,
+                    x=saved_x,
+                    y=saved_y,
                     min_size=(800, 600),
                     js_api=api,
                 )
                 window_ref[0] = window
                 window.events.closing += on_closing
+                window.events.shown += on_window_shown
+                window.events.maximized += on_window_maximized
+                window.events.restored += on_window_restored
+                window.events.moved += on_window_moved
+                window.events.resized += on_window_resized
 
             # Launch WPF overlay subprocess if requested
             if show_overlay:

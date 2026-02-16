@@ -333,7 +333,7 @@ const MICRO_STAT_OPTIONS = [
     { key: 'total_value', label: 'Total' },
     { key: 'net_worth', label: 'NW' },
     { key: 'this_run', label: 'Run' },
-    { key: 'value_per_map', label: 'Val/Map' },
+    { key: 'value_per_map', label: 'FE/Map' },
     { key: 'runs', label: 'Runs' },
     { key: 'avg_time', label: 'Avg' },
 ];
@@ -705,12 +705,12 @@ function renderStats(stats, inventory) {
         pauseBtn.classList.add('hidden');
     }
 
-    // Update Value/Hour tooltip based on mode
+    // Update FE/Hour tooltip based on mode
     const valueHourTooltip = isRealtime
         ? 'Calculated from wall-clock time (real elapsed time minus pauses). Includes time in town, hideout, and between runs.'
         : 'Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.';
     document.querySelectorAll('.info-icon').forEach(icon => {
-        // Only update info icons that are about Value/Hour (in stat header and chart)
+        // Only update info icons that are about FE/Hour (in stat header and chart)
         if (icon.closest('.stat-label') || icon.closest('h2')) {
             icon.title = valueHourTooltip;
         }
@@ -740,7 +740,7 @@ function clearRealtimeTicker() {
 }
 
 function renderRuns(data, forceRender = false) {
-    const newHash = simpleHash(data?.runs?.map(r => ({ id: r.id, val: r.total_value, dur: r.duration_seconds, cost: r.map_cost_fe })));
+    const newHash = simpleHash(data?.runs?.map(r => ({ id: r.id, val: r.total_value, dur: r.duration_seconds, cost: r.map_cost_fe, ign: r.is_ignored, igni: r.ignored_items?.length })));
     if (!forceRender && newHash === lastRunsHash) {
         return; // No change, skip re-render
     }
@@ -755,6 +755,7 @@ function renderRuns(data, forceRender = false) {
 
     tbody.innerHTML = data.runs.map(run => {
         const nightmareClass = run.is_nightmare ? ' nightmare' : '';
+        const ignoredClass = run.is_ignored ? ' ignored' : '';
         const consolidatedInfo = run.consolidated_run_ids ? ` (${run.consolidated_run_ids.length} segments)` : '';
 
         // Show net value if costs are enabled and there are costs
@@ -766,15 +767,19 @@ function renderRuns(data, forceRender = false) {
             valueDisplay = formatValue(run.total_value);
         }
 
+        const ignoredItemsIcon = (run.ignored_items && run.ignored_items.length > 0 && !run.is_ignored)
+            ? ' <span class="ignored-items-icon" title="This run has ignored items">&#x1F6AB;</span>'
+            : '';
+
         return `
-            <tr class="${nightmareClass}">
+            <tr class="${nightmareClass}${ignoredClass}">
                 <td class="zone-name" title="${run.zone_signature}${consolidatedInfo}">${escapeHtml(run.zone_name)}</td>
                 <td class="duration">${formatDuration(run.duration_seconds)}</td>
                 <td>${valueDisplay}</td>
                 <td>
                     <button class="expand-btn" onclick="showRunDetails(${run.id})">
                         Details
-                    </button>
+                    </button>${ignoredItemsIcon}
                 </td>
             </tr>
         `;
@@ -1652,7 +1657,16 @@ async function showRunDetails(runId) {
 
     title.textContent = `${run.zone_name} - ${formatDuration(run.duration_seconds)}`;
 
+    // Track ignored items state for this modal
+    const ignoredItems = new Set(run.ignored_items || []);
+
     let content = '';
+
+    // Ignore run button
+    const isIgnored = run.is_ignored;
+    content += `<button class="ignore-run-btn${isIgnored ? ' ignored' : ''}" id="ignore-run-btn" data-run-id="${run.id}" data-ignored="${isIgnored}">
+        ${isIgnored ? '✓ Run Ignored' : '✕ Ignore Run'}
+    </button>`;
 
     // Show loot section
     if (!run.loot || run.loot.length === 0) {
@@ -1671,8 +1685,12 @@ async function showRunDetails(runId) {
                     const valueStr = item.total_value_fe !== null
                         ? `${item.total_value_fe.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} FE`
                         : '<span class="no-price">no price</span>';
+                    const itemIgnored = ignoredItems.has(item.config_base_id);
+                    const itemIgnoredClass = itemIgnored ? ' item-ignored' : '';
+                    const ignoreIcon = itemIgnored ? '👁‍🗨' : '👁';
+                    const ignoreTitle = itemIgnored ? 'Include this item in calculations' : 'Ignore this item from calculations';
                     return `
-                        <li class="loot-item">
+                        <li class="loot-item${itemIgnoredClass}" data-config-id="${item.config_base_id}">
                             <div class="loot-item-name">
                                 ${iconHtml}
                                 <span>${escapeHtml(item.name)}</span>
@@ -1681,6 +1699,7 @@ async function showRunDetails(runId) {
                                 <span class="loot-item-qty ${item.total_value_fe !== null ? (item.total_value_fe > 0 ? 'positive' : 'negative') : ''}">${valueStr}</span>
                                 <span class="loot-item-value">x${formatNumber(Math.abs(item.quantity))}</span>
                             </div>
+                            <span class="loot-item-ignore${itemIgnored ? ' ignored' : ''}" title="${ignoreTitle}" data-config-id="${item.config_base_id}">${ignoreIcon}</span>
                         </li>
                     `;
                 }).join('')}
@@ -1715,6 +1734,65 @@ async function showRunDetails(runId) {
 
     body.innerHTML = content;
     modal.classList.remove('hidden');
+
+    // Wire up ignore run button
+    const ignoreBtn = document.getElementById('ignore-run-btn');
+    if (ignoreBtn) {
+        ignoreBtn.addEventListener('click', async () => {
+            const currentlyIgnored = ignoreBtn.dataset.ignored === 'true';
+            const newState = !currentlyIgnored;
+            try {
+                const resp = await fetch(`${API_BASE}/runs/${run.id}/ignore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ignored: newState }),
+                });
+                if (resp.ok) {
+                    ignoreBtn.dataset.ignored = String(newState);
+                    ignoreBtn.textContent = newState ? '✓ Run Ignored' : '✕ Ignore Run';
+                    ignoreBtn.classList.toggle('ignored', newState);
+                    // Update local data and refresh
+                    run.is_ignored = newState;
+                    lastRunsHash = null;
+                    lastStatsHash = null;
+                    await refreshAll(true);
+                }
+            } catch (e) { console.error('Failed to toggle run ignore:', e); }
+        });
+    }
+
+    // Wire up per-item ignore toggles
+    body.querySelectorAll('.loot-item-ignore').forEach(el => {
+        el.addEventListener('click', async () => {
+            const configId = parseInt(el.dataset.configId);
+            if (ignoredItems.has(configId)) {
+                ignoredItems.delete(configId);
+            } else {
+                ignoredItems.add(configId);
+            }
+            // Update UI immediately
+            const li = el.closest('.loot-item');
+            const isNowIgnored = ignoredItems.has(configId);
+            li.classList.toggle('item-ignored', isNowIgnored);
+            el.classList.toggle('ignored', isNowIgnored);
+            el.textContent = isNowIgnored ? '👁‍🗨' : '👁';
+            el.title = isNowIgnored ? 'Include this item in calculations' : 'Ignore this item from calculations';
+
+            // Save to server
+            try {
+                await fetch(`${API_BASE}/runs/${run.id}/ignored-items`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ignored_ids: Array.from(ignoredItems) }),
+                });
+                // Update local data and refresh
+                run.ignored_items = Array.from(ignoredItems);
+                lastRunsHash = null;
+                lastStatsHash = null;
+                await refreshAll(true);
+            } catch (e) { console.error('Failed to update ignored items:', e); }
+        });
+    });
 }
 
 function closeModal() {

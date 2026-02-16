@@ -8,9 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Ignore Runs & Items**: Exclude outlier runs or specific items from all calculations (FE/Hour, FE/Map, charts, loot report)
+  - "Ignore Run" button in run details modal to exclude entire runs
+  - Per-item ignore toggles (eye icon) to exclude specific item types within a run
+  - Ignored runs shown with strikethrough + dimmed styling in the Recent Runs table
+  - Runs with ignored items show indicator icon next to the Details button
+  - Data cleared on stats reset
+- **Main window state persistence**: Dashboard window remembers its position, size, and maximized state across restarts
+  - Supports multi-monitor setups (e.g., maximized on second monitor)
+  - Position and size saved on move/resize; maximized state saved on close
 - **Overlay state persistence**: Overlay remembers its position, size, and transparency across restarts
   - Normal and micro overlay positions saved independently
   - Position validated against screen bounds on restore (falls back to default if off-screen)
+
+### Changed
+- Renamed "Value/Hour" to "FE/Hour" and "Value/Map" to "FE/Map" across dashboard, overlay, and micro overlay
+- **Overlay default mode is fully opaque**: Removed background transparency from the full overlay's default (non-transparent) mode; use the transparency toggle button for transparent background
+
+### Fixed
+- **Window position not restored on correct monitor**: Fixed pywebview DPI scaling asymmetry where saved window coordinates were multiplied by the display scale factor on every restore, causing the window to drift off-screen. Now stores logical (DPI-adjusted) coordinates for correct multi-monitor round-tripping.
+- **Skill equip/unequip counted as loot**: Unequipping a skill during a map created a false loot drop; re-equipping created a false negative delta. Events with proto name `UnequipSkill` and events outside any proto block now update inventory without creating deltas.
+- **Trade house listings counted as negative loot**: Listing an item for sale (`XchgForSale`) during a map was counted as losing loot. Now updates inventory without creating deltas.
+- **Overlay lock button background not transparent**: When the overlay was locked while in transparent mode, the floating unlock button retained its opaque background instead of matching the transparent overlay style
 
 ---
 

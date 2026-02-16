@@ -37,6 +37,9 @@ class RunResponse(BaseModel):
     map_cost_fe: Optional[float] = None  # Sum of priced items only
     map_cost_has_unpriced: bool = False  # True if any items have unknown price
     net_value_fe: Optional[float] = None  # total_value - map_cost_fe
+    # Ignored state
+    is_ignored: bool = False  # True if this run is fully ignored from calculations
+    ignored_items: list[int] = []  # List of ignored config_base_ids within this run
 
 
 class RunListResponse(BaseModel):
@@ -212,3 +215,22 @@ class LootReportResponse(BaseModel):
     profit_per_hour: float  # Profit per hour of map time
     profit_per_map: float  # Average profit per map
     map_costs_enabled: bool  # Whether map costs are being tracked
+
+
+class IgnoreRunRequest(BaseModel):
+    """Request to toggle run ignored state."""
+
+    ignored: bool
+
+
+class IgnoreRunItemsRequest(BaseModel):
+    """Request to set ignored items for a run."""
+
+    ignored_ids: list[int]
+
+
+class IgnoredItemsResponse(BaseModel):
+    """Response for ignored items in a run."""
+
+    run_id: int
+    ignored_ids: list[int]

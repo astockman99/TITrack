@@ -33,10 +33,10 @@ from titrack.parser.exchange_parser import (
 from titrack.parser.player_parser import PlayerInfo, get_effective_player_id
 from titrack.data.inventory import EXCLUDED_PAGES, is_gear_excluded
 
-# Proto names for non-loot inventory changes (trade house, recycling, etc.).
+# Proto names for non-loot inventory changes (trade house, recycling, skill management, etc.).
 # These update inventory (slot state) but should NOT create deltas
 # because they are not map loot.
-EXCLUDED_PROTO_NAMES = {"Push2", "XchgReceive", "ExchangeItem", "XchgRecall"}
+EXCLUDED_PROTO_NAMES = {"Push2", "XchgReceive", "ExchangeItem", "XchgRecall", "XchgForSale", "UnequipSkill"}
 MAP_COST_PROTO_NAMES = {"Spv3Open", "ClimbTowerOpen"}
 
 
@@ -399,8 +399,10 @@ class Collector:
         if event.is_init:
             return
 
-        # Non-loot events (trade house, recycling): update slot state but don't track as loot
-        if self._current_proto_name in EXCLUDED_PROTO_NAMES:
+        # Non-loot events (trade house, recycling, skill equip/unequip): update slot state
+        # but don't track as loot. Events outside any proto block (proto_name is None)
+        # are inventory management actions (e.g., re-equipping a skill), not loot.
+        if self._current_proto_name is None or self._current_proto_name in EXCLUDED_PROTO_NAMES:
             return
 
         # Buffer map costs to associate with next run

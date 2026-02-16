@@ -31,11 +31,11 @@
                     <span id="cumulative-value" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Value/Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></span>
+                    <span class="stat-label">FE/Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></span>
                     <span id="value-per-hour" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Value/Map</span>
+                    <span class="stat-label">FE/Map</span>
                     <span id="value-per-map" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
@@ -81,7 +81,7 @@
                 <canvas id="cumulative-value-chart"></canvas>
             </div>
             <div class="chart-panel">
-                <h2>Value / Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></h2>
+                <h2>FE / Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></h2>
                 <canvas id="value-rate-chart"></canvas>
             </div>
         </section>
@@ -233,7 +233,7 @@
                         <li>Detects when you enter and leave maps</li>
                         <li>Tracks all items picked up during each run</li>
                         <li>Calculates value based on learned prices</li>
-                        <li>Shows your Value/Hour based on active run time only</li>
+                        <li>Shows your FE/Hour based on active run time only</li>
                     </ul>
                 </section>
 
@@ -315,7 +315,7 @@
                         <input type="checkbox" id="settings-realtime-tracking">
                         <div class="toggle-info">
                             <span class="toggle-label">Real-Time Tracking</span>
-                            <span class="toggle-desc">Use wall-clock time for Value/Hour and Total Time instead of in-map time only</span>
+                            <span class="toggle-desc">Use wall-clock time for FE/Hour and Total Time instead of in-map time only</span>
                         </div>
                     </label>
                 </section>

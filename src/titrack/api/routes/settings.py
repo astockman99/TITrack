@@ -34,6 +34,9 @@ ALLOWED_SETTINGS = {
     "overlay_micro_position",
     "realtime_tracking_enabled",
     "hidden_items_exclude_worth",
+    "window_position",
+    "window_size",
+    "window_maximized",
 }
 
 # Settings that are read-only via API (can be read but not written)

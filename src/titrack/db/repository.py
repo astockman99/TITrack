@@ -832,6 +832,112 @@ class Repository:
 
         return summary, total_cost, unpriced
 
+    # --- Ignored Runs/Items ---
+
+    def get_ignored_run_ids(self) -> set[int]:
+        """Get set of ignored run IDs for current player."""
+        player_id = self._current_player_id or ""
+        rows = self.db.fetchall(
+            "SELECT run_id FROM ignored_runs WHERE player_id = ?",
+            (player_id,),
+        )
+        return {row["run_id"] for row in rows}
+
+    def set_run_ignored(self, run_id: int, ignored: bool) -> None:
+        """Toggle a run's ignored state."""
+        player_id = self._current_player_id or ""
+        if ignored:
+            self.db.execute(
+                "INSERT OR IGNORE INTO ignored_runs (player_id, run_id) VALUES (?, ?)",
+                (player_id, run_id),
+            )
+        else:
+            self.db.execute(
+                "DELETE FROM ignored_runs WHERE player_id = ? AND run_id = ?",
+                (player_id, run_id),
+            )
+
+    def get_ignored_items_for_run(self, run_id: int) -> set[int]:
+        """Get ignored config_base_ids for a run."""
+        player_id = self._current_player_id or ""
+        rows = self.db.fetchall(
+            "SELECT config_base_id FROM ignored_run_items WHERE player_id = ? AND run_id = ?",
+            (player_id, run_id),
+        )
+        return {row["config_base_id"] for row in rows}
+
+    def get_all_ignored_items(self) -> dict[int, set[int]]:
+        """Get all ignored items grouped by run_id for current player."""
+        player_id = self._current_player_id or ""
+        rows = self.db.fetchall(
+            "SELECT run_id, config_base_id FROM ignored_run_items WHERE player_id = ?",
+            (player_id,),
+        )
+        result: dict[int, set[int]] = {}
+        for row in rows:
+            run_id = row["run_id"]
+            if run_id not in result:
+                result[run_id] = set()
+            result[run_id].add(row["config_base_id"])
+        return result
+
+    def set_ignored_items_for_run(self, run_id: int, ignored_ids: set[int]) -> None:
+        """Replace ignored items for a run (transactional)."""
+        player_id = self._current_player_id or ""
+        with self.db.transaction() as cursor:
+            cursor.execute(
+                "DELETE FROM ignored_run_items WHERE player_id = ? AND run_id = ?",
+                (player_id, run_id),
+            )
+            for config_id in ignored_ids:
+                cursor.execute(
+                    "INSERT INTO ignored_run_items (player_id, run_id, config_base_id) VALUES (?, ?, ?)",
+                    (player_id, run_id, config_id),
+                )
+
+    def get_ignored_item_value(self, run_id: int, ignored_config_ids: set[int]) -> float:
+        """Compute the total value of ignored items in a run.
+
+        Args:
+            run_id: The run to check.
+            ignored_config_ids: Set of config_base_ids to value.
+
+        Returns:
+            Total value of the ignored items in FE.
+        """
+        from titrack.parser.patterns import FE_CONFIG_BASE_ID
+
+        if not ignored_config_ids:
+            return 0.0
+
+        summary = self.get_run_summary(run_id)
+        tax_multiplier = self.get_trade_tax_multiplier()
+        total = 0.0
+
+        for config_id in ignored_config_ids:
+            quantity = summary.get(config_id, 0)
+            if quantity <= 0:
+                continue
+            if config_id == FE_CONFIG_BASE_ID:
+                total += float(quantity)
+            else:
+                price_fe = self.get_effective_price(config_id)
+                if price_fe and price_fe > 0:
+                    total += price_fe * quantity * tax_multiplier
+
+        return total
+
+    def clear_ignored_data(self) -> None:
+        """Clear all ignored_runs and ignored_run_items for current player."""
+        player_id = self._current_player_id or ""
+        with self.db.transaction() as cursor:
+            cursor.execute(
+                "DELETE FROM ignored_runs WHERE player_id = ?", (player_id,)
+            )
+            cursor.execute(
+                "DELETE FROM ignored_run_items WHERE player_id = ?", (player_id,)
+            )
+
     # --- Hidden Items ---
 
     def get_hidden_items(self) -> set[int]:
@@ -927,7 +1033,11 @@ class Repository:
         return (Path(row["file_path"]), row["position"], row["file_size"])
 
     def get_cumulative_loot(
-        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+        self,
+        season_id: Optional[int] = None,
+        player_id: Optional[str] = None,
+        ignored_run_ids: Optional[set[int]] = None,
+        ignored_run_items: Optional[dict[int, set[int]]] = None,
     ) -> list[dict]:
         """
         Get cumulative loot statistics across all runs.
@@ -938,6 +1048,8 @@ class Repository:
         Args:
             season_id: Filter by season (uses context if None)
             player_id: Filter by player (uses context if None)
+            ignored_run_ids: Run IDs to exclude entirely
+            ignored_run_items: {run_id: set of config_base_ids} to exclude from specific runs
 
         Returns:
             List of dicts with keys: config_base_id, total_quantity
@@ -968,6 +1080,12 @@ class Repository:
             base_query += " AND (player_id IS NULL OR player_id = ?)"
             params.append(player_id or '')
 
+        # Exclude ignored runs
+        if ignored_run_ids:
+            placeholders = ",".join("?" * len(ignored_run_ids))
+            base_query += f" AND run_id NOT IN ({placeholders})"
+            params.extend(ignored_run_ids)
+
         # Exclude gear page (unless item is in gear allowlist)
         if EXCLUDED_PAGES:
             base_query += self._build_page_exclusion_clause(params)
@@ -976,13 +1094,40 @@ class Repository:
         base_query += " GROUP BY config_base_id HAVING SUM(delta) > 0"
 
         rows = self.db.fetchall(base_query, tuple(params))
-        return [
+        result = [
             {"config_base_id": row["config_base_id"], "total_quantity": row["total_quantity"]}
             for row in rows
         ]
 
+        # Post-filter: subtract ignored items from specific runs
+        if ignored_run_items:
+            # Get deltas for ignored items in their specific runs
+            ignored_totals: dict[int, int] = {}
+            for run_id, config_ids in ignored_run_items.items():
+                if run_id in (ignored_run_ids or set()):
+                    continue  # Already fully excluded
+                summary = self.get_run_summary(run_id)
+                for config_id in config_ids:
+                    qty = summary.get(config_id, 0)
+                    if qty > 0:
+                        ignored_totals[config_id] = ignored_totals.get(config_id, 0) + qty
+
+            if ignored_totals:
+                adjusted = []
+                for item in result:
+                    config_id = item["config_base_id"]
+                    qty = item["total_quantity"] - ignored_totals.get(config_id, 0)
+                    if qty > 0:
+                        adjusted.append({"config_base_id": config_id, "total_quantity": qty})
+                result = adjusted
+
+        return result
+
     def get_completed_run_count(
-        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+        self,
+        season_id: Optional[int] = None,
+        player_id: Optional[str] = None,
+        ignored_run_ids: Optional[set[int]] = None,
     ) -> int:
         """
         Get count of completed (non-hub) runs.
@@ -990,6 +1135,7 @@ class Repository:
         Args:
             season_id: Filter by season (uses context if None)
             player_id: Filter by player (uses context if None)
+            ignored_run_ids: Run IDs to exclude from count
 
         Returns:
             Number of completed runs
@@ -1002,22 +1148,28 @@ class Repository:
         if self._current_player_id is None and player_id is None:
             return 0
 
+        base_query = "SELECT COUNT(*) as cnt FROM runs WHERE end_ts IS NOT NULL AND is_hub = 0"
+        params: list = []
+
         if season_id is not None:
-            row = self.db.fetchone(
-                """SELECT COUNT(*) as cnt FROM runs
-                   WHERE end_ts IS NOT NULL AND is_hub = 0
-                   AND (season_id IS NULL OR season_id = ?)
-                   AND (player_id IS NULL OR player_id = ?)""",
-                (season_id, player_id or ''),
-            )
-        else:
-            row = self.db.fetchone(
-                "SELECT COUNT(*) as cnt FROM runs WHERE end_ts IS NOT NULL AND is_hub = 0"
-            )
+            base_query += " AND (season_id IS NULL OR season_id = ?)"
+            params.append(season_id)
+            base_query += " AND (player_id IS NULL OR player_id = ?)"
+            params.append(player_id or '')
+
+        if ignored_run_ids:
+            placeholders = ",".join("?" * len(ignored_run_ids))
+            base_query += f" AND id NOT IN ({placeholders})"
+            params.extend(ignored_run_ids)
+
+        row = self.db.fetchone(base_query, tuple(params))
         return row["cnt"] if row else 0
 
     def get_total_run_duration(
-        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+        self,
+        season_id: Optional[int] = None,
+        player_id: Optional[str] = None,
+        ignored_run_ids: Optional[set[int]] = None,
     ) -> float:
         """
         Get total duration of all completed (non-hub) runs in seconds.
@@ -1025,6 +1177,7 @@ class Repository:
         Args:
             season_id: Filter by season (uses context if None)
             player_id: Filter by player (uses context if None)
+            ignored_run_ids: Run IDs to exclude from duration sum
 
         Returns:
             Total duration in seconds
@@ -1037,29 +1190,32 @@ class Repository:
         if self._current_player_id is None and player_id is None:
             return 0.0
 
-        if season_id is not None:
-            row = self.db.fetchone(
-                """SELECT SUM(
-                       (julianday(end_ts) - julianday(start_ts)) * 86400
-                   ) as total_seconds
-                   FROM runs
-                   WHERE end_ts IS NOT NULL AND is_hub = 0
-                   AND (season_id IS NULL OR season_id = ?)
-                   AND (player_id IS NULL OR player_id = ?)""",
-                (season_id, player_id or ''),
-            )
-        else:
-            row = self.db.fetchone(
-                """SELECT SUM(
+        base_query = """SELECT SUM(
                        (julianday(end_ts) - julianday(start_ts)) * 86400
                    ) as total_seconds
                    FROM runs
                    WHERE end_ts IS NOT NULL AND is_hub = 0"""
-            )
+        params: list = []
+
+        if season_id is not None:
+            base_query += " AND (season_id IS NULL OR season_id = ?)"
+            params.append(season_id)
+            base_query += " AND (player_id IS NULL OR player_id = ?)"
+            params.append(player_id or '')
+
+        if ignored_run_ids:
+            placeholders = ",".join("?" * len(ignored_run_ids))
+            base_query += f" AND id NOT IN ({placeholders})"
+            params.extend(ignored_run_ids)
+
+        row = self.db.fetchone(base_query, tuple(params))
         return row["total_seconds"] if row and row["total_seconds"] else 0.0
 
     def get_total_map_costs(
-        self, season_id: Optional[int] = None, player_id: Optional[str] = None
+        self,
+        season_id: Optional[int] = None,
+        player_id: Optional[str] = None,
+        ignored_run_ids: Optional[set[int]] = None,
     ) -> float:
         """
         Get total map costs across all runs.
@@ -1067,6 +1223,7 @@ class Repository:
         Args:
             season_id: Filter by season (uses context if None)
             player_id: Filter by player (uses context if None)
+            ignored_run_ids: Run IDs to exclude from cost sum
 
         Returns:
             Total map cost in FE
@@ -1080,23 +1237,24 @@ class Repository:
             return 0.0
 
         # Get all map cost deltas (Spv3Open/ClimbTowerOpen events with run_id)
+        base_query = """SELECT config_base_id, SUM(delta) as total_delta
+                   FROM item_deltas
+                   WHERE run_id IS NOT NULL AND proto_name IN ('Spv3Open', 'ClimbTowerOpen')"""
+        params: list = []
+
         if season_id is not None:
-            rows = self.db.fetchall(
-                """SELECT config_base_id, SUM(delta) as total_delta
-                   FROM item_deltas
-                   WHERE run_id IS NOT NULL AND proto_name IN ('Spv3Open', 'ClimbTowerOpen')
-                   AND (season_id IS NULL OR season_id = ?)
-                   AND (player_id IS NULL OR player_id = ?)
-                   GROUP BY config_base_id""",
-                (season_id, player_id or ''),
-            )
-        else:
-            rows = self.db.fetchall(
-                """SELECT config_base_id, SUM(delta) as total_delta
-                   FROM item_deltas
-                   WHERE run_id IS NOT NULL AND proto_name IN ('Spv3Open', 'ClimbTowerOpen')
-                   GROUP BY config_base_id"""
-            )
+            base_query += " AND (season_id IS NULL OR season_id = ?)"
+            params.append(season_id)
+            base_query += " AND (player_id IS NULL OR player_id = ?)"
+            params.append(player_id or '')
+
+        if ignored_run_ids:
+            placeholders = ",".join("?" * len(ignored_run_ids))
+            base_query += f" AND run_id NOT IN ({placeholders})"
+            params.extend(ignored_run_ids)
+
+        base_query += " GROUP BY config_base_id"
+        rows = self.db.fetchall(base_query, tuple(params))
 
         total_cost = 0.0
 

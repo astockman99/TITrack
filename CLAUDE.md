@@ -176,7 +176,8 @@ LevelMgr@ OpenLevel ...
 - Handle unknown ConfigBaseIds gracefully (show as "Unknown <id>")
 - `InitBagData` events update slot state but don't create deltas (used for inventory sync)
 - `RemoveBagItem` events fire when a slot is fully emptied (last item consumed). Has no ConfigBaseId/Num — lookup existing slot state to determine what was removed, then treat as Num=0.
-- Non-loot proto names (`Push2`, `XchgReceive`, `ExchangeItem`, `XchgRecall`) update slot state but don't create deltas. These are trade house sales, item recycling, and cancelled listings — not map loot.
+- Non-loot proto names (`Push2`, `XchgReceive`, `ExchangeItem`, `XchgRecall`, `XchgForSale`, `UnequipSkill`) update slot state but don't create deltas. These are trade house sales/listings, item recycling, cancelled listings, and skill management — not map loot.
+- Events outside any `ProtoName` block (e.g., re-equipping a skill) update slot state but don't create deltas. All legitimate loot/cost events occur inside proto blocks.
 
 ## Database Schema (Core Tables)
 
@@ -187,6 +188,8 @@ LevelMgr@ OpenLevel ...
 - `items` - item metadata (name, icon_url, category)
 - `prices` - item valuation (price_fe, source, updated_ts)
 - `hidden_items` - items hidden from inventory display per player (player_id, config_base_id)
+- `ignored_runs` - runs excluded from all calculations per player (player_id, run_id)
+- `ignored_run_items` - specific item types excluded per run (player_id, run_id, config_base_id)
 
 ## Item Database
 
@@ -216,6 +219,7 @@ The packaged EXE runs in a native window using pywebview (EdgeChromium on Window
 
 - **Window title**: "TITrack - Torchlight Infinite Loot Tracker"
 - **Default size**: 1280x800, minimum 800x600
+- **State persistence**: Window remembers position, size, and maximized state across restarts (settings keys: `window_position`, `window_size`, `window_maximized`)
 - **Shutdown**: Closing the window gracefully stops all services
 - **Browser fallback**: If WebView2 (EdgeChromium) is unavailable, the app shows a message box with a link to install the WebView2 Runtime and falls back to browser mode with an Exit button. The renderer is forced to EdgeChromium to prevent silent fallback to MSHTML (IE11) which cannot render modern CSS/JS.
 
@@ -384,6 +388,9 @@ In development mode (non-frozen), logs also output to console.
 - `GET /api/runs/{run_id}` - Get single run details
 - `POST /api/runs/pause` - Toggle realtime tracking pause on/off
 - `POST /api/runs/reset` - Clear all run tracking data (preserves prices, items, settings)
+- `POST /api/runs/{run_id}/ignore` - Toggle run ignored state (body: `{"ignored": true/false}`)
+- `GET /api/runs/{run_id}/ignored-items` - Get ignored item types for a run
+- `PUT /api/runs/{run_id}/ignored-items` - Set ignored item types for a run (body: `{"ignored_ids": [123, 456]}`)
 
 ### Items
 - `GET /api/items` - List items (with search)
@@ -417,10 +424,10 @@ In development mode (non-frozen), logs also output to console.
 
 ## Dashboard Features
 
-- **Stats Header**: Net Worth, Cumulative Value, Value/Hour, Value/Map, Runs, Avg Run Time, Total Time
-- **Charts**: Cumulative Value, Value/Hour (rolling)
+- **Stats Header**: Net Worth, Cumulative Value, FE/Hour, FE/Map, Runs, Avg Run Time, Total Time
+- **Charts**: Cumulative Value, FE/Hour (rolling)
 - **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
-- **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled)
+- **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled). Runs can be ignored (excluded from all calculations) via the details modal. Individual items within a run can also be ignored. Ignored runs show with strikethrough + dimmed styling; runs with ignored items show a small indicator icon.
 - **Current Inventory**: Sortable by quantity or value, with "Hide Items" button to hide items from display (hidden items count toward net worth by default; toggle "Exclude from Net Worth" in the Hide Items modal to exclude them). Hide Items modal includes a search bar to filter items by name.
 - **Controls**: Cloud Sync toggle, Economy button (opens titrack.ninja), Settings button, Reset Stats, Auto-refresh toggle
 - **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Overlay settings (Hide Loot Pickups), Game Directory configuration (with Browse button in native window mode)
@@ -464,7 +471,7 @@ Click "Export CSV" to save the report. A native "Save As" dialog lets you choose
 ### Data Filtering
 
 - Only includes items picked up during map runs (excludes trade house purchases, crafting, etc.)
-- Excludes non-loot events: trade house sales (`Push2`, `XchgReceive`) and item recycling (`ExchangeItem`) — these update inventory/net worth but don't create deltas
+- Excludes non-loot events: trade house sales/listings (`Push2`, `XchgReceive`, `XchgForSale`), item recycling (`ExchangeItem`), skill equip/unequip (`UnequipSkill`), and events outside proto blocks — these update inventory/net worth but don't create deltas
 - Excludes map costs (Spv3Open events) from loot totals
 - Excludes gear page items (PageId 100), except allowlisted types (Destiny, Prisms, Divinity)
 - Respects Trade Tax setting when calculating values
@@ -496,7 +503,7 @@ When map costs are enabled:
 - **Recent Runs table**: Shows net value (with warning icon if some costs are unpriced)
 - **Run Details modal**: Shows map costs section with consumed items, followed by summary (Gross / Cost / Net)
 - **Current Run panel**: Shows net value with cost breakdown
-- **Stats**: Value/Hour and Value/Map reflect net values after costs
+- **Stats**: FE/Hour and FE/Map reflect net values after costs
 
 ### Unknown Prices
 
@@ -513,7 +520,7 @@ If a consumed item doesn't have a known price:
 
 ## Real-Time Tracking
 
-By default, TITrack calculates Value/Hour and Total Time using only in-map time (summed run durations). Real-Time Tracking mode uses wall-clock elapsed time instead, giving a more realistic view of session productivity including town/hideout time.
+By default, TITrack calculates FE/Hour and Total Time using only in-map time (summed run durations). Real-Time Tracking mode uses wall-clock elapsed time instead, giving a more realistic view of session productivity including town/hideout time.
 
 ### Enabling Real-Time Tracking
 
@@ -523,9 +530,9 @@ Click the gear icon (Settings) in the header and enable "Real-Time Tracking" tog
 
 When enabled:
 - **Total Time** = wall-clock time from first run start to now, minus paused time (ticks continuously)
-- **Value/Hour** = total value / real elapsed time (includes downtime between maps)
+- **FE/Hour** = total value / real elapsed time (includes downtime between maps)
 - **Avg Run Time** = unchanged (always uses in-map duration)
-- **Value/Hour chart** = rolling window uses wall-clock duration instead of summed run durations
+- **FE/Hour chart** = rolling window uses wall-clock duration instead of summed run durations
 
 ### Pause Button
 

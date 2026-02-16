@@ -73,7 +73,7 @@ TITrack includes a compact always-on-top overlay window so you can see your stat
 - **Launch**: Click "Overlay" in the dashboard, or run `TITrack.exe --overlay`
 - **Transparent background** with text drop shadows for visibility over any game scene
 - **Click-through** — stats and loot areas pass clicks to the game underneath
-- **Live stats**: Net Worth, Value/Hour, Value/Map, Runs, Avg Time, Total Time
+- **Live stats**: Net Worth, FE/Hour, FE/Map, Runs, Avg Time, Total Time
 - **Current run tracking**: Zone name, duration, and top loot drops sorted by value
 - **Previous run preservation**: When a map ends, loot stays visible labeled "Previous Run"
 - **Adjustable font size** (A-/A+ buttons, 70%–160%, setting is saved)
@@ -100,8 +100,8 @@ The Report button opens a full breakdown of all loot collected across your runs.
 
 ### Dashboard
 
-- **Stats header**: Net Worth, Value/Hour, Value/Map, Runs, Avg Run Time, Total Time
-- **Interactive charts**: Cumulative Value and rolling Value/Hour over time
+- **Stats header**: Net Worth, FE/Hour, FE/Map, Runs, Avg Run Time, Total Time
+- **Interactive charts**: Cumulative Value and rolling FE/Hour over time
 - **Current Run panel**: Live drops during active map runs, sorted by value
 - **Recent Runs**: Zone, duration, value — click "Details" for full loot breakdown
 - **Inventory panel**: Current items sortable by quantity or value
@@ -125,7 +125,7 @@ The Report button opens a full breakdown of all loot collected across your runs.
 
 ### Real-Time Tracking (Optional)
 
-- Uses wall-clock time for Value/Hour and Total Time (includes downtime between maps)
+- Uses wall-clock time for FE/Hour and Total Time (includes downtime between maps)
 - Pause button to exclude breaks from calculations
 - Toggle in Settings — default is in-map time only
 

@@ -56,19 +56,34 @@ def get_stats_history(
             cumulative_fe=[],
         )
 
+    # Load ignored state
+    ignored_run_ids = repo.get_ignored_run_ids()
+
     # Calculate cumulative value at each run completion
     cumulative_value_points = []
     cumulative_fe_points = []
     cumulative_value = 0.0
     cumulative_fe = 0
 
-    # Pre-calculate run values for efficiency
+    # Load all ignored items (bulk query)
+    all_ignored_items = repo.get_all_ignored_items()
+
+    # Pre-calculate run values for efficiency (skip ignored runs)
     run_values = {}
     for run in runs:
+        if run.id in ignored_run_ids:
+            continue
         fe_gained, total_value = repo.get_run_value(run.id)
+        # Subtract ignored item values
+        ignored_items = all_ignored_items.get(run.id)
+        if ignored_items:
+            ignored_value = repo.get_ignored_item_value(run.id, ignored_items)
+            total_value -= ignored_value
         run_values[run.id] = (fe_gained, total_value)
 
     for run in runs:
+        if run.id in ignored_run_ids:
+            continue
         fe_gained, total_value = run_values[run.id]
         cumulative_fe += fe_gained
         cumulative_value += total_value
@@ -86,11 +101,14 @@ def get_stats_history(
     value_per_hour_points = []
     window_minutes = 60
 
-    for i, run in enumerate(runs):
+    # Filter runs for rolling calculation (exclude ignored)
+    non_ignored_runs = [r for r in runs if r.id not in ignored_run_ids]
+
+    for i, run in enumerate(non_ignored_runs):
         # Find runs in the last hour window
         window_start = run.end_ts - timedelta(minutes=window_minutes)
         window_runs = [
-            r for r in runs[:i+1]
+            r for r in non_ignored_runs[:i+1]
             if r.end_ts and r.end_ts >= window_start
         ]
 

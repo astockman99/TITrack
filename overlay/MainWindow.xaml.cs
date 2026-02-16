@@ -32,6 +32,8 @@ public partial class MainWindow : Window
     private bool _isTransparent = false;
     private bool _isLocked = false;
     private Window? _unlockWindow;
+    private Border? _unlockBorder;
+    private TextBlock? _unlockText;
     private double _fontScale = 1.0;
     private const double MinFontScale = 0.7;
     private const double MaxFontScale = 1.6;
@@ -66,7 +68,7 @@ public partial class MainWindow : Window
         { "total_value", "Total" },
         { "net_worth", "NW" },
         { "this_run", "Run" },
-        { "value_per_map", "Val/Map" },
+        { "value_per_map", "FE/Map" },
         { "runs", "Runs" },
         { "avg_time", "Avg" },
     };
@@ -85,11 +87,11 @@ public partial class MainWindow : Window
     private DispatcherTimer? _sizeDebounceTimer;
 
     // Colors for opaque mode
-    private static readonly Color OpaqueMainBg = Color.FromArgb(0xF0, 0x1a, 0x1a, 0x2e);
-    private static readonly Color OpaqueHeaderBg = Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a);
-    private static readonly Color OpaqueStatBoxBg = Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a);
-    private static readonly Color OpaqueLootSectionBg = Color.FromArgb(0xC0, 0x2a, 0x2a, 0x4a);
-    private static readonly Color OpaqueZoneHeaderBg = Color.FromArgb(0xA0, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueMainBg = Color.FromArgb(0xFF, 0x1a, 0x1a, 0x2e);
+    private static readonly Color OpaqueHeaderBg = Color.FromArgb(0xFF, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueStatBoxBg = Color.FromArgb(0xFF, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueLootSectionBg = Color.FromArgb(0xFF, 0x2a, 0x2a, 0x4a);
+    private static readonly Color OpaqueZoneHeaderBg = Color.FromArgb(0xFF, 0x2a, 0x2a, 0x4a);
     private static readonly Color OpaqueBorderColor = Color.FromArgb(0xFF, 0x3a, 0x3a, 0x5a);
 
     // Drop shadow effect for transparent mode
@@ -361,29 +363,58 @@ public partial class MainWindow : Window
             ResizeMode = ResizeMode.NoResize,
         };
 
-        var border = new Border
+        _unlockBorder = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a)),
             CornerRadius = new CornerRadius(4),
             Cursor = Cursors.Hand,
             ToolTip = "Unlock overlay",
         };
 
-        var text = new TextBlock
+        _unlockText = new TextBlock
         {
             Text = "🔒",
             FontSize = 12,
-            Foreground = new SolidColorBrush(Color.FromRgb(0xa0, 0xa0, 0xa0)),
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        border.Child = text;
-        border.MouseLeftButtonDown += (s, e) => UnlockOverlay();
-        border.MouseEnter += (s, e) => border.Background = new SolidColorBrush(Color.FromRgb(0x3a, 0x3a, 0x5a));
-        border.MouseLeave += (s, e) => border.Background = new SolidColorBrush(Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a));
+        _unlockBorder.Child = _unlockText;
+        _unlockBorder.MouseLeftButtonDown += (s, e) => UnlockOverlay();
+        _unlockBorder.MouseEnter += (s, e) =>
+        {
+            if (_isTransparent)
+                _unlockBorder.Background = new SolidColorBrush(Color.FromArgb(0x40, 0x3a, 0x3a, 0x5a));
+            else
+                _unlockBorder.Background = new SolidColorBrush(Color.FromRgb(0x3a, 0x3a, 0x5a));
+        };
+        _unlockBorder.MouseLeave += (s, e) =>
+        {
+            _unlockBorder.Background = _isTransparent
+                ? Brushes.Transparent
+                : new SolidColorBrush(Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a));
+        };
 
-        _unlockWindow.Content = border;
+        ApplyUnlockButtonTransparency();
+
+        _unlockWindow.Content = _unlockBorder;
+    }
+
+    private void ApplyUnlockButtonTransparency()
+    {
+        if (_unlockBorder == null || _unlockText == null) return;
+
+        if (_isTransparent)
+        {
+            _unlockBorder.Background = Brushes.Transparent;
+            _unlockText.Foreground = new SolidColorBrush(Colors.White);
+            _unlockText.Effect = TextShadow;
+        }
+        else
+        {
+            _unlockBorder.Background = new SolidColorBrush(Color.FromArgb(0xE0, 0x2a, 0x2a, 0x4a));
+            _unlockText.Foreground = new SolidColorBrush(Color.FromRgb(0xa0, 0xa0, 0xa0));
+            _unlockText.Effect = null;
+        }
     }
 
     private async void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -1047,6 +1078,9 @@ public partial class MainWindow : Window
             MicroBorder.Background = Brushes.Transparent;
             MicroBorder.BorderBrush = Brushes.Transparent;
             ApplyMicroTextShadows(true);
+
+            // Update unlock button if it exists
+            ApplyUnlockButtonTransparency();
         }
         else
         {
@@ -1083,6 +1117,9 @@ public partial class MainWindow : Window
             MicroBorder.Background = new SolidColorBrush(OpaqueMainBg);
             MicroBorder.BorderBrush = new SolidColorBrush(OpaqueBorderColor);
             ApplyMicroTextShadows(false);
+
+            // Update unlock button if it exists
+            ApplyUnlockButtonTransparency();
         }
     }
 
