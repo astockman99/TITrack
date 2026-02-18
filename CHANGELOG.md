@@ -5,6 +5,18 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2026-02-18
+
+### Added
+- **Ignore Items in Loot Report**: Eye icon toggle on each item row to exclude specific item types from report totals, chart, and percentages. Ignored items shown with strikethrough and dimmed styling. Totals, profit, and rates recalculate instantly on toggle. Items ignored in individual runs are automatically pre-ignored in the report. Per-character, persists across sessions, cleared on stats reset.
+- **Recent Runs Scrolling**: Recent Runs table now scrolls within a fixed-height container (600px) with sticky header, keeping the page layout stable when many runs are listed.
+- **Charts Use In-Map Time by Default**: Chart x-axis now shows cumulative in-map time (e.g., "1h", "2h 30m") instead of wall-clock time, eliminating misleading gaps from idle periods. When Real-Time Tracking is enabled, charts switch back to wall-clock timestamps.
+
+### Fixed
+- **Main window bounds checking**: Window position is validated against virtual screen bounds on restore. If the saved position is off-screen (e.g., disconnected monitor), it resets to center instead of opening invisibly.
+
+---
+
 ## [0.5.3] - 2026-02-17
 
 ### Added

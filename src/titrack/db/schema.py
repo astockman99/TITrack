@@ -179,6 +179,15 @@ CREATE TABLE IF NOT EXISTS ignored_run_items (
 )
 """
 
+# Ignored report items - item types excluded from loot report totals (per-player)
+CREATE_IGNORED_REPORT_ITEMS = """
+CREATE TABLE IF NOT EXISTS ignored_report_items (
+    player_id TEXT NOT NULL DEFAULT '',
+    config_base_id INTEGER NOT NULL,
+    PRIMARY KEY (player_id, config_base_id)
+)
+"""
+
 ALL_CREATE_STATEMENTS = [
     CREATE_SETTINGS,
     CREATE_RUNS,
@@ -196,4 +205,5 @@ ALL_CREATE_STATEMENTS = [
     CREATE_HIDDEN_ITEMS,
     CREATE_IGNORED_RUNS,
     CREATE_IGNORED_RUN_ITEMS,
+    CREATE_IGNORED_REPORT_ITEMS,
 ]

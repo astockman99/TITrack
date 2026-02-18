@@ -23,6 +23,7 @@ class TimeSeriesPoint(BaseModel):
 
     timestamp: datetime
     value: float
+    cumulative_seconds: float = 0  # Running sum of in-map time
 
 
 class TimeSeriesResponse(BaseModel):
@@ -31,6 +32,7 @@ class TimeSeriesResponse(BaseModel):
     cumulative_value: list[TimeSeriesPoint]  # Total value over time
     value_per_hour: list[TimeSeriesPoint]  # Value/hour rate over time
     cumulative_fe: list[TimeSeriesPoint]  # Raw FE over time (legacy)
+    realtime_tracking: bool = False  # Whether realtime tracking is enabled
 
 
 @router.get("/history", response_model=TimeSeriesResponse)
@@ -67,6 +69,7 @@ def get_stats_history(
     cumulative_fe_points = []
     cumulative_value = 0.0
     cumulative_fe = 0
+    cumulative_map_seconds = 0.0
 
     # Load all ignored items (bulk query)
     all_ignored_items = repo.get_all_ignored_items()
@@ -94,11 +97,21 @@ def get_stats_history(
         fe_gained, total_value = run_values[run.id]
         cumulative_fe += fe_gained
         cumulative_value += total_value
+        if run.duration_seconds:
+            cumulative_map_seconds += run.duration_seconds
         cumulative_value_points.append(
-            TimeSeriesPoint(timestamp=run.end_ts, value=round(cumulative_value, 2))
+            TimeSeriesPoint(
+                timestamp=run.end_ts,
+                value=round(cumulative_value, 2),
+                cumulative_seconds=cumulative_map_seconds,
+            )
         )
         cumulative_fe_points.append(
-            TimeSeriesPoint(timestamp=run.end_ts, value=cumulative_fe)
+            TimeSeriesPoint(
+                timestamp=run.end_ts,
+                value=cumulative_fe,
+                cumulative_seconds=cumulative_map_seconds,
+            )
         )
 
     # Check realtime tracking mode
@@ -111,7 +124,13 @@ def get_stats_history(
     # Filter runs for rolling calculation (exclude ignored)
     non_ignored_runs = [r for r in runs if r.id not in ignored_run_ids]
 
+    # Pre-compute cumulative in-map seconds for value_per_hour points
+    vph_cumulative_seconds = 0.0
+
     for i, run in enumerate(non_ignored_runs):
+        if run.duration_seconds:
+            vph_cumulative_seconds += run.duration_seconds
+
         # Find runs in the last hour window
         window_start = run.end_ts - timedelta(minutes=window_minutes)
         window_runs = [
@@ -143,7 +162,11 @@ def get_stats_history(
                 value_rate = 0
 
             value_per_hour_points.append(
-                TimeSeriesPoint(timestamp=run.end_ts, value=round(value_rate, 2))
+                TimeSeriesPoint(
+                    timestamp=run.end_ts,
+                    value=round(value_rate, 2),
+                    cumulative_seconds=vph_cumulative_seconds,
+                )
             )
 
     # Filter to requested time window
@@ -157,6 +180,7 @@ def get_stats_history(
         cumulative_value=filtered_cumulative_value,
         value_per_hour=filtered_value_rate,
         cumulative_fe=filtered_cumulative_fe,
+        realtime_tracking=realtime_enabled,
     )
 
 

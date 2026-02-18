@@ -107,6 +107,7 @@
                         <h2>Recent Runs</h2>
                         <button class="report-btn" onclick="showLootReport()">Report</button>
                     </div>
+                <div class="runs-scroll-container">
                 <table id="runs-table">
                     <thead>
                         <tr>
@@ -120,6 +121,7 @@
                         <tr><td colspan="4" class="loading">Loading...</td></tr>
                     </tbody>
                 </table>
+                </div>
                 </section>
             </div>
 
@@ -441,10 +443,11 @@
                                 <th>Unit Price</th>
                                 <th>Total Value</th>
                                 <th>%</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="loot-report-table-body">
-                            <tr><td colspan="5" class="loading">Loading...</td></tr>
+                            <tr><td colspan="6" class="loading">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>

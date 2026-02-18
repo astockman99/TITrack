@@ -190,6 +190,7 @@ LevelMgr@ OpenLevel ...
 - `hidden_items` - items hidden from inventory display per player (player_id, config_base_id)
 - `ignored_runs` - runs excluded from all calculations per player (player_id, run_id)
 - `ignored_run_items` - specific item types excluded per run (player_id, run_id, config_base_id)
+- `ignored_report_items` - item types excluded from loot report totals per player (player_id, config_base_id)
 
 ## Item Database
 
@@ -385,6 +386,8 @@ In development mode (non-frozen), logs also output to console.
 - `GET /api/runs/stats` - Summary statistics (value/hour, avg per run, etc.)
 - `GET /api/runs/report` - Cumulative loot statistics across all runs
 - `GET /api/runs/report/csv` - Export loot report as CSV file
+- `GET /api/runs/report/ignored-items` - Get ignored item types for the loot report
+- `PUT /api/runs/report/ignored-items` - Set ignored item types for the loot report (body: `{"ignored_ids": [123, 456]}`)
 - `GET /api/runs/{run_id}` - Get single run details
 - `POST /api/runs/pause` - Toggle realtime tracking pause on/off
 - `POST /api/runs/reset` - Clear all run tracking data (preserves prices, items, settings)
@@ -425,9 +428,9 @@ In development mode (non-frozen), logs also output to console.
 ## Dashboard Features
 
 - **Stats Header**: Net Worth, Cumulative Value, FE/Hour, FE/Map, Runs, Avg Run Time, Total Time
-- **Charts**: Cumulative Value, FE/Hour (rolling)
+- **Charts**: Cumulative Value, FE/Hour (rolling). X-axis uses cumulative in-map time by default (e.g., "1h", "2h 30m"); switches to wall-clock timestamps when Real-Time Tracking is enabled.
 - **Current Run Panel**: Live drops display during active map runs (sorted by value, shows costs when enabled)
-- **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled). Runs can be ignored (excluded from all calculations) via the details modal. Individual items within a run can also be ignored. Ignored runs show with strikethrough + dimmed styling; runs with ignored items show a small indicator icon.
+- **Recent Runs**: Zone, duration, value with details modal (shows net value when costs enabled). Scrollable with sticky header (max 600px). Runs can be ignored (excluded from all calculations) via the details modal. Individual items within a run can also be ignored. Ignored runs show with strikethrough + dimmed styling; runs with ignored items show a small indicator icon.
 - **Current Inventory**: Sortable by quantity or value, with "Hide Items" button to hide items from display (hidden items count toward net worth by default; toggle "Exclude from Net Worth" in the Hide Items modal to exclude them). Hide Items modal includes a search bar to filter items by name.
 - **Controls**: Cloud Sync toggle, Economy button (opens titrack.ninja), Settings button, Reset Stats, Auto-refresh toggle
 - **Settings Modal**: Trade Tax toggle, Map Costs toggle, Real-Time Tracking toggle, Overlay settings (Hide Loot Pickups), Game Directory configuration (with Browse button in native window mode)
@@ -459,8 +462,13 @@ A scrollable table lists all items with:
 - Unit price (from local or cloud pricing)
 - Total value (quantity × unit price)
 - Percentage of total value
+- Ignore toggle (eye icon) to exclude item from report totals
 
 Items without known prices show "--" and appear at the bottom.
+
+### Ignore Items
+
+Click the eye icon on any item row to exclude it from report totals, percentages, chart, and rate calculations. Ignored items appear dimmed with strikethrough. Totals recalculate instantly client-side. Items ignored in individual runs (via run details modal) are automatically pre-ignored in the report. State is per-character, persists across sessions, and clears on stats reset. Stored in `ignored_report_items` table.
 
 ### CSV Export
 

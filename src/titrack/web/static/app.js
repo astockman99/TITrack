@@ -16,6 +16,7 @@ const failedIcons = new Set(); // Track icons that failed to load
 let cumulativeValueChart = null;
 let valueRateChart = null;
 let lootReportChart = null;
+let lastChartRealtimeMode = null; // Track chart x-axis mode
 
 // Loot report data cache
 let lastLootReportData = null;
@@ -72,7 +73,7 @@ async function fetchStats() {
     return fetchJson('/runs/stats');
 }
 
-async function fetchRuns(page = 1, pageSize = 20) {
+async function fetchRuns(page = 1, pageSize = 500) {
     return fetchJson(`/runs?page=${page}&page_size=${pageSize}&exclude_hubs=true`);
 }
 
@@ -1503,54 +1504,80 @@ async function saveLogDirectory() {
     }
 }
 
-// Chart configuration
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-        intersect: false,
-        mode: 'index',
-    },
-    plugins: {
-        legend: {
-            display: false,
+// Chart configuration - base options shared by both modes
+function getChartOptions(realtimeMode) {
+    const xScale = realtimeMode ? {
+        type: 'time',
+        time: {
+            displayFormats: {
+                hour: 'HH:mm',
+                minute: 'HH:mm',
+            },
         },
-        tooltip: {
-            backgroundColor: 'rgba(22, 33, 62, 0.9)',
-            titleColor: '#eaeaea',
-            bodyColor: '#eaeaea',
-            borderColor: '#2a2a4a',
-            borderWidth: 1,
+        grid: {
+            color: 'rgba(42, 42, 74, 0.5)',
         },
-    },
-    scales: {
-        x: {
-            type: 'time',
-            time: {
-                displayFormats: {
-                    hour: 'HH:mm',
-                    minute: 'HH:mm',
+        ticks: {
+            color: '#a0a0a0',
+            maxTicksLimit: 6,
+        },
+    } : {
+        type: 'linear',
+        grid: {
+            color: 'rgba(42, 42, 74, 0.5)',
+        },
+        ticks: {
+            color: '#a0a0a0',
+            maxTicksLimit: 6,
+            callback: function(value) {
+                const hours = Math.floor(value);
+                const minutes = Math.round((value - hours) * 60);
+                if (minutes === 0) return `${hours}h`;
+                return `${hours}h ${minutes}m`;
+            },
+        },
+    };
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            intersect: false,
+            mode: 'index',
+        },
+        plugins: {
+            legend: {
+                display: false,
+            },
+            tooltip: {
+                backgroundColor: 'rgba(22, 33, 62, 0.9)',
+                titleColor: '#eaeaea',
+                bodyColor: '#eaeaea',
+                borderColor: '#2a2a4a',
+                borderWidth: 1,
+            },
+        },
+        scales: {
+            x: xScale,
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(42, 42, 74, 0.5)',
+                },
+                ticks: {
+                    color: '#a0a0a0',
                 },
             },
-            grid: {
-                color: 'rgba(42, 42, 74, 0.5)',
-            },
-            ticks: {
-                color: '#a0a0a0',
-                maxTicksLimit: 6,
-            },
         },
-        y: {
-            beginAtZero: true,
-            grid: {
-                color: 'rgba(42, 42, 74, 0.5)',
-            },
-            ticks: {
-                color: '#a0a0a0',
-            },
-        },
-    },
-};
+    };
+}
+
+function formatElapsedTime(hours) {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+}
 
 function renderCharts(data, forceRender = false) {
     const newHash = simpleHash(data);
@@ -1559,17 +1586,34 @@ function renderCharts(data, forceRender = false) {
     }
     lastStatsHash = newHash;
 
+    const realtimeMode = !!data?.realtime_tracking;
+
+    // Destroy charts if mode changed (axis type can't be updated in-place)
+    if (lastChartRealtimeMode !== null && lastChartRealtimeMode !== realtimeMode) {
+        if (cumulativeValueChart) { cumulativeValueChart.destroy(); cumulativeValueChart = null; }
+        if (valueRateChart) { valueRateChart.destroy(); valueRateChart = null; }
+    }
+    lastChartRealtimeMode = realtimeMode;
+
+    const chartOptions = getChartOptions(realtimeMode);
+
     // Prepare data for cumulative value chart
     const cumulativeValueData = (data?.cumulative_value || []).map(p => ({
-        x: new Date(p.timestamp),
+        x: realtimeMode ? new Date(p.timestamp) : p.cumulative_seconds / 3600,
         y: p.value,
     }));
 
     // Prepare data for value/hour chart
     const valueRateData = (data?.value_per_hour || []).map(p => ({
-        x: new Date(p.timestamp),
+        x: realtimeMode ? new Date(p.timestamp) : p.cumulative_seconds / 3600,
         y: p.value,
     }));
+
+    // Tooltip title callback for map-time mode
+    const tooltipTitle = realtimeMode ? undefined : function(items) {
+        if (items.length > 0) return formatElapsedTime(items[0].parsed.x);
+        return '';
+    };
 
     // Render or update Cumulative Value chart
     const cumulativeValueCtx = document.getElementById('cumulative-value-chart');
@@ -1598,6 +1642,7 @@ function renderCharts(data, forceRender = false) {
                         tooltip: {
                             ...chartOptions.plugins.tooltip,
                             callbacks: {
+                                title: tooltipTitle,
                                 label: (ctx) => `Value: ${formatNumber(Math.round(ctx.parsed.y))} FE`,
                             },
                         },
@@ -1634,6 +1679,7 @@ function renderCharts(data, forceRender = false) {
                         tooltip: {
                             ...chartOptions.plugins.tooltip,
                             callbacks: {
+                                title: tooltipTitle,
                                 label: (ctx) => `Value/hr: ${formatNumber(Math.round(ctx.parsed.y))} FE`,
                             },
                         },
@@ -2047,7 +2093,7 @@ async function showLootReport() {
     const tableBody = document.getElementById('loot-report-table-body');
 
     // Show loading state
-    tableBody.innerHTML = '<tr><td colspan="5" class="loading">Loading report...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading">Loading report...</td></tr>';
     document.getElementById('report-total-value').textContent = '...';
     document.getElementById('report-profit').textContent = '...';
     document.getElementById('report-total-items').textContent = '...';
@@ -2063,7 +2109,7 @@ async function showLootReport() {
     lastLootReportData = data;
 
     if (!data) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="loading">Failed to load report</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="loading">Failed to load report</td></tr>';
         return;
     }
 
@@ -2087,7 +2133,7 @@ async function showLootReport() {
 
     // Handle empty state
     if (!data.items || data.items.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="loading">No loot recorded yet. Complete some runs to see your report.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="loading">No loot recorded yet. Complete some runs to see your report.</td></tr>';
         // Clear any existing chart
         if (lootReportChart) {
             lootReportChart.destroy();
@@ -2102,9 +2148,12 @@ async function showLootReport() {
         const priceText = item.price_fe !== null ? formatFEValue(item.price_fe) : '<span class="no-price">--</span>';
         const valueText = item.total_value_fe !== null ? formatFEValue(item.total_value_fe) : '<span class="no-price">--</span>';
         const percentText = item.percentage !== null ? `${item.percentage.toFixed(1)}%` : '--';
+        const isIgnored = item.is_ignored;
+        const ignoreIcon = isIgnored ? '👁‍🗨' : '👁';
+        const ignoreTitle = isIgnored ? 'Include this item in report totals' : 'Exclude this item from report totals';
 
         return `
-            <tr>
+            <tr class="${isIgnored ? 'report-item-ignored' : ''}">
                 <td>
                     <div class="item-col">
                         ${iconHtml}
@@ -2115,11 +2164,99 @@ async function showLootReport() {
                 <td>${priceText}</td>
                 <td>${valueText}</td>
                 <td>${percentText}</td>
+                <td><span class="report-item-ignore${isIgnored ? ' ignored' : ''}" title="${ignoreTitle}" data-config-id="${item.config_base_id}">${ignoreIcon}</span></td>
             </tr>
         `;
     }).join('');
 
-    // Render chart (top 10 items + "Other")
+    // Wire up report item ignore toggles
+    tableBody.querySelectorAll('.report-item-ignore').forEach(el => {
+        el.addEventListener('click', async () => {
+            const configId = parseInt(el.dataset.configId);
+            const item = data.items.find(i => i.config_base_id === configId);
+            if (!item) return;
+
+            // Toggle state
+            item.is_ignored = !item.is_ignored;
+            const isNowIgnored = item.is_ignored;
+
+            // Update row UI immediately
+            const tr = el.closest('tr');
+            tr.classList.toggle('report-item-ignored', isNowIgnored);
+            el.classList.toggle('ignored', isNowIgnored);
+            el.textContent = isNowIgnored ? '👁‍🗨' : '👁';
+            el.title = isNowIgnored ? 'Include this item in report totals' : 'Exclude this item from report totals';
+
+            // Recalculate totals client-side
+            recalcReportTotals(data);
+
+            // Save to server
+            const ignoredIds = data.items.filter(i => i.is_ignored).map(i => i.config_base_id);
+            try {
+                await fetch(`${API_BASE}/runs/report/ignored-items`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ignored_ids: ignoredIds }),
+                });
+            } catch (e) { console.error('Failed to update report ignored items:', e); }
+        });
+    });
+
+    // Render chart (top 10 items + "Other") - only non-ignored items
+    renderLootReportChart(data);
+}
+
+function recalcReportTotals(data) {
+    // Recalculate total_value from non-ignored items
+    let totalValue = 0;
+    for (const item of data.items) {
+        if (!item.is_ignored && item.total_value_fe !== null) {
+            totalValue += item.total_value_fe;
+        }
+    }
+    data.total_value_fe = Math.round(totalValue * 100) / 100;
+
+    // Recalculate percentages
+    for (const item of data.items) {
+        if (item.is_ignored) {
+            item.percentage = null;
+        } else if (item.total_value_fe !== null && totalValue > 0) {
+            item.percentage = Math.round((item.total_value_fe / totalValue) * 10000) / 100;
+        }
+    }
+
+    // Update percent cells in the table
+    const rows = document.querySelectorAll('#loot-report-table-body tr');
+    rows.forEach(row => {
+        const ignoreEl = row.querySelector('.report-item-ignore');
+        if (!ignoreEl) return;
+        const configId = parseInt(ignoreEl.dataset.configId);
+        const item = data.items.find(i => i.config_base_id === configId);
+        if (!item) return;
+        const cells = row.querySelectorAll('td');
+        const percentCell = cells[4]; // 5th column (0-indexed)
+        percentCell.textContent = item.percentage !== null ? `${item.percentage.toFixed(1)}%` : '--';
+    });
+
+    // Recalculate profit
+    const profit = totalValue - (data.map_costs_enabled ? data.total_map_cost_fe : 0);
+    data.profit_fe = Math.round(profit * 100) / 100;
+
+    // Recalculate rates
+    const profitPerHour = data.total_duration_seconds > 0 ? (profit / data.total_duration_seconds * 3600) : 0;
+    const profitPerMap = data.run_count > 0 ? (profit / data.run_count) : 0;
+
+    // Count non-ignored items
+    const nonIgnoredCount = data.items.filter(i => !i.is_ignored).length;
+
+    // Update summary display
+    document.getElementById('report-total-value').textContent = formatFEValue(data.total_value_fe) + ' FE';
+    document.getElementById('report-profit').textContent = formatFEValue(data.profit_fe) + ' FE';
+    document.getElementById('report-total-items').textContent = formatNumber(nonIgnoredCount);
+    document.getElementById('report-profit-per-hour').textContent = formatNumber(Math.round(profitPerHour)) + ' FE';
+    document.getElementById('report-profit-per-map').textContent = formatNumber(Math.round(profitPerMap)) + ' FE';
+
+    // Re-render chart with updated data
     renderLootReportChart(data);
 }
 
@@ -2132,8 +2269,8 @@ function renderLootReportChart(data) {
         lootReportChart = null;
     }
 
-    // Filter items with value and sort by value
-    const pricedItems = data.items.filter(item => item.total_value_fe !== null && item.total_value_fe > 0);
+    // Filter items with value and sort by value (exclude ignored items)
+    const pricedItems = data.items.filter(item => item.total_value_fe !== null && item.total_value_fe > 0 && !item.is_ignored);
 
     if (pricedItems.length === 0) {
         return;

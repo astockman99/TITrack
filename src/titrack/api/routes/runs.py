@@ -319,7 +319,7 @@ def _consolidate_runs(
 
 
 # Validation limits
-MAX_PAGE_SIZE = 100
+MAX_PAGE_SIZE = 500
 MAX_PAGE = 10000
 
 
@@ -718,10 +718,15 @@ def get_loot_report(
     # Load all ignored items (bulk query)
     all_ignored_items = repo.get_all_ignored_items()
 
-    # Get aggregated loot data (excluding ignored runs and items)
+    # Load report-level ignored items (union with per-run ignored items)
+    ignored_report_items = repo.get_ignored_report_items()
+    for ids in all_ignored_items.values():
+        ignored_report_items.update(ids)
+
+    # Get aggregated loot data (excluding ignored runs, but NOT per-run ignored items
+    # — those are handled at display level via is_ignored flag in the report)
     cumulative_loot = repo.get_cumulative_loot(
         ignored_run_ids=ignored_run_ids if ignored_run_ids else None,
-        ignored_run_items=all_ignored_items if all_ignored_items else None,
     )
 
     # Check if map costs are enabled
@@ -737,6 +742,7 @@ def get_loot_report(
     for loot in cumulative_loot:
         config_id = loot["config_base_id"]
         quantity = loot["total_quantity"]
+        is_ignored = config_id in ignored_report_items
 
         # Get item metadata
         item = repo.get_item(config_id)
@@ -752,7 +758,8 @@ def get_loot_report(
             else:
                 item_total = None
 
-        if item_total:
+        # Only count non-ignored items toward totals
+        if item_total and not is_ignored:
             total_value += item_total
 
         items.append(
@@ -764,13 +771,14 @@ def get_loot_report(
                 price_fe=price_fe,
                 total_value_fe=round(item_total, 2) if item_total else None,
                 percentage=None,  # Will be calculated after total is known
+                is_ignored=is_ignored,
             )
         )
 
-    # Calculate percentages now that we have total_value
+    # Calculate percentages from non-ignored totals
     if total_value > 0:
         for item in items:
-            if item.total_value_fe is not None:
+            if item.total_value_fe is not None and not item.is_ignored:
                 item.percentage = round((item.total_value_fe / total_value) * 100, 2)
 
     # Sort by total value (highest first), unpriced items at the end
@@ -783,25 +791,50 @@ def get_loot_report(
     # Get map costs if enabled (excluding ignored runs)
     total_map_cost = repo.get_total_map_costs(ignored_run_ids=ignored_run_ids if ignored_run_ids else None) if map_costs_enabled else 0.0
 
-    # Calculate profit
+    # Calculate profit (only from non-ignored items)
     profit = total_value - total_map_cost
 
     # Calculate rates
     profit_per_hour = (profit / total_duration * 3600) if total_duration > 0 else 0.0
     profit_per_map = profit / run_count if run_count > 0 else 0.0
 
+    # total_items counts only non-ignored items
+    non_ignored_count = sum(1 for i in items if not i.is_ignored)
+
     return LootReportResponse(
         items=items,
         total_value_fe=round(total_value, 2),
         total_map_cost_fe=round(total_map_cost, 2),
         profit_fe=round(profit, 2),
-        total_items=len(items),
+        total_items=non_ignored_count,
         run_count=run_count,
         total_duration_seconds=round(total_duration, 2),
         profit_per_hour=round(profit_per_hour, 2),
         profit_per_map=round(profit_per_map, 2),
         map_costs_enabled=map_costs_enabled,
     )
+
+
+@router.get("/report/ignored-items")
+def get_report_ignored_items(
+    repo: Repository = Depends(get_repository),
+) -> dict:
+    """Get ignored item types for the loot report (includes per-run ignored items)."""
+    ignored_ids = repo.get_ignored_report_items()
+    all_ignored_items = repo.get_all_ignored_items()
+    for ids in all_ignored_items.values():
+        ignored_ids.update(ids)
+    return {"ignored_ids": list(ignored_ids)}
+
+
+@router.put("/report/ignored-items")
+def set_report_ignored_items(
+    body: IgnoreRunItemsRequest,
+    repo: Repository = Depends(get_repository),
+) -> dict:
+    """Set ignored item types for the loot report."""
+    repo.set_ignored_report_items(set(body.ignored_ids))
+    return {"ignored_ids": body.ignored_ids}
 
 
 @router.get("/report/csv")

@@ -201,6 +201,7 @@ class LootReportItem(BaseModel):
     price_fe: Optional[float] = None  # Price per unit
     total_value_fe: Optional[float] = None  # quantity * price
     percentage: Optional[float] = None  # Percentage of total value
+    is_ignored: bool = False  # True if excluded from report totals
 
 
 class LootReportResponse(BaseModel):

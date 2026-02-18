@@ -597,6 +597,19 @@ footer {
     white-space: nowrap;
 }
 
+/* Runs scroll container */
+.runs-scroll-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+#runs-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 1;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
@@ -690,6 +703,35 @@ tr.ignored .duration {
 
 .loot-item.item-ignored .loot-item-qty,
 .loot-item.item-ignored .loot-item-value {
+    text-decoration: line-through;
+}
+
+/* Report per-item ignore toggle */
+.report-item-ignore {
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0.5;
+}
+
+.report-item-ignore:hover {
+    opacity: 1;
+}
+
+.report-item-ignore.ignored {
+    opacity: 1;
+    color: var(--negative);
+}
+
+tr.report-item-ignored {
+    opacity: 0.4;
+}
+
+tr.report-item-ignored td:nth-child(2),
+tr.report-item-ignored td:nth-child(4),
+tr.report-item-ignored td:nth-child(5) {
     text-decoration: line-through;
 }
 

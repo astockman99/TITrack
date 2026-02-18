@@ -1198,6 +1198,24 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 x, y = pos_str.split(",")
                 saved_x, saved_y = int(float(x)), int(float(y))
 
+                # Validate position is on-screen (handles disconnected monitors)
+                try:
+                    user32 = ctypes.windll.user32
+                    # Virtual screen spans all monitors; divide by DPI scale
+                    # to match saved logical coordinates
+                    sl = user32.GetSystemMetrics(76) / _dpi_scale   # SM_XVIRTUALSCREEN
+                    st = user32.GetSystemMetrics(77) / _dpi_scale   # SM_YVIRTUALSCREEN
+                    sr = sl + user32.GetSystemMetrics(78) / _dpi_scale  # + SM_CXVIRTUALSCREEN
+                    sb = st + user32.GetSystemMetrics(79) / _dpi_scale  # + SM_CYVIRTUALSCREEN
+
+                    if not (saved_x >= sl and saved_x < sr - 100 and
+                            saved_y >= st and saved_y < sb - 100):
+                        logger.info(f"Window position ({saved_x},{saved_y}) is off-screen "
+                                    f"(virtual screen: {sl},{st} to {sr},{sb}), resetting to center")
+                        saved_x, saved_y = None, None
+                except Exception:
+                    pass
+
             max_str = win_repo.get_setting("window_maximized")
             saved_maximized = max_str == "true"
             logger.debug(f"Loaded window state: pos=({saved_x},{saved_y}) size=({saved_width},{saved_height}) maximized={saved_maximized}")

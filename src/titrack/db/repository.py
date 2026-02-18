@@ -936,7 +936,7 @@ class Repository:
         return total
 
     def clear_ignored_data(self) -> None:
-        """Clear all ignored_runs and ignored_run_items for current player."""
+        """Clear all ignored_runs, ignored_run_items, and ignored_report_items for current player."""
         player_id = self._current_player_id or ""
         with self.db.transaction() as cursor:
             cursor.execute(
@@ -945,6 +945,33 @@ class Repository:
             cursor.execute(
                 "DELETE FROM ignored_run_items WHERE player_id = ?", (player_id,)
             )
+            cursor.execute(
+                "DELETE FROM ignored_report_items WHERE player_id = ?", (player_id,)
+            )
+
+    # --- Ignored Report Items ---
+
+    def get_ignored_report_items(self) -> set[int]:
+        """Get set of ignored config_base_ids for the loot report for current player."""
+        player_id = self._current_player_id or ""
+        rows = self.db.fetchall(
+            "SELECT config_base_id FROM ignored_report_items WHERE player_id = ?",
+            (player_id,),
+        )
+        return {row["config_base_id"] for row in rows}
+
+    def set_ignored_report_items(self, ignored_ids: set[int]) -> None:
+        """Replace ignored report items for current player (transactional)."""
+        player_id = self._current_player_id or ""
+        with self.db.transaction() as cursor:
+            cursor.execute(
+                "DELETE FROM ignored_report_items WHERE player_id = ?", (player_id,)
+            )
+            for config_id in ignored_ids:
+                cursor.execute(
+                    "INSERT INTO ignored_report_items (player_id, config_base_id) VALUES (?, ?)",
+                    (player_id, config_id),
+                )
 
     # --- Hidden Items ---
 
