@@ -5,7 +5,7 @@ All notable changes to TITrack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.5] - 2026-02-18
 
 ### Fixed
 - **Relog no longer clears run data**: Fixed race condition where relogging the same character caused all runs and stats to disappear. The game writes Name, SeasonId, and PlayerId on separate log lines; the collector was triggering a player change before PlayerId arrived, creating a mismatched identity that hid all existing data. Data was never deleted but became invisible until app restart. Bug existed since v0.2.8 (multi-character support).

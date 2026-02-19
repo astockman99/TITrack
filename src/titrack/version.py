@@ -1,3 +1,3 @@
 """TITrack version - single source of truth."""
 
-__version__ = "0.5.4"
+__version__ = "0.5.5"
