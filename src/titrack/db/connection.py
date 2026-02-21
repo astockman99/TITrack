@@ -241,15 +241,12 @@ class Database:
 
     def _auto_seed_items(self, cursor: sqlite3.Cursor) -> None:
         """
-        Auto-seed items table on first run if empty.
+        Auto-seed items table from bundled seed file.
 
-        Loads items from bundled tlidb_items_seed_en.json for
-        immediate item name display without manual seeding.
+        Uses INSERT OR IGNORE so existing items are preserved.
+        Runs every startup to pick up newly added seed items
+        (e.g., bound item variants) without overwriting user edits.
         """
-        # Check if items table has any data
-        result = cursor.execute("SELECT COUNT(*) FROM items").fetchone()
-        if result[0] > 0:
-            return  # Already seeded
 
         # Try to find and load the seed file
         try:

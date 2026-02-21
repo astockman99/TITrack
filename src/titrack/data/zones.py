@@ -7,8 +7,8 @@ ZONE_NAMES = {
     "XZ_YuJinZhiXiBiNanSuo": "Hideout - Ember's Rest",
     "DD_ShengTingZhuangYuan": "Hideout - Sacred Court Manor",
 
-    # Sandlord zone (trackable - players earn FE here)
-    "YunDuanLvZhou": "Cloud Oasis",
+    # Sandlord zones (trackable - players earn FE from airship/glider rewards)
+    "YunDuanLvZhou": "Cloud Oasis (Sandlord)",
 
     # Voidlands (entries with number suffixes must come before generic ones)
     # KD_YuanSuKuangDong000 differentiated by LevelId suffix
@@ -165,7 +165,20 @@ LEVEL_ID_ZONES = {
     999903: "Path of the Brave",
     999904: "Path of the Brave",
     999905: "Path of the Brave",
+    # Sandlord zones
+    9999999: "Cloud Oasis (Sandlord)",
+    9999997: "Quicksand Treasure Stash (Sandlord)",
 }
+
+# LevelIds for sandlord zones (Cloud Oasis + sub-zones like Pillage Raid).
+# Transitions between these zones do NOT create new runs.
+# Push2 events in these zones create deltas (oasis rewards/costs).
+SANDLORD_LEVEL_IDS = frozenset({9999999, 9999997})
+
+
+def is_sandlord_zone(level_id: int | None) -> bool:
+    """Check if a level_id corresponds to a sandlord zone."""
+    return level_id is not None and level_id in SANDLORD_LEVEL_IDS
 
 
 def get_zone_display_name(zone_path: str, level_id: int | None = None) -> str:

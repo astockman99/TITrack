@@ -6,6 +6,7 @@ import pytest
 
 from titrack.core.models import ParsedLevelEvent, Run
 from titrack.core.run_segmenter import RunSegmenter, is_hub_zone
+from titrack.data.zones import SANDLORD_LEVEL_IDS, is_sandlord_zone
 
 
 class TestIsHubZone:
@@ -162,3 +163,117 @@ class TestRunSegmenter:
         segmenter.load_active_run(run)
 
         assert segmenter.get_current_run() == run
+
+    def test_sandlord_zone_transition_does_not_create_new_run(self, segmenter):
+        """Transitioning between sandlord zones should keep the same run."""
+        ts1 = datetime(2026, 2, 21, 12, 28, 0)
+        ts2 = datetime(2026, 2, 21, 12, 29, 0)
+
+        # Enter Cloud Oasis (LevelId 9999999)
+        event1 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou",
+            raw_line="test",
+        )
+        _, oasis_run = segmenter.process_event(
+            event1, timestamp=ts1, level_id=9999999, level_type=21
+        )
+        assert oasis_run is not None
+        assert oasis_run.level_id == 9999999
+
+        # Transition to Quicksand Treasure Stash (LevelId 9999997) — should NOT create new run
+        event2 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Maps/06SQ/SQ_NvShenQunBai100/SQ_NvShenQunBai100",
+            raw_line="test",
+        )
+        ended, new = segmenter.process_event(
+            event2, timestamp=ts2, level_id=9999997, level_type=22
+        )
+        assert ended is None
+        assert new is None
+        # The original oasis run should still be active
+        assert segmenter.get_current_run() is oasis_run
+        assert oasis_run.end_ts is None
+
+    def test_sandlord_to_hub_ends_run(self, segmenter):
+        """Leaving a sandlord zone for a hub should end the run normally."""
+        ts1 = datetime(2026, 2, 21, 12, 28, 0)
+        ts2 = datetime(2026, 2, 21, 12, 35, 0)
+
+        event1 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou",
+            raw_line="test",
+        )
+        segmenter.process_event(event1, timestamp=ts1, level_id=9999999)
+
+        event2 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200",
+            raw_line="test",
+        )
+        ended, new = segmenter.process_event(event2, timestamp=ts2)
+
+        assert ended is not None
+        assert ended.level_id == 9999999
+        assert ended.end_ts == ts2
+        assert new is not None
+        assert new.is_hub is True
+
+    def test_sandlord_round_trip_stays_one_run(self, segmenter):
+        """Cloud Oasis -> Quicksand -> Cloud Oasis should be one continuous run."""
+        ts1 = datetime(2026, 2, 21, 12, 28, 0)
+        ts2 = datetime(2026, 2, 21, 12, 29, 0)
+        ts3 = datetime(2026, 2, 21, 12, 30, 0)
+
+        # Enter Cloud Oasis
+        event1 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou",
+            raw_line="test",
+        )
+        _, oasis_run = segmenter.process_event(
+            event1, timestamp=ts1, level_id=9999999
+        )
+
+        # Go to Quicksand
+        event2 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Maps/06SQ/SQ_NvShenQunBai100/SQ_NvShenQunBai100",
+            raw_line="test",
+        )
+        segmenter.process_event(event2, timestamp=ts2, level_id=9999997)
+
+        # Return to Cloud Oasis
+        event3 = ParsedLevelEvent(
+            event_type="OpenMainWorld",
+            level_info="/Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou",
+            raw_line="test",
+        )
+        ended, new = segmenter.process_event(event3, timestamp=ts3, level_id=9999999)
+
+        assert ended is None
+        assert new is None
+        # Still the same original run
+        assert segmenter.get_current_run() is oasis_run
+        assert oasis_run.id == 1  # Run ID didn't change
+
+
+class TestSandlordZone:
+    """Tests for sandlord zone detection."""
+
+    def test_cloud_oasis_is_sandlord(self):
+        assert is_sandlord_zone(9999999) is True
+
+    def test_quicksand_treasure_stash_is_sandlord(self):
+        assert is_sandlord_zone(9999997) is True
+
+    def test_normal_map_not_sandlord(self):
+        assert is_sandlord_zone(4606) is False
+
+    def test_none_not_sandlord(self):
+        assert is_sandlord_zone(None) is False
+
+    def test_hub_not_sandlord(self):
+        assert is_sandlord_zone(110) is False

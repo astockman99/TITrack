@@ -76,6 +76,27 @@ HUB_ZONE_PATTERNS = [
 # Flame Elementium ConfigBaseId (primary currency)
 FE_CONFIG_BASE_ID = 100300
 
+# Bound (untradeable) item IDs — always valued at 0 FE.
+# Pattern: bound variant = original ConfigBaseId + 1000.
+BOUND_ITEM_IDS = frozenset({
+    # Flame Fuels (燃料)
+    101200,  # Bound Flame Sand (100200)
+    101300,  # Bound Flame Elementium (100300)
+    # Embers (灰烬)
+    201003,  # Bound Fine Ember (200003)
+    201028,  # Bound Precious Ember (200028)
+    201029,  # Bound Matchless Ember (200029)
+    201030,  # Bound Ultimate Ember (200030)
+    # Core Currencies (通用道具)
+    6011,    # Bound Elixir of Oblivion (5011)
+    6028,    # Bound Netherrealm Resonance (5028)
+    6029,    # Bound Winding Key (5029)
+    6030,    # Bound Twin Reflection (5030)
+    6031,    # Bound Sprout of Legends (5031)
+    6040,    # Bound Deep Space Resonance (5040)
+    6080,    # Bound Energy Core (5080)
+})
+
 # Proto names for non-loot inventory changes (trade house, recycling, skill management, etc.).
 # These update inventory (slot state) but should NOT create deltas or count as loot.
 EXCLUDED_PROTO_NAMES = frozenset({

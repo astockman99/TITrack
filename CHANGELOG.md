@@ -7,10 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.5.6] - 2026-02-21
+
 ### Added
+- **Cloud Oasis (Sandlord) loot tracking**: Push2 events from airship/glider rewards in Cloud Oasis and Quicksand Treasure Stash zones are now tracked as loot deltas. Previously, Push2 was globally excluded as a non-loot proto name.
+- **Sandlord run segmentation**: Cloud Oasis and Quicksand Treasure Stash zones form one continuous run. Transitioning between them no longer ends/starts a new run.
+- **Bound item support**: Added 13 bound (untradeable) currency variants to the items database — Flame Sand, Flame Elementium, all 4 Embers, Elixir of Oblivion, Netherrealm Resonance, Winding Key, Twin Reflection, Sprout of Legends, Deep Space Resonance, and Energy Core. Bound items are always valued at 0 FE.
 - **Low Map Supply Alerts**: Configurable per-item alerts that notify when a specific consumed supply item drops to a threshold. Only items you've actually used as map costs (beacons, compasses, resonance) are monitored — unused items won't trigger alerts. Set thresholds per category in Settings (0 to disable). Dashboard shows amber toast (15s); full overlay shows amber banner (15s); micro overlay shows ⚠ icon with tooltip (15s). Alerts trigger once per item and re-arm when quantity goes back above threshold.
+- **Incremental item seeding**: Items seed now runs every startup with INSERT OR IGNORE, so existing databases automatically pick up newly added items without requiring a reset.
 
 ### Fixed
+- **Quicksand Treasure Stash zone name**: Fixed incorrect zone name display (was showing "Thunder Wastes - Defiled Oasis" due to shared map path). Now correctly resolved via LevelId.
 - **Hidden items lost between sessions**: Fixed player identity inconsistency that could cause hidden items, ignored runs, and ignored report items to become inaccessible across app restarts. When the game log was missing PlayerId (e.g., after log rotation), the app used a name-based fallback ID that differed from the actual player ID used in previous sessions. Now persists the known player ID mapping in settings and automatically migrates per-player data when the ID format changes.
 - **Runs empty after delayed character detection**: Fixed PlayerId being lost during live player detection when the app starts with no player context (e.g., game log rotated overnight). Name+SeasonId triggered an initial detection that cleared pending data before PlayerId arrived, locking the app to a fallback ID that didn't match stored runs. PlayerId now continues accumulating and corrects the effective ID automatically.
 - **Hidden items not restored on player change**: Fixed frontend not reloading hidden items when the player context transitions from "no player" to a detected player. The hidden items set was only loaded once at startup and never refreshed on player change.

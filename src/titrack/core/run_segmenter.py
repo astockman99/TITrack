@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from titrack.core.models import ParsedLevelEvent, Run
+from titrack.data.zones import is_sandlord_zone
 from titrack.parser.patterns import HUB_ZONE_PATTERNS
 
 
@@ -78,6 +79,15 @@ class RunSegmenter:
 
         zone_sig = event.level_info
         is_hub = is_hub_zone(zone_sig)
+
+        # Sandlord zones (Cloud Oasis, Quicksand Treasure Stash) form one
+        # continuous run.  Transitioning between them should NOT end/start runs.
+        if (
+            self._current_run is not None
+            and is_sandlord_zone(self._current_run.level_id)
+            and is_sandlord_zone(level_id)
+        ):
+            return None, None
 
         # End current run if exists
         if self._current_run is not None:

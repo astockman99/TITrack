@@ -2,7 +2,7 @@
   "meta": {
     "generated_from": "TLI-tracker-translated-1.0 (Rt-data.json + wiki-translations.json)",
     "generated_at_utc": "2026-01-26T16:44:28.094683Z",
-    "count": 1811,
+    "count": 1824,
     "notes": [
       "name_en uses wiki-translations when available; otherwise derived from TLIDB URL slug when present; some entries may remain null."
     ],
@@ -19929,6 +19929,149 @@
       "reward_cn": null,
       "baseItemId": null,
       "url_en": "https://tlidb.com/en/Eternal_Sea_Fog"
+    },
+    {
+      "id": "101200",
+      "name_en": "Bound Flame Sand",
+      "name_cn": "绑定初火灵砂",
+      "type_cn": "燃料",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Item_chuhuolingshaV3_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "101300",
+      "name_en": "Bound Flame Elementium",
+      "name_cn": "绑定初火源质",
+      "type_cn": "燃料",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Item_chuhuoyuanzhiV3_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "201003",
+      "name_en": "Bound Fine Ember",
+      "name_cn": "绑定优质灰烬",
+      "type_cn": "灰烬",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Ash/128/UI_Ash_09StonelowXUNJIE_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "201028",
+      "name_en": "Bound Precious Ember",
+      "name_cn": "绑定珍贵灰烬",
+      "type_cn": "灰烬",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Ash/128/UI_Ash_20StonelowYOUZHI_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "201029",
+      "name_en": "Bound Matchless Ember",
+      "name_cn": "绑定稀世灰烬",
+      "type_cn": "灰烬",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Ash/128/UI_Ash_21StonelowZHENGUI_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "201030",
+      "name_en": "Bound Ultimate Ember",
+      "name_cn": "绑定至臻灰烬",
+      "type_cn": "灰烬",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Ash/128/UI_Ash_22StonelowZHIZHEN_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6011",
+      "name_en": "Bound Elixir of Oblivion",
+      "name_cn": "绑定遗忘之水",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Goods_Return1_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6028",
+      "name_en": "Bound Netherrealm resonance",
+      "name_cn": "绑定异界回响",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Item_Echo_01_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6029",
+      "name_en": "Bound Winding Key",
+      "name_cn": "绑定逆转发条",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_MysticTreeRespecPoint_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6030",
+      "name_en": "Bound Twin Reflection",
+      "name_cn": "绑定孪生倒影",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Item_CopySystem_CopyItem_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6031",
+      "name_en": "Bound Sprout of Legends",
+      "name_cn": "绑定传奇降生之绿芽",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_TreasureVaultKey_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6040",
+      "name_en": "Bound Deep Space Resonance",
+      "name_cn": "绑定深空回响",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Item_Echo_03_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
+    },
+    {
+      "id": "6080",
+      "name_en": "Bound Energy Core",
+      "name_cn": "绑定能量核心",
+      "type_cn": "通用道具",
+      "img": "https://cdn.tlidb.com/UI/Textures/Common/Icon/Item/128/UI_Item_Core_01_Icon_128.webp",
+      "url_cn": null,
+      "reward_cn": null,
+      "baseItemId": null,
+      "url_en": null
     }
   ]
 }

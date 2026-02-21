@@ -397,6 +397,130 @@ class TestCollectorIntegration:
         summary = repo.get_run_summary(map_run.id)
         assert summary[FE_CONFIG_BASE_ID] == 100
 
+    def test_push2_creates_deltas_in_sandlord_zone(self, test_env):
+        """Test that Push2 events create deltas when in Cloud Oasis (sandlord zone)."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        # Seed initial slot state, enter Cloud Oasis, then receive Push2 rewards
+        log_content = """\
+[2026.02.21-12.28.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
+[2026.02.21-12.28.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 1 ConfigBaseId = 200028 Num = 2000
+[2026.02.21-12.28.30:000][  0]GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 2035 21 9999999
+[2026.02.21-12.28.30:100][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou
+[2026.02.21-12.29.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 start
+[2026.02.21-12.29.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 510
+[2026.02.21-12.29.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 end
+[2026.02.21-12.29.01:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 start
+[2026.02.21-12.29.01:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 1 ConfigBaseId = 200028 Num = 1990
+[2026.02.21-12.29.01:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 end
+"""
+        log_path = tmpdir / "sandlord_push2.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Should have 2 deltas: +10 FE and -10 item 200028
+        assert len(deltas_received) == 2
+        fe_delta = next(d for d in deltas_received if d.config_base_id == FE_CONFIG_BASE_ID)
+        assert fe_delta.delta == 10
+        assert fe_delta.proto_name == "SandlordPush2"
+
+        mat_delta = next(d for d in deltas_received if d.config_base_id == 200028)
+        assert mat_delta.delta == -10
+
+        # Verify deltas are visible in run queries (not filtered out)
+        map_runs = [r for r in repo.get_recent_runs() if not r.is_hub]
+        assert len(map_runs) == 1
+        run_summary = repo.get_run_summary(map_runs[0].id)
+        assert FE_CONFIG_BASE_ID in run_summary
+        assert run_summary[FE_CONFIG_BASE_ID] == 10
+
+    def test_push2_no_deltas_outside_sandlord_zone(self, test_env):
+        """Test that Push2 events do NOT create deltas in normal map zones."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        log_content = """\
+[2026.02.21-12.28.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
+[2026.02.21-12.28.30:000][  0]GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 1061006 3 4606
+[2026.02.21-12.28.30:100][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/02KD/KD_YuanSuKuangDong000/KD_YuanSuKuangDong000
+[2026.02.21-12.29.00:000][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 start
+[2026.02.21-12.29.00:001][  0]GameLog: Display: [Game] BagMgr@:Modfy BagItem PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 1500
+[2026.02.21-12.29.00:002][  0]GameLog: Display: [Game] ItemChange@ ProtoName=Push2 end
+"""
+        log_path = tmpdir / "normal_map_push2.log"
+        log_path.write_text(log_content)
+
+        deltas_received = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_delta=lambda d: deltas_received.append(d),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # No deltas — Push2 in normal maps is excluded
+        assert len(deltas_received) == 0
+        # But slot state should still be updated
+        fe_state = repo.get_slot_state(102, 0)
+        assert fe_state.num == 1500
+
+    def test_sandlord_zone_continuous_run(self, test_env):
+        """Test that Cloud Oasis -> Quicksand -> Cloud Oasis is one run."""
+        db = test_env["db"]
+        tmpdir = test_env["tmpdir"]
+        repo = Repository(db)
+        repo.set_player_context(TEST_PLAYER_INFO.season_id, TEST_PLAYER_INFO.player_id)
+
+        log_content = """\
+[2026.02.21-12.28.00:000][  0]GameLog: Display: [Game] BagMgr@:InitBagData PageId = 102 SlotId = 0 ConfigBaseId = 100300 Num = 500
+[2026.02.21-12.28.30:000][  0]GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 2035 21 9999999
+[2026.02.21-12.28.30:100][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou
+[2026.02.21-12.29.30:000][  0]GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 212 22 9999997
+[2026.02.21-12.29.30:100][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/06SQ/SQ_NvShenQunBai100/SQ_NvShenQunBai100
+[2026.02.21-12.30.30:000][  0]GameLog: Display: [Game] LevelMgr@ LevelUid, LevelType, LevelId = 2035 21 9999999
+[2026.02.21-12.30.30:100][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Season/S10/Maps/YunDuanLvZhou/YunDuanLvZhou
+[2026.02.21-12.35.00:000][  0]GameLog: Display: [Game] SceneLevelMgr@ OpenMainWorld END! InMainLevelPath = /Game/Art/Maps/01SD/XZ_YuJinZhiXiBiNanSuo200/XZ_YuJinZhiXiBiNanSuo200
+"""
+        log_path = tmpdir / "sandlord_continuous.log"
+        log_path.write_text(log_content)
+
+        runs_started = []
+        runs_ended = []
+        collector = Collector(
+            db=db,
+            log_path=log_path,
+            on_run_start=lambda r: runs_started.append(r),
+            on_run_end=lambda r: runs_ended.append(r),
+            player_info=TEST_PLAYER_INFO,
+        )
+        collector.initialize()
+        collector.process_file(from_beginning=True)
+
+        # Should have exactly 2 runs: Cloud Oasis (sandlord) + Hideout (hub)
+        # The Quicksand Treasure Stash transition should NOT create extra runs
+        all_runs = repo.get_recent_runs(limit=10)
+        assert len(all_runs) == 2
+
+        # First run should be the sandlord zone (Cloud Oasis)
+        sandlord_run = [r for r in all_runs if not r.is_hub][0]
+        assert sandlord_run.level_id == 9999999
+
     def test_init_bag_followed_by_pickup(self, test_env):
         """Test that init events set baseline for subsequent pickup deltas."""
         db = test_env["db"]

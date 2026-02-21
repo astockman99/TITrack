@@ -667,12 +667,18 @@ class Repository:
         Get the effective price for an item using cloud-first logic.
 
         Priority:
+        0. Bound items always return 0.0 (untradeable)
         1. Cloud price is the default (community aggregate, more reliable)
         2. Local price overrides ONLY if it's newer than the cloud data
 
         Returns the price in FE, or None if no price available.
         """
         from datetime import datetime
+
+        from titrack.parser.patterns import BOUND_ITEM_IDS
+
+        if config_base_id in BOUND_ITEM_IDS:
+            return 0.0
 
         season_id = season_id if season_id is not None else self._current_season_id
         season_id_filter = season_id if season_id is not None else 0

@@ -33,6 +33,7 @@ from titrack.parser.exchange_parser import (
 from titrack.parser.player_parser import PlayerInfo, get_effective_player_id
 from titrack.parser.patterns import EXCLUDED_PROTO_NAMES, MAP_COST_PROTO_NAMES
 from titrack.data.inventory import EXCLUDED_PAGES, is_gear_excluded
+from titrack.data.zones import is_sandlord_zone
 
 
 class Collector:
@@ -418,8 +419,18 @@ class Collector:
         # Non-loot events (trade house, recycling, skill equip/unequip): update slot state
         # but don't track as loot. Events outside any proto block (proto_name is None)
         # are inventory management actions (e.g., re-equipping a skill), not loot.
+        # Exception: Push2 in sandlord zones (Cloud Oasis) tracks oasis rewards/costs.
         if self._current_proto_name is None or self._current_proto_name in EXCLUDED_PROTO_NAMES:
-            return
+            is_sandlord_push2 = (
+                self._current_proto_name == "Push2"
+                and current_run is not None
+                and is_sandlord_zone(current_run.level_id)
+            )
+            if not is_sandlord_push2:
+                return
+            # Rename proto so queries don't filter it out as excluded
+            if delta:
+                delta.proto_name = "SandlordPush2"
 
         # Buffer map costs to associate with next run
         if self._current_proto_name in MAP_COST_PROTO_NAMES and delta:
@@ -446,13 +457,6 @@ class Collector:
             event, timestamp, level_id, level_type, level_uid,
             season_id=self._season_id, player_id=self._player_id
         )
-
-        # DEBUG: Print zone transitions to console
-        if new_run:
-            hub_status = "[HUB]" if new_run.is_hub else "[MAP]"
-            level_info = f" (LevelId={new_run.level_id})" if new_run.level_id else ""
-            nightmare_tag = " [NIGHTMARE]" if new_run.level_type == 11 else ""
-            print(f"ZONE: {hub_status} {new_run.zone_signature}{level_info}{nightmare_tag}")
 
         if ended_run:
             self.repository.update_run_end(ended_run.id, ended_run.end_ts)
