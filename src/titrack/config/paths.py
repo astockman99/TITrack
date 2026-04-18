@@ -70,14 +70,22 @@ def get_data_dir(portable: bool = False) -> Path:
         # Portable mode or frozen: data beside exe
         data_dir = get_app_dir() / "data"
     else:
-        # Development: use user's local app data
+        # Development / installed: use platform-appropriate user data dir
         import os
 
         local_app_data = os.environ.get("LOCALAPPDATA", "")
+        xdg_data_home = os.environ.get("XDG_DATA_HOME", "")
         if local_app_data:
+            # Windows
             data_dir = Path(local_app_data) / "TITracker"
+        elif xdg_data_home:
+            # Linux with explicit XDG_DATA_HOME
+            data_dir = Path(xdg_data_home) / "TITrack"
+        elif os.name != "nt":
+            # Linux default (XDG base dir spec)
+            data_dir = Path.home() / ".local" / "share" / "TITrack"
         else:
-            # Fallback to beside app
+            # Windows without LOCALAPPDATA — fallback to beside the app
             data_dir = get_app_dir() / "data"
 
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -104,6 +112,10 @@ def get_items_seed_path() -> Path:
     Get the path to the items seed JSON file.
 
     Returns:
-        Path to tlidb_items_seed_en.json
+        Absolute path to tlidb_items_seed_en.json
     """
-    return get_resource_path("tlidb_items_seed_en.json")
+    if is_frozen():
+        # PyInstaller bundles it at the _internal root (from ti_tracker.spec)
+        return get_internal_dir() / "tlidb_items_seed_en.json"
+    # Installed / dev: single copy in package data
+    return Path(__file__).resolve().parent.parent / "data" / "tlidb_items_seed_en.json"
