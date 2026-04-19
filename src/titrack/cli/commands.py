@@ -671,14 +671,15 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
 
         logger.info(f"Starting server on port {args.port}")
 
-        # Run server (log_config=None to avoid frozen mode logging issues)
-        uvicorn.run(
+        config = uvicorn.Config(
             app,
             host=args.host,
             port=args.port,
             log_level="warning",
             log_config=None,
         )
+        server = uvicorn.Server(config)
+        server.run()
     finally:
         # Clean up overlay subprocess
         if overlay_process is not None and overlay_process.poll() is None:
