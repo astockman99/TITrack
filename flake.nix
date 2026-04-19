@@ -86,7 +86,7 @@
       nixosModules.default = nixosModule;
       nixosModules.titrack = nixosModule;
     }
-    // flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
+    // flake-utils.lib.eachDefaultSystem (
       system:
       let
         pyproject = fromTOML (builtins.readFile ./pyproject.toml);
