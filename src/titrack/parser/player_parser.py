@@ -3,7 +3,6 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
 
 
 @dataclass
@@ -12,9 +11,9 @@ class PlayerInfo:
 
     name: str
     level: int
-    season_id: Optional[int]
+    season_id: int | None
     hero_id: int
-    player_id: Optional[str] = None  # Unique player identifier
+    player_id: str | None = None  # Unique player identifier
 
     @property
     def season_name(self) -> str:
@@ -51,12 +50,8 @@ PLAYER_ID_PATTERN_ALT = re.compile(r"^\|\s{6}\+PlayerId\s*\[([^\]]+)\]")
 # New patterns for post-Apr-2026 patch (GetPlayerData socket no longer logged).
 # Player name + hero ID come from the _JoinFight line.
 # Player ID comes from the PlayerIdTrace login line.
-JOINFIGHT_PLAYER_PATTERN = re.compile(
-    r"SwitchBattleAreaUtil:_JoinFight\s+(\S+?):(\d+)\s*$"
-)
-PLAYER_ID_TRACE_PATTERN = re.compile(
-    r"PlayerIdTrace@\w+:SetPlayerId\b.*\bnew=(\d+)"
-)
+JOINFIGHT_PLAYER_PATTERN = re.compile(r"SwitchBattleAreaUtil:_JoinFight\s+(\S+?):(\d+)\s*$")
+PLAYER_ID_TRACE_PATTERN = re.compile(r"PlayerIdTrace@\w+:SetPlayerId\b.*\bnew=(\d+)")
 
 
 # Season ID to name mapping
@@ -160,7 +155,7 @@ def parse_player_line(line: str) -> dict[str, any]:
     return result
 
 
-def detect_log_encoding(log_path: Path) -> Tuple[str, str]:
+def detect_log_encoding(log_path: Path) -> tuple[str, str]:
     """
     Detect the encoding of a game log file.
 
@@ -201,7 +196,7 @@ def detect_log_encoding(log_path: Path) -> Tuple[str, str]:
         return ("utf-8", "replace")
 
 
-def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo]:
+def parse_game_log(log_path: Path, from_end: bool = True) -> PlayerInfo | None:
     """
     Parse player info from the main game log file.
 
@@ -219,11 +214,11 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
     if not log_path.exists():
         return None
 
-    name: Optional[str] = None
-    level: Optional[int] = None
-    season_id: Optional[int] = None
-    hero_id: Optional[int] = None
-    player_id: Optional[str] = None
+    name: str | None = None
+    level: int | None = None
+    season_id: int | None = None
+    hero_id: int | None = None
+    player_id: str | None = None
 
     # Max bytes to read from end of file (5 MB) to avoid loading huge logs into memory
     MAX_TAIL_BYTES = 5 * 1024 * 1024
@@ -234,7 +229,7 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
         if encoding != "utf-8":
             logger.info(f"Game log encoding detected as {encoding}")
 
-        with open(log_path, "r", encoding=encoding, errors=errors) as f:
+        with open(log_path, encoding=encoding, errors=errors) as f:
             if from_end:
                 if file_size > MAX_TAIL_BYTES:
                     # Seek to near the end to avoid reading entire large file
@@ -320,7 +315,7 @@ def parse_game_log(log_path: Path, from_end: bool = True) -> Optional[PlayerInfo
 
 
 # Legacy alias for backwards compatibility
-def parse_enter_log(log_path: Path) -> Optional[PlayerInfo]:
+def parse_enter_log(log_path: Path) -> PlayerInfo | None:
     """Legacy function - now parses from main game log."""
     return parse_game_log(log_path, from_end=True)
 
@@ -334,7 +329,7 @@ def get_enter_log_path(game_log_path: Path) -> Path:
     return game_log_path
 
 
-def get_effective_player_id(player_info: Optional[PlayerInfo]) -> Optional[str]:
+def get_effective_player_id(player_info: PlayerInfo | None) -> str | None:
     """
     Get effective player ID for data isolation.
 

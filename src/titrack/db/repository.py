@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from titrack.core.models import (
     EventContext,
@@ -12,7 +11,6 @@ from titrack.core.models import (
     Run,
     SlotState,
 )
-from titrack.db.connection import Database
 from titrack.data.inventory import (
     EXCLUDED_PAGES,
     get_gear_allowlist,
@@ -20,6 +18,7 @@ from titrack.data.inventory import (
     get_supply_compass_ids,
     get_supply_resonance_ids,
 )
+from titrack.db.connection import Database
 from titrack.parser.patterns import EXCLUDED_PROTO_NAMES, MAP_COST_PROTO_NAMES
 
 
@@ -29,14 +28,14 @@ class Repository:
     def __init__(self, db: Database) -> None:
         self.db = db
         # Current player context for filtering (set externally)
-        self._current_season_id: Optional[int] = None
-        self._current_player_id: Optional[str] = None
+        self._current_season_id: int | None = None
+        self._current_player_id: str | None = None
 
     def set_player_context(
         self,
-        season_id: Optional[int],
-        player_id: Optional[str],
-        player_name: Optional[str] = None,
+        season_id: int | None,
+        player_id: str | None,
+        player_name: str | None = None,
     ) -> None:
         """Set the current player context for filtering queries.
 
@@ -53,9 +52,7 @@ class Repository:
             fallback_id = f"{season_id}_{player_name}"
             if player_id != fallback_id:
                 # Save mapping so future sessions can resolve this player
-                self.set_setting(
-                    f"known_player_id_{season_id}_{player_name}", player_id
-                )
+                self.set_setting(f"known_player_id_{season_id}_{player_name}", player_id)
                 # Save reverse mapping so season_id can be recovered from player_id alone
                 self.set_setting(f"known_season_id_{player_id}", str(season_id))
                 # Migrate any per-player data stored under the fallback key
@@ -82,15 +79,13 @@ class Repository:
                         (new_id, old_id),
                     )
                     # Clean up any leftover rows under old_id (from PK conflicts)
-                    cursor.execute(
-                        f"DELETE FROM {table} WHERE player_id = ?", (old_id,)
-                    )
+                    cursor.execute(f"DELETE FROM {table} WHERE player_id = ?", (old_id,))
 
-    def lookup_player_id(self, season_id: int, player_name: str) -> Optional[str]:
+    def lookup_player_id(self, season_id: int, player_name: str) -> str | None:
         """Look up a previously saved actual player_id for a name+season combo."""
         return self.get_setting(f"known_player_id_{season_id}_{player_name}")
 
-    def lookup_season_id_by_player_id(self, player_id: str) -> Optional[int]:
+    def lookup_season_id_by_player_id(self, player_id: str) -> int | None:
         """Look up a previously saved season_id for a known player_id."""
         val = self.get_setting(f"known_season_id_{player_id}")
         if val:
@@ -145,7 +140,7 @@ class Repository:
 
     # --- Settings ---
 
-    def get_setting(self, key: str) -> Optional[str]:
+    def get_setting(self, key: str) -> str | None:
         """Get a setting value by key."""
         row = self.db.fetchone("SELECT value FROM settings WHERE key = ?", (key,))
         return row["value"] if row else None
@@ -188,14 +183,16 @@ class Repository:
             (end_ts.isoformat(), run_id),
         )
 
-    def get_run(self, run_id: int) -> Optional[Run]:
+    def get_run(self, run_id: int) -> Run | None:
         """Get a run by ID."""
         row = self.db.fetchone("SELECT * FROM runs WHERE id = ?", (run_id,))
         if not row:
             return None
         return self._row_to_run(row)
 
-    def get_active_run(self, season_id: Optional[int] = None, player_id: Optional[str] = None) -> Optional[Run]:
+    def get_active_run(
+        self, season_id: int | None = None, player_id: str | None = None
+    ) -> Run | None:
         """Get the currently active (non-ended) run, optionally filtered by season/player."""
         # Use provided values or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
@@ -213,7 +210,7 @@ class Repository:
                    AND (season_id IS NULL OR season_id = ?)
                    AND (player_id IS NULL OR player_id = ?)
                    ORDER BY start_ts DESC LIMIT 1""",
-                (season_id, player_id or ''),
+                (season_id, player_id or ""),
             )
         else:
             row = self.db.fetchone(
@@ -223,7 +220,9 @@ class Repository:
             return None
         return self._row_to_run(row)
 
-    def get_recent_runs(self, limit: int = 20, season_id: Optional[int] = None, player_id: Optional[str] = None) -> list[Run]:
+    def get_recent_runs(
+        self, limit: int = 20, season_id: int | None = None, player_id: str | None = None
+    ) -> list[Run]:
         """Get recent runs ordered by start time descending, optionally filtered by season/player."""
         # Use provided values or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
@@ -241,15 +240,15 @@ class Repository:
                    WHERE (season_id IS NULL OR season_id = ?)
                    AND (player_id IS NULL OR player_id = ?)
                    ORDER BY start_ts DESC LIMIT ?""",
-                (season_id, player_id or '', limit),
+                (season_id, player_id or "", limit),
             )
         else:
-            rows = self.db.fetchall(
-                "SELECT * FROM runs ORDER BY start_ts DESC LIMIT ?", (limit,)
-            )
+            rows = self.db.fetchall("SELECT * FROM runs ORDER BY start_ts DESC LIMIT ?", (limit,))
         return [self._row_to_run(row) for row in rows]
 
-    def get_completed_runs_by_level_uid(self, level_uid: int, after_ts: Optional[datetime] = None) -> list[Run]:
+    def get_completed_runs_by_level_uid(
+        self, level_uid: int, after_ts: datetime | None = None
+    ) -> list[Run]:
         """Get completed runs with a given level_uid, optionally after a timestamp.
 
         Args:
@@ -274,7 +273,7 @@ class Repository:
             )
         return [self._row_to_run(row) for row in rows]
 
-    def get_last_hub_end_ts(self) -> Optional[datetime]:
+    def get_last_hub_end_ts(self) -> datetime | None:
         """Get the end timestamp of the most recent completed hub run."""
         row = self.db.fetchone(
             """SELECT end_ts FROM runs
@@ -290,7 +289,9 @@ class Repository:
         row = self.db.fetchone("SELECT MAX(id) as max_id FROM runs")
         return row["max_id"] or 0
 
-    def get_unique_zones(self, season_id: Optional[int] = None, player_id: Optional[str] = None) -> list[str]:
+    def get_unique_zones(
+        self, season_id: int | None = None, player_id: str | None = None
+    ) -> list[str]:
         """Get all unique zone signatures from runs, optionally filtered by season/player."""
         # Use provided values or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
@@ -307,7 +308,7 @@ class Repository:
                    WHERE (season_id IS NULL OR season_id = ?)
                    AND (player_id IS NULL OR player_id = ?)
                    ORDER BY zone_signature""",
-                (season_id, player_id or ''),
+                (season_id, player_id or ""),
             )
         else:
             rows = self.db.fetchall(
@@ -460,7 +461,9 @@ class Repository:
             ),
         )
 
-    def get_all_slot_states(self, include_excluded: bool = False, player_id: Optional[str] = None) -> list[SlotState]:
+    def get_all_slot_states(
+        self, include_excluded: bool = False, player_id: str | None = None
+    ) -> list[SlotState]:
         """
         Get all slot states.
 
@@ -505,7 +508,9 @@ class Repository:
                 )
         return [self._row_to_slot_state(row) for row in rows]
 
-    def get_slot_state(self, page_id: int, slot_id: int, player_id: Optional[str] = None) -> Optional[SlotState]:
+    def get_slot_state(
+        self, page_id: int, slot_id: int, player_id: str | None = None
+    ) -> SlotState | None:
         """Get state for a specific slot."""
         # Use provided value or fall back to context
         player_id = player_id if player_id is not None else self._current_player_id
@@ -519,7 +524,7 @@ class Repository:
             return None
         return self._row_to_slot_state(row)
 
-    def clear_page_slot_states(self, page_id: int, player_id: Optional[str] = None) -> int:
+    def clear_page_slot_states(self, page_id: int, player_id: str | None = None) -> int:
         """
         Clear all slot states for a specific inventory page and player.
 
@@ -592,11 +597,9 @@ class Repository:
             ],
         )
 
-    def get_item(self, config_base_id: int) -> Optional[Item]:
+    def get_item(self, config_base_id: int) -> Item | None:
         """Get item by ConfigBaseId."""
-        row = self.db.fetchone(
-            "SELECT * FROM items WHERE config_base_id = ?", (config_base_id,)
-        )
+        row = self.db.fetchone("SELECT * FROM items WHERE config_base_id = ?", (config_base_id,))
         if not row:
             return None
         return self._row_to_item(row)
@@ -656,7 +659,7 @@ class Repository:
             ),
         )
 
-    def get_price(self, config_base_id: int, season_id: Optional[int] = None) -> Optional[Price]:
+    def get_price(self, config_base_id: int, season_id: int | None = None) -> Price | None:
         """Get price for an item, filtered by season (no cross-season fallback)."""
         # Use provided value or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
@@ -670,7 +673,9 @@ class Repository:
             return None
         return self._row_to_price(row)
 
-    def get_cloud_price(self, config_base_id: int, season_id: Optional[int] = None) -> Optional[float]:
+    def get_cloud_price(
+        self, config_base_id: int, season_id: int | None = None
+    ) -> float | None:
         """
         Get cloud price for an item (median price from community data).
 
@@ -689,7 +694,9 @@ class Repository:
             return None
         return row["price_fe_median"]
 
-    def get_effective_price(self, config_base_id: int, season_id: Optional[int] = None) -> Optional[float]:
+    def get_effective_price(
+        self, config_base_id: int, season_id: int | None = None
+    ) -> float | None:
         """
         Get the effective price for an item using cloud-first logic.
 
@@ -765,7 +772,7 @@ class Repository:
             # Default to cloud
             return cloud_price
 
-    def get_all_prices(self, season_id: Optional[int] = None) -> list[Price]:
+    def get_all_prices(self, season_id: int | None = None) -> list[Price]:
         """Get all prices, filtered by season (no cross-season mixing)."""
         # Use provided value or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
@@ -777,7 +784,7 @@ class Repository:
         )
         return [self._row_to_price(row) for row in rows]
 
-    def get_price_count(self, season_id: Optional[int] = None) -> int:
+    def get_price_count(self, season_id: int | None = None) -> int:
         """Get total number of prices in database, filtered by season."""
         # Use provided value or fall back to context
         season_id = season_id if season_id is not None else self._current_season_id
@@ -1029,15 +1036,9 @@ class Repository:
         """Clear all ignored_runs, ignored_run_items, and ignored_report_items for current player."""
         player_id = self._current_player_id or ""
         with self.db.transaction() as cursor:
-            cursor.execute(
-                "DELETE FROM ignored_runs WHERE player_id = ?", (player_id,)
-            )
-            cursor.execute(
-                "DELETE FROM ignored_run_items WHERE player_id = ?", (player_id,)
-            )
-            cursor.execute(
-                "DELETE FROM ignored_report_items WHERE player_id = ?", (player_id,)
-            )
+            cursor.execute("DELETE FROM ignored_runs WHERE player_id = ?", (player_id,))
+            cursor.execute("DELETE FROM ignored_run_items WHERE player_id = ?", (player_id,))
+            cursor.execute("DELETE FROM ignored_report_items WHERE player_id = ?", (player_id,))
 
     # --- Ignored Report Items ---
 
@@ -1054,9 +1055,7 @@ class Repository:
         """Replace ignored report items for current player (transactional)."""
         player_id = self._current_player_id or ""
         with self.db.transaction() as cursor:
-            cursor.execute(
-                "DELETE FROM ignored_report_items WHERE player_id = ?", (player_id,)
-            )
+            cursor.execute("DELETE FROM ignored_report_items WHERE player_id = ?", (player_id,))
             for config_id in ignored_ids:
                 cursor.execute(
                     "INSERT INTO ignored_report_items (player_id, config_base_id) VALUES (?, ?)",
@@ -1078,9 +1077,7 @@ class Repository:
         """Replace hidden items list for current player (transactional)."""
         player_id = self._current_player_id or ""
         with self.db.transaction() as cursor:
-            cursor.execute(
-                "DELETE FROM hidden_items WHERE player_id = ?", (player_id,)
-            )
+            cursor.execute("DELETE FROM hidden_items WHERE player_id = ?", (player_id,))
             for config_id in hidden_ids:
                 cursor.execute(
                     "INSERT INTO hidden_items (player_id, config_base_id) VALUES (?, ?)",
@@ -1090,9 +1087,7 @@ class Repository:
     def clear_hidden_items(self) -> None:
         """Clear all hidden items for current player."""
         player_id = self._current_player_id or ""
-        self.db.execute(
-            "DELETE FROM hidden_items WHERE player_id = ?", (player_id,)
-        )
+        self.db.execute("DELETE FROM hidden_items WHERE player_id = ?", (player_id,))
 
     # --- Supply Alerts ---
 
@@ -1136,8 +1131,8 @@ class Repository:
         quantities: dict[int, int] = {}
         for state in states:
             if state.config_base_id in relevant_ids:
-                quantities[state.config_base_id] = (
-                    quantities.get(state.config_base_id, 0) + max(0, state.num)
+                quantities[state.config_base_id] = quantities.get(state.config_base_id, 0) + max(
+                    0, state.num
                 )
 
         # Build result with names and categories
@@ -1149,12 +1144,14 @@ class Repository:
                 category = "compasses"
             else:
                 category = "resonance"
-            result.append({
-                "config_base_id": cid,
-                "name": self.get_item_name(cid),
-                "category": category,
-                "quantity": quantities.get(cid, 0),
-            })
+            result.append(
+                {
+                    "config_base_id": cid,
+                    "name": self.get_item_name(cid),
+                    "category": category,
+                    "quantity": quantities.get(cid, 0),
+                }
+            )
 
         return result
 
@@ -1209,7 +1206,7 @@ class Repository:
         # Force checkpoint (also uses lock via execute)
         self.db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
-    def get_log_position(self) -> Optional[tuple[Path, int, int]]:
+    def get_log_position(self) -> tuple[Path, int, int] | None:
         """
         Get saved log position.
 
@@ -1223,10 +1220,10 @@ class Repository:
 
     def get_cumulative_loot(
         self,
-        season_id: Optional[int] = None,
-        player_id: Optional[str] = None,
-        ignored_run_ids: Optional[set[int]] = None,
-        ignored_run_items: Optional[dict[int, set[int]]] = None,
+        season_id: int | None = None,
+        player_id: str | None = None,
+        ignored_run_ids: set[int] | None = None,
+        ignored_run_items: dict[int, set[int]] | None = None,
     ) -> list[dict]:
         """
         Get cumulative loot statistics across all runs.
@@ -1271,7 +1268,7 @@ class Repository:
             base_query += " AND (season_id IS NULL OR season_id = ?)"
             params.append(season_id)
             base_query += " AND (player_id IS NULL OR player_id = ?)"
-            params.append(player_id or '')
+            params.append(player_id or "")
 
         # Exclude ignored runs
         if ignored_run_ids:
@@ -1318,9 +1315,9 @@ class Repository:
 
     def get_completed_run_count(
         self,
-        season_id: Optional[int] = None,
-        player_id: Optional[str] = None,
-        ignored_run_ids: Optional[set[int]] = None,
+        season_id: int | None = None,
+        player_id: str | None = None,
+        ignored_run_ids: set[int] | None = None,
     ) -> int:
         """
         Get count of completed (non-hub) runs.
@@ -1348,7 +1345,7 @@ class Repository:
             base_query += " AND (season_id IS NULL OR season_id = ?)"
             params.append(season_id)
             base_query += " AND (player_id IS NULL OR player_id = ?)"
-            params.append(player_id or '')
+            params.append(player_id or "")
 
         if ignored_run_ids:
             placeholders = ",".join("?" * len(ignored_run_ids))
@@ -1360,9 +1357,9 @@ class Repository:
 
     def get_total_run_duration(
         self,
-        season_id: Optional[int] = None,
-        player_id: Optional[str] = None,
-        ignored_run_ids: Optional[set[int]] = None,
+        season_id: int | None = None,
+        player_id: str | None = None,
+        ignored_run_ids: set[int] | None = None,
     ) -> float:
         """
         Get total duration of all completed (non-hub) runs in seconds.
@@ -1394,7 +1391,7 @@ class Repository:
             base_query += " AND (season_id IS NULL OR season_id = ?)"
             params.append(season_id)
             base_query += " AND (player_id IS NULL OR player_id = ?)"
-            params.append(player_id or '')
+            params.append(player_id or "")
 
         if ignored_run_ids:
             placeholders = ",".join("?" * len(ignored_run_ids))
@@ -1406,9 +1403,9 @@ class Repository:
 
     def get_total_map_costs(
         self,
-        season_id: Optional[int] = None,
-        player_id: Optional[str] = None,
-        ignored_run_ids: Optional[set[int]] = None,
+        season_id: int | None = None,
+        player_id: str | None = None,
+        ignored_run_ids: set[int] | None = None,
     ) -> float:
         """
         Get total map costs across all runs.
@@ -1440,7 +1437,7 @@ class Repository:
             base_query += " AND (season_id IS NULL OR season_id = ?)"
             params.append(season_id)
             base_query += " AND (player_id IS NULL OR player_id = ?)"
-            params.append(player_id or '')
+            params.append(player_id or "")
 
         if ignored_run_ids:
             placeholders = ",".join("?" * len(ignored_run_ids))

@@ -52,7 +52,8 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
 </details>
 
-### Alternative: Linux (Nix)
+<details>
+<summary><strong>Alternative: Linux (Nix)</strong></summary>
 
 TITrack runs on Linux via [Nix](https://nixos.org/download/). Install Nix via your distro's package manager (e.g. `apt install nix`, `pacman -S nix`) or the [official installer](https://nixos.org/download/), then:
 
@@ -61,6 +62,8 @@ nix run github:astockman99/TITrack -- serve --no-window
 ```
 
 The server starts on `http://127.0.0.1:8000`. Data is stored in `~/.local/share/TITrack/`.
+
+</details>
 
 ### First-Time Setup
 
@@ -453,9 +456,13 @@ Contributions welcome! Please:
 
 ---
 
-## Linux / NixOS
+## Linux
 
-### NixOS Service
+<details>
+<summary><strong>NixOS</strong></summary>
+
+<details>
+<summary><strong>As a system service (recommended)</strong></summary>
 
 Add TITrack as a user service that starts automatically at login:
 
@@ -472,21 +479,45 @@ services.titrack = {
 };
 ```
 
-Then rebuild and start:
-
-```bash
-sudo nixos-rebuild switch --flake .
-systemctl --user status titrack.service
-```
-
 Logs are available via:
 
 ```bash
 journalctl --user -u titrack -f
 ```
 
-> To use `journalctl --user` without sudo your user needs to be in the `systemd-journal` group:
+> To use `journalctl --user` without sudo add yourself to the `systemd-journal` group:
 > `users.users.<you>.extraGroups = [ "systemd-journal" ];`
+
+</details>
+
+<details>
+<summary><strong>As a package</strong></summary>
+
+**System-wide** (`configuration.nix`):
+
+```nix
+inputs.titrack.url = "github:astockman99/TITrack";
+
+environment.systemPackages = [ inputs.titrack.packages.x86_64-linux.default ];
+```
+
+**Home Manager** (`home.nix`):
+
+```nix
+inputs.titrack.url = "github:astockman99/TITrack";
+
+home.packages = [ inputs.titrack.packages.x86_64-linux.default ];
+```
+
+Then run manually:
+
+```bash
+titrack serve --no-window
+```
+
+</details>
+
+</details>
 
 ---
 
