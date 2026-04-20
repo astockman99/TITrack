@@ -1,6 +1,13 @@
 {
   description = "TITrack - Torchlight Infinite Local Loot Tracker";
 
+  nixConfig = {
+    extra-substituters = [ "https://nixcache.christophhollizeck.dev" ];
+    extra-trusted-public-keys = [
+      "christophhollizeck.dev:7pPAvm9xqFQB8FDApVNL6Tii1Jsv+Sj/LjEIkdeGhbA="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -13,6 +20,8 @@
       flake-utils,
     }:
     let
+      pyprojectVersion = (fromTOML (builtins.readFile ./pyproject.toml)).project.version;
+
       nixosModule =
         {
           config,
@@ -25,10 +34,10 @@
           python = pkgs.python312;
           defaultPkg = python.pkgs.buildPythonApplication {
             pname = "titrack";
-            version = "0.5.7";
+            version = pyprojectVersion;
             src = self;
             format = "pyproject";
-            nativeBuildInputs = [ python.pkgs.setuptools ];
+            nativeBuildInputs = [ python.pkgs.setuptools python.pkgs.pythonRelaxDepsHook ];
             propagatedBuildInputs = with python.pkgs; [
               fastapi
               uvicorn
@@ -38,13 +47,9 @@
               websockets
               python-dotenv
               pyyaml
-              pywebview
               supabase
             ];
-            buildInputs = with pkgs; [
-              webkitgtk_4_1
-              glib-networking
-            ];
+            pythonRemoveDeps = [ "pywebview" ];
             doCheck = false;
           };
         in
@@ -85,21 +90,25 @@
     {
       nixosModules.default = nixosModule;
       nixosModules.titrack = nixosModule;
+
+      hydraJobs = flake-utils.lib.eachSystem [ "x86_64-linux" ] (system: {
+        titrack = self.packages.${system}.default;
+        titrack-dev = self.devShells.${system}.default;
+      });
     }
-    // flake-utils.lib.eachDefaultSystem (
+    // flake-utils.lib.eachSystem [ "x86_64-linux" ] (
       system:
       let
-        pyproject = fromTOML (builtins.readFile ./pyproject.toml);
         pkgs = nixpkgs.legacyPackages.${system};
         python = pkgs.python312;
 
         titrack = python.pkgs.buildPythonApplication {
           pname = "titrack";
-          version = pyproject.project.version;
+          version = pyprojectVersion;
           src = ./.;
           format = "pyproject";
 
-          nativeBuildInputs = [ python.pkgs.setuptools ];
+          nativeBuildInputs = [ python.pkgs.setuptools python.pkgs.pythonRelaxDepsHook ];
 
           propagatedBuildInputs = with python.pkgs; [
             fastapi
@@ -110,14 +119,10 @@
             websockets
             python-dotenv
             pyyaml
-            pywebview
             supabase
           ];
 
-          buildInputs = with pkgs; [
-            webkitgtk_4_1
-            glib-networking
-          ];
+          pythonRemoveDeps = [ "pywebview" ];
 
           doCheck = false;
 
@@ -126,7 +131,7 @@
             homepage = "https://github.com/astockman99/TITrack";
             license = licenses.mit;
             maintainers = with pkgs.lib.maintainers; [ cholli ];
-            platforms = platforms.linux;
+            platforms = [ "x86_64-linux" ];
             mainProgram = "titrack";
           };
         };
@@ -134,10 +139,16 @@
       {
         packages.default = titrack;
 
-        apps.default = {
-          type = "app";
-          program = "${titrack}/bin/titrack";
-        };
+        apps.default =
+          let
+            script = pkgs.writeShellScript "titrack-serve" ''
+              exec ${titrack}/bin/titrack serve --no-window "$@"
+            '';
+          in
+          {
+            type = "app";
+            program = "${script}";
+          };
 
         devShells.default = pkgs.mkShell {
           packages = [
