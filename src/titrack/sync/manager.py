@@ -547,13 +547,27 @@ class SyncManager:
         return uploaded
 
     def _trigger_initial_download(self) -> None:
-        """Trigger an immediate price download if conditions are met."""
+        """Trigger an immediate price download in a background thread.
+
+        Runs off-thread so a hung Supabase (timeout, 5xx, DNS failure) can't
+        block callers — notably startup, where this is invoked before the
+        native window is created.
+        """
         if not self.is_enabled or not self.is_download_enabled:
             return
         if not self.client.is_connected:
             return
-        self._download_prices()
-        self._maybe_download_history()
+
+        def _run():
+            try:
+                self._download_prices()
+                self._maybe_download_history()
+            except Exception as e:
+                logger.warning(f"Initial cloud sync download failed: {e}")
+
+        threading.Thread(
+            target=_run, daemon=True, name="cloud-sync-initial"
+        ).start()
 
     def _download_prices(self) -> int:
         """

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.8] - 2026-04-22
+
+### Fixed
+- **App fails to launch after first run**: Some users reported the app launching successfully once, then on subsequent launches appearing as `titrack.exe` in Task Manager with no UI. Root cause: when Supabase was unhealthy (e.g., HTTP 5xx or DNS failure), the initial cloud-sync price download ran synchronously on the startup thread with no timeout, blocking uvicorn and the native window from ever starting. The initial download now runs in a background daemon thread so an unhealthy cloud backend can no longer block app startup.
+
+---
+
 ## [0.5.7] - 2026-04-16
 
 ### Fixed
