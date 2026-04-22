@@ -9,10 +9,9 @@ import threading
 import webbrowser
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from titrack.collector.collector import Collector
-from titrack.config.logging import setup_logging, get_logger
+from titrack.config.logging import setup_logging
 from titrack.config.settings import Settings, find_log_file
 from titrack.core.models import Item, ItemDelta, Price, Run
 from titrack.data.inventory import initialize_gear_allowlist, initialize_supply_categories
@@ -20,11 +19,19 @@ from titrack.data.zones import get_zone_display_name
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
 from titrack.parser.patterns import FE_CONFIG_BASE_ID
-from titrack.parser.player_parser import get_enter_log_path, get_effective_player_id, parse_enter_log, parse_game_log, PlayerInfo
+from titrack.parser.player_parser import (
+    PlayerInfo,
+    get_effective_player_id,
+    get_enter_log_path,
+    parse_enter_log,
+    parse_game_log,
+)
 from titrack.sync.manager import SyncManager
 
 
-def _resolve_player_id(player_info: Optional[PlayerInfo], repo: Repository, logger) -> Optional[PlayerInfo]:
+def _resolve_player_id(
+    player_info: PlayerInfo | None, repo: Repository, logger
+) -> PlayerInfo | None:
     """Fill in missing player_id from saved settings if name+season are known.
 
     When the game log is rotated, PlayerId may not be present yet.  If a
@@ -45,6 +52,33 @@ def _resolve_player_id(player_info: Optional[PlayerInfo], repo: Repository, logg
                 season_id=player_info.season_id,
                 hero_id=player_info.hero_id,
                 player_id=saved,
+            )
+    return player_info
+
+
+def _resolve_season_id(
+    player_info: PlayerInfo | None, repo: Repository, logger
+) -> PlayerInfo | None:
+    """Fill in missing season_id from saved settings if player_id is known.
+
+    Post-Apr-2026 game patch: the GetPlayerData socket response is no longer
+    logged, so SeasonId is not present in the log. If a previous session saved
+    the reverse mapping (player_id → season_id) we can recover it here.
+    """
+    if player_info is None:
+        return None
+    if player_info.season_id is not None:
+        return player_info  # already have season_id
+    if player_info.player_id:
+        saved_season = repo.lookup_season_id_by_player_id(player_info.player_id)
+        if saved_season is not None:
+            logger.info(f"Resolved season_id from saved mapping: {saved_season}")
+            return PlayerInfo(
+                name=player_info.name,
+                level=player_info.level,
+                season_id=saved_season,
+                hero_id=player_info.hero_id,
+                player_id=player_info.player_id,
             )
     return player_info
 
@@ -116,7 +150,7 @@ def cmd_init(args: argparse.Namespace) -> int:
         print(f"  {existing} items in database")
 
     # Seed prices if provided
-    prices_seed = getattr(args, 'prices_seed', None)
+    prices_seed = getattr(args, "prices_seed", None)
     if prices_seed:
         prices_path = Path(prices_seed)
         if prices_path.exists():
@@ -136,7 +170,7 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 def seed_items(repo: Repository, seed_file: Path) -> int:
     """Load items from seed file into database."""
-    with open(seed_file, "r", encoding="utf-8") as f:
+    with open(seed_file, encoding="utf-8") as f:
         data = json.load(f)
 
     items_data = data.get("items", [])
@@ -160,7 +194,7 @@ def seed_items(repo: Repository, seed_file: Path) -> int:
 
 def seed_prices(repo: Repository, seed_file: Path) -> int:
     """Load prices from seed file into database."""
-    with open(seed_file, "r", encoding="utf-8") as f:
+    with open(seed_file, encoding="utf-8") as f:
         data = json.load(f)
 
     prices_data = data.get("prices", [])
@@ -369,8 +403,7 @@ def cmd_show_runs(args: argparse.Namespace) -> int:
         hub_str = "[hub] " if run.is_hub else ""
         zone_name = get_zone_display_name(run.zone_signature, run.level_id)
         print(
-            f"  #{run.id:3} {hub_str}{zone_name[:30]:<30} "
-            f"{duration_str:>10} FE: {fe_gained:+d}"
+            f"  #{run.id:3} {hub_str}{zone_name[:30]:<30} " f"{duration_str:>10} FE: {fe_gained:+d}"
         )
 
     print("-" * 60)
@@ -387,8 +420,8 @@ def _check_instance_status(host: str, port: int) -> tuple[bool, bool]:
         is_titrack=True means an existing TITrack instance is using the port.
     """
     import socket
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     # First check if port is in use
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -402,11 +435,11 @@ def _check_instance_status(host: str, port: int) -> tuple[bool, bool]:
     # Port is in use - check if it's TITrack by hitting the status endpoint
     try:
         url = f"http://{host}:{port}/api/status"
-        req = urllib.request.Request(url, method='GET')
+        req = urllib.request.Request(url, method="GET")
         with urllib.request.urlopen(req, timeout=2) as response:
             if response.status == 200:
-                data = response.read().decode('utf-8')
-                if 'titrack' in data.lower() or 'collector' in data.lower():
+                data = response.read().decode("utf-8")
+                if "titrack" in data.lower() or "collector" in data.lower():
                     return (False, True)  # Port in use by TITrack
     except Exception:
         pass  # Request failed, not TITrack or not responding
@@ -421,8 +454,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     # Check for existing instance BEFORE starting any services
     # This prevents duplicate collectors from processing the same log events
-    host = getattr(args, 'host', '127.0.0.1')
-    port = getattr(args, 'port', 8000)
+    host = getattr(args, "host", "127.0.0.1")
+    port = getattr(args, "port", 8000)
     port_available, is_titrack = _check_instance_status(host, port)
 
     if not port_available:
@@ -434,6 +467,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         if is_frozen():
             try:
                 import ctypes
+
                 ctypes.windll.user32.MessageBoxW(0, error_msg, "TITrack", 0x10)  # MB_ICONERROR
             except Exception:
                 print(error_msg)
@@ -442,9 +476,9 @@ def cmd_serve(args: argparse.Namespace) -> int:
         return 1
 
     # Set up logging early
-    portable = getattr(args, 'portable', False) or is_frozen()
+    portable = getattr(args, "portable", False) or is_frozen()
     # Show console output only in dev mode or when using --no-window
-    console_output = not is_frozen() or getattr(args, 'no_window', False)
+    console_output = not is_frozen() or getattr(args, "no_window", False)
     logger = setup_logging(portable=portable, console=console_output)
 
     logger.info(f"TITrack v{__version__} starting...")
@@ -452,6 +486,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     # Import here to avoid loading FastAPI when not needed
     try:
         import uvicorn
+
         from titrack.api.app import create_app
     except ImportError:
         logger.error("FastAPI and Uvicorn are required for the serve command.")
@@ -479,6 +514,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     if saved_log_dir:
         # User has explicitly configured a log directory - use it
         from titrack.config.settings import find_log_file
+
         found_path = find_log_file(custom_game_dir=saved_log_dir)
         if found_path and found_path.exists():
             settings.log_path = found_path
@@ -488,23 +524,28 @@ def cmd_serve(args: argparse.Namespace) -> int:
     # If no saved setting or saved path invalid, keep auto-detected path (if any)
 
     # Check if we should use native window mode
-    use_window = is_frozen() and not getattr(args, 'no_window', False)
+    use_window = is_frozen() and not getattr(args, "no_window", False)
 
     # Check for overlay-only mode
-    overlay_only = getattr(args, 'overlay_only', False)
-    show_overlay = getattr(args, 'overlay', False) or overlay_only
+    overlay_only = getattr(args, "overlay_only", False)
+    show_overlay = getattr(args, "overlay", False) or overlay_only
 
     if use_window:
         # Try window mode - it will fall back to browser mode on failure
-        return _serve_with_window(args, settings, logger, show_overlay=show_overlay, overlay_only=overlay_only)
+        return _serve_with_window(
+            args, settings, logger, show_overlay=show_overlay, overlay_only=overlay_only
+        )
     else:
         args.browser_mode = False
         return _serve_browser_mode(args, settings, logger, show_overlay=show_overlay)
 
 
-def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False) -> int:
+def _serve_browser_mode(
+    args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False
+) -> int:
     """Run server in browser mode (original behavior)."""
     import uvicorn
+
     from titrack.api.app import create_app
 
     collector = None
@@ -523,7 +564,9 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
             # Try to detect player from existing log (reads backwards for most recent)
             player_info = parse_game_log(settings.log_path, from_end=True)
             if player_info:
-                logger.info(f"Detected character from log: {player_info.name} ({player_info.season_name})")
+                logger.info(
+                    f"Detected character from log: {player_info.name} ({player_info.season_name})"
+                )
             else:
                 logger.info("Waiting for character login...")
 
@@ -537,6 +580,8 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
 
             # Resolve player_id from saved mapping if missing from log
             player_info = _resolve_player_id(player_info, collector_repo, logger)
+            # Resolve season_id from saved mapping if missing (post-Apr-2026 patch)
+            player_info = _resolve_season_id(player_info, collector_repo, logger)
 
             # Initialize sync manager (uses collector's DB connection)
             # Don't set season context yet - wait for player detection from live log
@@ -556,7 +601,9 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
             player_change_callback = [None]  # Use list to allow closure modification
 
             def on_player_change(new_player_info):
-                logger.info(f"[Player] Switched to: {new_player_info.name} ({new_player_info.season_name})")
+                logger.info(
+                    f"[Player] Switched to: {new_player_info.name} ({new_player_info.season_name})"
+                )
                 # Update app state if callback is set
                 if player_change_callback[0]:
                     player_change_callback[0](new_player_info)
@@ -599,15 +646,16 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
             collector=collector,
             player_info=player_info,
             sync_manager=sync_manager,
-            browser_mode=getattr(args, 'browser_mode', False),
+            browser_mode=getattr(args, "browser_mode", False),
         )
 
         # Set up player change callback to update app state
         if collector is not None:
+
             def update_app_player(new_player_info):
                 app.state.player_info = new_player_info
                 # Also update the API repository context with effective player_id
-                if hasattr(app.state, 'repo'):
+                if hasattr(app.state, "repo"):
                     effective_id = get_effective_player_id(new_player_info)
                     app.state.repo.set_player_context(
                         new_player_info.season_id,
@@ -615,8 +663,9 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
                         player_name=new_player_info.name,
                     )
                 # Update sync manager season context
-                if hasattr(app.state, 'sync_manager') and app.state.sync_manager:
+                if hasattr(app.state, "sync_manager") and app.state.sync_manager:
                     app.state.sync_manager.set_season_context(new_player_info.season_id)
+
             player_change_callback[0] = update_app_player
 
             # Start collector AFTER callback is wired up to avoid race condition
@@ -644,14 +693,15 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
 
         logger.info(f"Starting server on port {args.port}")
 
-        # Run server (log_config=None to avoid frozen mode logging issues)
-        uvicorn.run(
+        config = uvicorn.Config(
             app,
             host=args.host,
             port=args.port,
             log_level="warning",
             log_config=None,
         )
+        server = uvicorn.Server(config)
+        server.run()
     finally:
         # Clean up overlay subprocess
         if overlay_process is not None and overlay_process.poll() is None:
@@ -719,24 +769,25 @@ def _get_winforms_form(window, logger=None):
 
     Tries multiple approaches since pywebview's internal structure varies.
     """
+
     def log(msg):
         if logger:
             logger.info(msg)
 
     # Try window.native (pywebview 5.x+)
-    form = getattr(window, 'native', None)
+    form = getattr(window, "native", None)
     if form is not None:
         log("Found form via window.native")
         return form
 
     # Try window.gui.BrowserForm (older pywebview)
-    gui = getattr(window, 'gui', None)
+    gui = getattr(window, "gui", None)
     if gui is not None:
-        form = getattr(gui, 'BrowserForm', None)
+        form = getattr(gui, "BrowserForm", None)
         if form is not None:
             log("Found form via window.gui.BrowserForm")
             return form
-        form = getattr(gui, 'form', None)
+        form = getattr(gui, "form", None)
         if form is not None:
             log("Found form via window.gui.form")
             return form
@@ -750,6 +801,7 @@ def _remove_chroma_key(window, logger=None) -> bool:
 
     Resets the TransparencyKey to disable color keying.
     """
+
     def log(msg):
         if logger:
             logger.info(msg)
@@ -763,8 +815,8 @@ def _remove_chroma_key(window, logger=None) -> bool:
             return False
 
         try:
-            from System.Drawing import Color
             from System import Action
+            from System.Drawing import Color
         except ImportError as e:
             log(f"Remove chroma key: Could not import .NET types: {e}")
             return False
@@ -789,6 +841,7 @@ def _remove_chroma_key(window, logger=None) -> bool:
     except Exception as e:
         log(f"Remove chroma key: Exception - {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -802,6 +855,7 @@ def _apply_chroma_key(window, logger=None) -> bool:
     Uses WinForms TransparencyKey combined with WebView2.DefaultBackgroundColor
     to achieve true transparency with the EdgeChromium backend.
     """
+
     def log(msg):
         if logger:
             logger.info(msg)
@@ -816,8 +870,8 @@ def _apply_chroma_key(window, logger=None) -> bool:
 
         # Import .NET types via pythonnet
         try:
-            from System.Drawing import Color
             from System import Action
+            from System.Drawing import Color
         except ImportError as e:
             log(f"Chroma key: Could not import .NET types: {e}")
             return False
@@ -846,17 +900,19 @@ def _apply_chroma_key(window, logger=None) -> bool:
     except Exception as e:
         log(f"Chroma key: Exception - {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def _find_overlay_executable() -> Optional[Path]:
+def _find_overlay_executable() -> Path | None:
     """Find the TITrackOverlay.exe relative to the main executable."""
     from titrack.config.paths import is_frozen
 
     if is_frozen():
         # When packaged, look beside the main exe or in overlay subfolder
         import sys
+
         exe_dir = Path(sys.executable).parent
         candidates = [
             exe_dir / "TITrackOverlay.exe",
@@ -867,7 +923,13 @@ def _find_overlay_executable() -> Optional[Path]:
         project_root = Path(__file__).parent.parent.parent.parent
         candidates = [
             project_root / "overlay" / "publish" / "TITrackOverlay.exe",
-            project_root / "overlay" / "bin" / "Release" / "net8.0-windows" / "win-x64" / "TITrackOverlay.exe",
+            project_root
+            / "overlay"
+            / "bin"
+            / "Release"
+            / "net8.0-windows"
+            / "win-x64"
+            / "TITrackOverlay.exe",
         ]
 
     for path in candidates:
@@ -877,7 +939,7 @@ def _find_overlay_executable() -> Optional[Path]:
     return None
 
 
-def _launch_overlay_process(url: str, logger) -> Optional[subprocess.Popen]:
+def _launch_overlay_process(url: str, logger) -> subprocess.Popen | None:
     """Launch the WPF overlay as a subprocess.
 
     Returns the subprocess.Popen object if successful, None otherwise.
@@ -902,18 +964,26 @@ def _launch_overlay_process(url: str, logger) -> Optional[subprocess.Popen]:
         return None
 
 
-def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, show_overlay: bool = False, overlay_only: bool = False) -> int:
+def _serve_with_window(
+    args: argparse.Namespace,
+    settings: Settings,
+    logger,
+    show_overlay: bool = False,
+    overlay_only: bool = False,
+) -> int:
     """Run server with native window using pywebview."""
     from titrack.config.paths import is_frozen
 
     # Test pywebview/pythonnet availability early, before starting any resources
     try:
         import webview
+
         # Try to initialize the CLR/pythonnet which pywebview uses on Windows
         # This triggers the "Failed to resolve Python.Runtime.Loader.Initialize" error
         # if .NET components are missing, before we start any other resources
         try:
             import clr_loader
+
             clr_loader.get_coreclr()
         except Exception:
             # clr_loader not available or failed - try direct pythonnet
@@ -924,12 +994,15 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
     except ImportError as e:
         logger.warning(f"pywebview not available: {e}")
         logger.warning("Falling back to browser mode...")
-        logger.info("Tip: Install .NET Desktop Runtime or Visual C++ Redistributable for native window mode")
+        logger.info(
+            "Tip: Install .NET Desktop Runtime or Visual C++ Redistributable for native window mode"
+        )
         args.no_browser = False
         args.browser_mode = True  # Flag for UI to show Exit button
         return _serve_browser_mode(args, settings, logger)
 
     import uvicorn
+
     from titrack.api.app import create_app
 
     collector = None
@@ -975,7 +1048,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
             # Try to detect player from existing log (reads backwards for most recent)
             player_info = parse_game_log(settings.log_path, from_end=True)
             if player_info:
-                logger.info(f"Detected character from log: {player_info.name} ({player_info.season_name})")
+                logger.info(
+                    f"Detected character from log: {player_info.name} ({player_info.season_name})"
+                )
             else:
                 logger.info("Waiting for character login...")
 
@@ -988,6 +1063,8 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
 
             # Resolve player_id from saved mapping if missing from log
             player_info = _resolve_player_id(player_info, collector_repo, logger)
+            # Resolve season_id from saved mapping if missing (post-Apr-2026 patch)
+            player_info = _resolve_season_id(player_info, collector_repo, logger)
 
             sync_manager = SyncManager(collector_db)
             sync_manager.initialize()
@@ -1004,7 +1081,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
             player_change_callback = [None]
 
             def on_player_change(new_player_info):
-                logger.info(f"[Player] Switched to: {new_player_info.name} ({new_player_info.season_name})")
+                logger.info(
+                    f"[Player] Switched to: {new_player_info.name} ({new_player_info.season_name})"
+                )
                 if player_change_callback[0]:
                     player_change_callback[0](new_player_info)
 
@@ -1051,17 +1130,19 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
 
         # Set up player change callback
         if collector is not None:
+
             def update_app_player(new_player_info):
                 app.state.player_info = new_player_info
-                if hasattr(app.state, 'repo'):
+                if hasattr(app.state, "repo"):
                     effective_id = get_effective_player_id(new_player_info)
                     app.state.repo.set_player_context(
                         new_player_info.season_id,
                         effective_id,
                         player_name=new_player_info.name,
                     )
-                if hasattr(app.state, 'sync_manager') and app.state.sync_manager:
+                if hasattr(app.state, "sync_manager") and app.state.sync_manager:
                     app.state.sync_manager.set_season_context(new_player_info.season_id)
+
             player_change_callback[0] = update_app_player
 
             # Start collector AFTER callback is wired up to avoid race condition
@@ -1096,6 +1177,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
 
         # Wait for server to be ready before opening the window
         import time
+
         for _ in range(100):  # Up to 10 seconds
             if server.started or server.should_exit:
                 break
@@ -1134,9 +1216,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 """Open a folder browser dialog and return the selected path."""
                 try:
                     result = self._window[0].create_file_dialog(
-                        webview.FOLDER_DIALOG,
-                        directory='',
-                        allow_multiple=False
+                        webview.FOLDER_DIALOG, directory="", allow_multiple=False
                     )
                     if result and len(result) > 0:
                         return result[0]
@@ -1150,9 +1230,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 try:
                     result = self._window[0].create_file_dialog(
                         webview.OPEN_DIALOG,
-                        directory='',
+                        directory="",
                         allow_multiple=False,
-                        file_types=('Log files (*.log)', 'All files (*.*)')
+                        file_types=("Log files (*.log)", "All files (*.*)"),
                     )
                     if result and len(result) > 0:
                         return result[0]
@@ -1213,6 +1293,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
         # We store logical coordinates so they round-trip correctly.
         try:
             import ctypes
+
             _dpi_scale = ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
         except Exception:
             _dpi_scale = 1.0
@@ -1239,22 +1320,28 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 # Validate position is on-screen (handles disconnected monitors)
                 try:
                     import ctypes.wintypes
+
                     class POINT(ctypes.Structure):
                         _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
                     # Check a point 50px inside the window to avoid the shadow
                     # area that maximized windows extend beyond monitor edges
                     MONITOR_DEFAULTTONULL = 0
                     pt = POINT(int(saved_x + 50), int(saved_y + 50))
                     monitor = ctypes.windll.user32.MonitorFromPoint(pt, MONITOR_DEFAULTTONULL)
                     if not monitor:
-                        logger.info(f"Window position ({saved_x},{saved_y}) is off-screen, resetting to center")
+                        logger.info(
+                            f"Window position ({saved_x},{saved_y}) is off-screen, resetting to center"
+                        )
                         saved_x, saved_y = None, None
                 except Exception:
                     pass
 
             max_str = win_repo.get_setting("window_maximized")
             saved_maximized = max_str == "true"
-            logger.debug(f"Loaded window state: pos=({saved_x},{saved_y}) size=({saved_width},{saved_height}) maximized={saved_maximized}")
+            logger.debug(
+                f"Loaded window state: pos=({saved_x},{saved_y}) size=({saved_width},{saved_height}) maximized={saved_maximized}"
+            )
         except Exception as e:
             logger.debug(f"Could not load window state: {e}")
 
@@ -1267,7 +1354,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 w = window_ref[0]
                 if w is None:
                     return
-                logger.debug(f"Window shown at ({w.x},{w.y}), restoring maximized={saved_maximized}")
+                logger.debug(
+                    f"Window shown at ({w.x},{w.y}), restoring maximized={saved_maximized}"
+                )
                 if saved_maximized:
                     w.maximize()
             except Exception as e:
@@ -1314,7 +1403,9 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 repo = Repository(api_db)
                 # Convert device coords to logical coords for round-trip
                 lx, ly = w.x / _dpi_scale, w.y / _dpi_scale
-                logger.debug(f"Saving window state: raw=({w.x},{w.y}) logical=({lx},{ly}) scale={_dpi_scale} maximized={is_maximized[0]}")
+                logger.debug(
+                    f"Saving window state: raw=({w.x},{w.y}) logical=({lx},{ly}) scale={_dpi_scale} maximized={is_maximized[0]}"
+                )
                 repo.set_setting("window_maximized", "true" if is_maximized[0] else "false")
                 # Always save position so we know which monitor to restore to
                 # (even when maximized, x/y tells us which monitor it's on).
@@ -1374,7 +1465,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
                 # MSHTML (IE11) which can't render modern CSS/JS properly.
                 # If WebView2 is unavailable, this raises an exception caught
                 # below, triggering a browser mode fallback instead.
-                webview.start(gui='edgechromium')
+                webview.start(gui="edgechromium")
 
             logger.info("Application shutdown complete")
             return 0
@@ -1389,6 +1480,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
             if is_frozen():
                 try:
                     import ctypes
+
                     msg = (
                         "Native window mode requires the Microsoft Edge WebView2 Runtime.\n\n"
                         "TITrack will open in your browser instead (works identically).\n\n"
@@ -1404,6 +1496,7 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
 
             # Open browser since window mode failed
             import webbrowser
+
             webbrowser.open(url)
 
             # Keep server running until shutdown is triggered (via UI Exit button or interrupt)
@@ -1559,7 +1652,6 @@ def create_parser() -> argparse.ArgumentParser:
 def main() -> int:
     """Main entry point."""
     from titrack.config.paths import is_frozen
-    from titrack.version import __version__
 
     parser = create_parser()
     args = parser.parse_args()
@@ -1570,14 +1662,14 @@ def main() -> int:
             # Running as packaged EXE - default to serve with portable mode and native window
             args.command = "serve"
             args.file = None
-            args.port = getattr(args, 'port', 8000) or 8000
-            args.host = getattr(args, 'host', '127.0.0.1') or '127.0.0.1'
+            args.port = getattr(args, "port", 8000) or 8000
+            args.host = getattr(args, "host", "127.0.0.1") or "127.0.0.1"
             args.no_browser = True  # Window mode handles its own display
-            args.no_window = getattr(args, 'no_window', False)
+            args.no_window = getattr(args, "no_window", False)
             args.portable = True  # Force portable mode for frozen exe
             # Preserve --overlay and --overlay-only flags from command line
-            args.overlay = getattr(args, 'overlay', False)
-            args.overlay_only = getattr(args, 'overlay_only', False)
+            args.overlay = getattr(args, "overlay", False)
+            args.overlay_only = getattr(args, "overlay_only", False)
         else:
             parser.print_help()
             return 0

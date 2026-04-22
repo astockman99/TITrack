@@ -1,7 +1,6 @@
 """Pydantic schemas for API responses."""
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -12,9 +11,9 @@ class LootItem(BaseModel):
     config_base_id: int
     name: str
     quantity: int
-    icon_url: Optional[str] = None
-    price_fe: Optional[float] = None  # Price per unit
-    total_value_fe: Optional[float] = None  # quantity * price
+    icon_url: str | None = None
+    price_fe: float | None = None  # Price per unit
+    total_value_fe: float | None = None  # quantity * price
 
 
 class RunResponse(BaseModel):
@@ -24,19 +23,21 @@ class RunResponse(BaseModel):
     zone_name: str
     zone_signature: str
     start_ts: datetime
-    end_ts: Optional[datetime] = None
-    duration_seconds: Optional[float] = None
+    end_ts: datetime | None = None
+    duration_seconds: float | None = None
     is_hub: bool
     is_nightmare: bool = False  # True if this is a nightmare run (Twinightmare)
     fe_gained: int  # Raw FE currency gained
     total_value: float  # Total value including priced items (gross)
     loot: list[LootItem]
-    consolidated_run_ids: Optional[list[int]] = None  # IDs of runs merged into this one
+    consolidated_run_ids: list[int] | None = None  # IDs of runs merged into this one
     # Map cost tracking fields (only populated when map_costs_enabled)
-    map_cost_items: Optional[list[LootItem]] = None  # Items consumed (each item has price_fe=None if unknown)
-    map_cost_fe: Optional[float] = None  # Sum of priced items only
+    map_cost_items: list[LootItem] | None = (
+        None  # Items consumed (each item has price_fe=None if unknown)
+    )
+    map_cost_fe: float | None = None  # Sum of priced items only
     map_cost_has_unpriced: bool = False  # True if any items have unknown price
-    net_value_fe: Optional[float] = None  # total_value - map_cost_fe
+    net_value_fe: float | None = None  # total_value - map_cost_fe
     # Ignored state
     is_ignored: bool = False  # True if this run is fully ignored from calculations
     ignored_items: list[int] = []  # List of ignored config_base_ids within this run
@@ -63,10 +64,12 @@ class ActiveRunResponse(BaseModel):
     total_value: float  # Total value including priced items (gross)
     loot: list[LootItem]  # Items picked up so far
     # Map cost tracking fields (only populated when map_costs_enabled)
-    map_cost_items: Optional[list[LootItem]] = None  # Items consumed (each item has price_fe=None if unknown)
-    map_cost_fe: Optional[float] = None  # Sum of priced items only
+    map_cost_items: list[LootItem] | None = (
+        None  # Items consumed (each item has price_fe=None if unknown)
+    )
+    map_cost_fe: float | None = None  # Sum of priced items only
     map_cost_has_unpriced: bool = False  # True if any items have unknown price
-    net_value_fe: Optional[float] = None  # total_value - map_cost_fe
+    net_value_fe: float | None = None  # total_value - map_cost_fe
 
 
 class RunStatsResponse(BaseModel):
@@ -92,9 +95,9 @@ class InventoryItem(BaseModel):
     name: str
     quantity: int
     page_id: int = 0
-    icon_url: Optional[str] = None
-    price_fe: Optional[float] = None
-    total_value_fe: Optional[float] = None
+    icon_url: str | None = None
+    price_fe: float | None = None
+    total_value_fe: float | None = None
 
 
 class InventoryResponse(BaseModel):
@@ -121,12 +124,12 @@ class ItemResponse(BaseModel):
     """Item metadata response."""
 
     config_base_id: int
-    name_en: Optional[str] = None
-    name_cn: Optional[str] = None
-    type_cn: Optional[str] = None
-    icon_url: Optional[str] = None
-    url_en: Optional[str] = None
-    url_cn: Optional[str] = None
+    name_en: str | None = None
+    name_cn: str | None = None
+    type_cn: str | None = None
+    icon_url: str | None = None
+    url_en: str | None = None
+    url_cn: str | None = None
 
 
 class ItemListResponse(BaseModel):
@@ -139,7 +142,7 @@ class ItemListResponse(BaseModel):
 class ItemUpdateRequest(BaseModel):
     """Request to update an item's name."""
 
-    name_en: Optional[str] = None
+    name_en: str | None = None
 
 
 class PriceResponse(BaseModel):
@@ -172,7 +175,7 @@ class StatusResponse(BaseModel):
     status: str
     collector_running: bool
     db_path: str
-    log_path: Optional[str] = None
+    log_path: str | None = None
     log_path_missing: bool = False
     item_count: int
     run_count: int
@@ -184,11 +187,11 @@ class PlayerResponse(BaseModel):
 
     name: str
     level: int
-    season_id: int
+    season_id: int | None = None
     season_name: str
     hero_id: int
     hero_name: str
-    player_id: Optional[str] = None
+    player_id: str | None = None
 
 
 class LootReportItem(BaseModel):
@@ -197,10 +200,10 @@ class LootReportItem(BaseModel):
     config_base_id: int
     name: str
     quantity: int
-    icon_url: Optional[str] = None
-    price_fe: Optional[float] = None  # Price per unit
-    total_value_fe: Optional[float] = None  # quantity * price
-    percentage: Optional[float] = None  # Percentage of total value
+    icon_url: str | None = None
+    price_fe: float | None = None  # Price per unit
+    total_value_fe: float | None = None  # quantity * price
+    percentage: float | None = None  # Percentage of total value
     is_ignored: bool = False  # True if excluded from report totals
 
 

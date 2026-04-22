@@ -52,6 +52,19 @@ Inspired by [WealthyExile](https://github.com/WealthyExile) for Path of Exile.
 
 </details>
 
+<details>
+<summary><strong>Alternative: Linux (Nix)</strong></summary>
+
+TITrack runs on Linux via [Nix](https://nixos.org/download/). Install Nix via your distro's package manager (e.g. `apt install nix`, `pacman -S nix`) or the [official installer](https://nixos.org/download/), then:
+
+```bash
+nix run github:astockman99/TITrack -- serve --no-window
+```
+
+The server starts on `http://127.0.0.1:8000`. Data is stored in `~/.local/share/TITrack/`.
+
+</details>
+
 ### First-Time Setup
 
 Once TITrack is running:
@@ -246,6 +259,18 @@ pip install -e ".[dev]"
 python -m titrack init --seed tlidb_items_seed_en.json
 ```
 
+<details>
+<summary><strong>Alternative: Nix dev shell (Linux)</strong></summary>
+
+```bash
+git clone https://github.com/astockman99/TITrack.git
+cd TITrack
+nix develop
+python -m titrack serve --no-window
+```
+
+</details>
+
 ### Running in Development
 
 ```bash
@@ -426,6 +451,71 @@ Contributions welcome! Please:
 1. Run tests before submitting PRs (`pytest tests/`)
 2. Follow existing code style (`black .`, `ruff check .`)
 3. Add tests for new functionality
+
+</details>
+
+---
+
+## Linux
+
+<details>
+<summary><strong>NixOS</strong></summary>
+
+<details>
+<summary><strong>As a system service (recommended)</strong></summary>
+
+Add TITrack as a user service that starts automatically at login:
+
+```nix
+# flake.nix
+inputs.titrack.url = "github:astockman99/TITrack";
+
+# In your NixOS configuration
+imports = [ inputs.titrack.nixosModules.default ];
+
+services.titrack = {
+  enable = true;
+  port = 8000; # optional, default 8000
+};
+```
+
+Logs are available via:
+
+```bash
+journalctl --user -u titrack -f
+```
+
+> To use `journalctl --user` without sudo add yourself to the `systemd-journal` group:
+> `users.users.<you>.extraGroups = [ "systemd-journal" ];`
+
+</details>
+
+<details>
+<summary><strong>As a package</strong></summary>
+
+**System-wide** (`configuration.nix`):
+
+```nix
+inputs.titrack.url = "github:astockman99/TITrack";
+
+environment.systemPackages = [ inputs.titrack.packages.x86_64-linux.default ];
+```
+
+**Home Manager** (`home.nix`):
+
+```nix
+inputs.titrack.url = "github:astockman99/TITrack";
+
+home.packages = [ inputs.titrack.packages.x86_64-linux.default ];
+```
+
+Then run manually:
+
+```bash
+titrack serve --no-window
+```
+
+</details>
 
 </details>
 

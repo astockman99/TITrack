@@ -1,9 +1,9 @@
 """Collector - main collection loop orchestrating parsing and storage."""
 
 import time
-from datetime import datetime, timedelta
+from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
-from typing import Callable, Optional
 
 from titrack.core.delta_calculator import DeltaCalculator
 from titrack.core.models import (
@@ -20,20 +20,20 @@ from titrack.core.models import (
     SlotKey,
 )
 from titrack.core.run_segmenter import RunSegmenter
+from titrack.data.inventory import is_gear_excluded
+from titrack.data.zones import is_sandlord_zone
 from titrack.db.connection import Database
 from titrack.db.repository import Repository
-from titrack.parser.log_parser import parse_line
-from titrack.parser.log_tailer import LogTailer
 from titrack.parser.exchange_parser import (
     ExchangeMessageParser,
     ExchangePriceRequest,
     ExchangePriceResponse,
     calculate_reference_price,
 )
-from titrack.parser.player_parser import PlayerInfo, get_effective_player_id
+from titrack.parser.log_parser import parse_line
+from titrack.parser.log_tailer import LogTailer
 from titrack.parser.patterns import EXCLUDED_PROTO_NAMES, MAP_COST_PROTO_NAMES
-from titrack.data.inventory import EXCLUDED_PAGES, is_gear_excluded
-from titrack.data.zones import is_sandlord_zone
+from titrack.parser.player_parser import PlayerInfo, get_effective_player_id
 
 
 class Collector:
@@ -48,13 +48,13 @@ class Collector:
         self,
         db: Database,
         log_path: Path,
-        on_delta: Optional[Callable[[ItemDelta], None]] = None,
-        on_run_start: Optional[Callable[[Run], None]] = None,
-        on_run_end: Optional[Callable[[Run], None]] = None,
-        on_price_update: Optional[Callable[[Price], None]] = None,
-        on_player_change: Optional[Callable[[PlayerInfo], None]] = None,
-        player_info: Optional[PlayerInfo] = None,
-        sync_manager: Optional[object] = None,
+        on_delta: Callable[[ItemDelta], None] | None = None,
+        on_run_start: Callable[[Run], None] | None = None,
+        on_run_end: Callable[[Run], None] | None = None,
+        on_price_update: Callable[[Price], None] | None = None,
+        on_player_change: Callable[[PlayerInfo], None] | None = None,
+        player_info: PlayerInfo | None = None,
+        sync_manager: object | None = None,
     ) -> None:
         """
         Initialize collector.
@@ -85,10 +85,10 @@ class Collector:
 
         # Player context for data isolation
         self._player_info = player_info
-        self._season_id: Optional[int] = player_info.season_id if player_info else None
+        self._season_id: int | None = player_info.season_id if player_info else None
         # Use effective_player_id: actual player_id if available, otherwise "season_name" as identifier
         # This ensures different characters have separate inventories even if player_id isn't in logs
-        self._player_id: Optional[str] = get_effective_player_id(player_info)
+        self._player_id: str | None = get_effective_player_id(player_info)
 
         # Set repository player context for filtered queries
         player_name = player_info.name if player_info else None
@@ -98,18 +98,18 @@ class Collector:
 
         # Track pending player data from streaming log (for character change detection)
         self._pending_player_data: dict[str, any] = {}
-        self._player_data_last_update: Optional[datetime] = None
+        self._player_data_last_update: datetime | None = None
         self._player_data_batch_threshold_seconds = 2.0  # New player data if > 2 seconds gap
         self._player_data_max_age_seconds = 30.0  # Discard incomplete batches older than this
 
         # Context tracking
         self._current_context = EventContext.OTHER
-        self._current_proto_name: Optional[str] = None
+        self._current_proto_name: str | None = None
 
         # LevelId/LevelType/LevelUid tracking (for zone differentiation)
-        self._pending_level_id: Optional[int] = None
-        self._pending_level_type: Optional[int] = None
-        self._pending_level_uid: Optional[int] = None
+        self._pending_level_id: int | None = None
+        self._pending_level_type: int | None = None
+        self._pending_level_uid: int | None = None
 
         # Exchange price tracking: SynId -> (ConfigBaseId, timestamp)
         self._pending_price_searches: dict[int, tuple[int, datetime]] = {}
@@ -120,13 +120,13 @@ class Collector:
 
         # InitBagData batch tracking: page_id -> last init timestamp
         # Used to detect new init batches and clear stale slot states
-        self._last_init_page: Optional[int] = None
-        self._last_init_time: Optional[datetime] = None
+        self._last_init_page: int | None = None
+        self._last_init_time: datetime | None = None
         self._init_batch_threshold_seconds = 2.0  # New batch if > 2 seconds gap
 
         self._running = False
 
-    def set_sync_manager(self, sync_manager: Optional[object]) -> None:
+    def set_sync_manager(self, sync_manager: object | None) -> None:
         """
         Set the sync manager for cloud price submissions.
 
@@ -213,16 +213,16 @@ class Collector:
             return False
 
         # Player changed! Update context
-        print(f"Player change detected: {old_name or 'None'} -> {new_name} ({new_player_info.season_name})")
+        print(
+            f"Player change detected: {old_name or 'None'} -> {new_name} ({new_player_info.season_name})"
+        )
 
         self._player_info = new_player_info
         self._season_id = new_season_id
         self._player_id = new_effective_id
 
         # Update repository context
-        self.repository.set_player_context(
-            self._season_id, self._player_id, player_name=new_name
-        )
+        self.repository.set_player_context(self._season_id, self._player_id, player_name=new_name)
 
         # End any active run from the old character
         ended_run = self.run_segmenter.force_end_current_run()
@@ -281,14 +281,12 @@ class Collector:
 
         # Update log position to current position so we don't re-parse old events
         self.repository.save_log_position(
-            self.tailer.file_path,
-            self.tailer.position,
-            self.tailer.file_size
+            self.tailer.file_path, self.tailer.position, self.tailer.file_size
         )
 
         return runs_deleted
 
-    def process_line(self, line: str, timestamp: Optional[datetime] = None) -> None:
+    def process_line(self, line: str, timestamp: datetime | None = None) -> None:
         """
         Process a single log line.
 
@@ -378,7 +376,8 @@ class Collector:
             is_new_batch = (
                 self._last_init_page != event.page_id
                 or self._last_init_time is None
-                or (timestamp - self._last_init_time).total_seconds() > self._init_batch_threshold_seconds
+                or (timestamp - self._last_init_time).total_seconds()
+                > self._init_batch_threshold_seconds
             )
 
             if is_new_batch:
@@ -386,8 +385,7 @@ class Collector:
                 self.repository.clear_page_slot_states(event.page_id, player_id=self._player_id)
                 # Clear from delta calculator's in-memory state
                 keys_to_remove = [
-                    key for key in self.delta_calc._slot_states
-                    if key.page_id == event.page_id
+                    key for key in self.delta_calc._slot_states if key.page_id == event.page_id
                 ]
                 for key in keys_to_remove:
                     del self.delta_calc._slot_states[key]
@@ -454,8 +452,13 @@ class Collector:
         self._pending_level_uid = None
 
         ended_run, new_run = self.run_segmenter.process_event(
-            event, timestamp, level_id, level_type, level_uid,
-            season_id=self._season_id, player_id=self._player_id
+            event,
+            timestamp,
+            level_id,
+            level_type,
+            level_uid,
+            season_id=self._season_id,
+            player_id=self._player_id,
         )
 
         if ended_run:
@@ -477,9 +480,7 @@ class Collector:
             if self._on_run_start:
                 self._on_run_start(new_run)
 
-    def _handle_player_data_event(
-        self, event: ParsedPlayerDataEvent, timestamp: datetime
-    ) -> None:
+    def _handle_player_data_event(self, event: ParsedPlayerDataEvent, timestamp: datetime) -> None:
         """Handle player data from streaming log (for character change detection)."""
         # Check if pending data is too old (incomplete batch timeout)
         if (
@@ -534,6 +535,22 @@ class Collector:
             # The is_new_batch reset at the top handles separation between
             # different login batches.
             self._process_player_change(new_player_info)
+
+        elif "name" in self._pending_player_data and "player_id" in self._pending_player_data:
+            # Post-Apr-2026 patch: SeasonId is no longer logged. Try to recover it
+            # from the saved reverse mapping (player_id → season_id).
+            saved_season = self.repository.lookup_season_id_by_player_id(
+                self._pending_player_data["player_id"]
+            )
+            if saved_season is not None:
+                new_player_info = PlayerInfo(
+                    name=self._pending_player_data["name"],
+                    level=self._pending_player_data.get("level", 0),
+                    season_id=saved_season,
+                    hero_id=self._pending_player_data.get("hero_id", 0),
+                    player_id=self._pending_player_data["player_id"],
+                )
+                self._process_player_change(new_player_info)
 
     def _cleanup_stale_pending_searches(self, current_time: datetime) -> None:
         """Remove pending price searches older than TTL."""
@@ -652,6 +669,7 @@ class Collector:
                 # Log the error (import at top level would cause circular import)
                 try:
                     from titrack.config.logging import get_logger
+
                     logger = get_logger()
                     logger.warning(f"Collector error (attempt {consecutive_errors}): {error_msg}")
                 except Exception:
@@ -662,7 +680,7 @@ class Collector:
                     raise
 
                 # Wait before retrying (exponential backoff capped at 5 seconds)
-                backoff = min(poll_interval * (2 ** consecutive_errors), 5.0)
+                backoff = min(poll_interval * (2**consecutive_errors), 5.0)
                 time.sleep(backoff)
 
     def stop(self) -> None:
