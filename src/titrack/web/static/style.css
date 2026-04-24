@@ -73,10 +73,89 @@ header h1 {
     color: #f0c674;
     font-style: italic;
     font-size: 0.9rem;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .awaiting-message.hidden {
     display: none;
+}
+
+.awaiting-link {
+    background: none;
+    border: none;
+    color: #f0c674;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-style: normal;
+    padding: 0;
+}
+
+.awaiting-link:hover {
+    color: #f5d58e;
+}
+
+.awaiting-panel {
+    background: rgba(240, 198, 116, 0.08);
+    border: 1px solid rgba(240, 198, 116, 0.35);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.awaiting-title {
+    color: #f0c674;
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.awaiting-message-body {
+    color: var(--text-primary);
+}
+
+.awaiting-message-body code {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    word-break: break-all;
+}
+
+.awaiting-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.awaiting-actions.hidden {
+    display: none;
+}
+
+.awaiting-btn {
+    background: transparent;
+    border: 1px solid rgba(240, 198, 116, 0.5);
+    color: #f0c674;
+    padding: 5px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.awaiting-btn:hover {
+    background: rgba(240, 198, 116, 0.12);
+}
+
+.awaiting-btn.primary {
+    background: rgba(240, 198, 116, 0.18);
+    font-weight: 600;
 }
 
 .player-name {

@@ -128,6 +128,35 @@ def find_log_file(custom_game_dir: Optional[str] = None) -> Optional[Path]:
     return None
 
 
+def find_all_log_files() -> list[Path]:
+    """
+    Enumerate every UE_game.log found at known Steam/standalone install paths.
+
+    Used by the character-detection diagnostics to surface the case where a user
+    has two game clients installed (e.g. Steam + standalone) and TITrack is
+    watching the older/wrong one.
+
+    Returns:
+        All existing log file paths across GAME_PATHS x LOG_RELATIVE_PATHS,
+        with duplicates removed. Order is not guaranteed — caller should sort
+        by mtime if needed.
+    """
+    seen: set[Path] = set()
+    found: list[Path] = []
+    for game_path in GAME_PATHS:
+        for relative_path in LOG_RELATIVE_PATHS:
+            log_path = game_path / relative_path
+            try:
+                if log_path.exists() and log_path.is_file():
+                    resolved = log_path.resolve()
+                    if resolved not in seen:
+                        seen.add(resolved)
+                        found.append(log_path)
+            except OSError:
+                continue
+    return found
+
+
 def validate_game_directory(game_dir: str) -> tuple[bool, Optional[Path]]:
     """
     Validate that a path can be resolved to the game log file.

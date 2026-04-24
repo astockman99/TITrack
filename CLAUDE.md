@@ -424,6 +424,9 @@ In development mode (non-frozen), logs also output to console.
 - `GET /api/inventory/hidden` - Get list of hidden item IDs for current player
 - `PUT /api/inventory/hidden` - Replace hidden items list for current player
 
+### Collector
+- `GET /api/collector/diagnose` - Diagnostics for the character-detection panel: current log path, exists/mtime, "looks like TI log" heuristic, tailer position, whether player lines have been seen, and other `UE_game.log` files found at known Steam/standalone install paths (for dual-client detection)
+
 ### Other
 - `GET /api/status` - Server status
 
@@ -680,6 +683,8 @@ TITrack detects characters in two ways:
 2. **Live monitoring**: Watches the live log stream for player data lines as they appear. When a different character is detected, the collector switches context.
 
 If no player data exists in the log (first time use, or log was deleted), the app shows "Waiting for character detection..." until the user logs in.
+
+**Dependency on the in-game Enable Log toggle.** Torchlight only writes the verbose `+player+Exp ... +Name [...] +SeasonId [...]` block when the in-game **Settings → Enable Log** toggle is on at the moment the server's character-data packet arrives (on each login). Enable Log defaults to off and does not persist across client restarts, so the most common "detection failing" support case is: the user has logging off, or toggled it on after already being in-game. The fix is to have them toggle Enable Log on, exit to the Select Character screen, and log back in — the server re-sends the packet on every login, and the game will write it this time. No client restart is required in the typical case. A rarer edge case produces a truncated `+player+...` placeholder even with logging on; the fallback is a full Torchlight client restart (quit to desktop). The in-app "Character Not Detected" modal walks users through both recipes.
 
 Inventories, runs, and prices are isolated per character/season.
 

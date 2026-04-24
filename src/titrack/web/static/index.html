@@ -18,7 +18,8 @@
                     <span id="player-details" class="player-details"></span>
                 </div>
                 <div id="awaiting-player-message" class="awaiting-message hidden">
-                    Waiting for character detection... (log in or sort your inventory)
+                    <span id="awaiting-player-summary">Waiting for character detection... (log in or sort your inventory)</span>
+                    <button type="button" class="awaiting-link" onclick="showNoCharacterModal()">See details</button>
                 </div>
             </div>
             <div class="header-stats">
@@ -281,20 +282,46 @@
             </div>
             <div class="help-body">
                 <section class="help-section">
-                    <p>TITrack could not detect your character information. This usually means game logging is not enabled or you haven't logged in with a character yet.</p>
+                    <div id="no-character-diagnostic" class="awaiting-panel">
+                        <div class="awaiting-title">Diagnostics</div>
+                        <div id="no-character-diagnostic-body" class="awaiting-message-body">
+                            Checking log activity...
+                        </div>
+                        <div id="no-character-diagnostic-actions" class="awaiting-actions hidden"></div>
+                    </div>
                 </section>
                 <section class="help-section">
-                    <h4>To fix this:</h4>
+                    <h4>How character detection works</h4>
+                    <p>TITrack reads your character name and season from the game log, but Torchlight only writes those details when its <strong>Enable Log</strong> setting is on <em>at the exact moment</em> the game's login-time data packet arrives. Enabling the log after you're already logged in is not enough — you need to trigger a new login while the log is on.</p>
+                </section>
+                <section class="help-section">
+                    <h4>Try this first</h4>
                     <ol>
-                        <li>Open Torchlight Infinite</li>
-                        <li>Go to <strong>Settings</strong></li>
-                        <li>Click <strong>"Enable Log"</strong></li>
-                        <li>Log in with your character (or sort your inventory if already in-game)</li>
+                        <li>Open Torchlight Infinite and log in to your character as usual.</li>
+                        <li>Open the in-game <strong>Settings</strong> menu and turn on <strong>Enable Log</strong>.</li>
+                        <li>Exit all the way back to the <strong>Select Character</strong> screen (you don't need to quit the client).</li>
+                        <li>Click your character to log back in.</li>
                     </ol>
-                    <p class="help-note">If you've already played with logging enabled, TITrack detects your character automatically on startup.</p>
+                    <p class="help-note">This works because the server re-sends your full character data on every login, and Torchlight only writes it to the log when Enable Log is already on when that packet arrives.</p>
                 </section>
                 <section class="help-section">
-                    <p class="help-note">TITrack tracks data separately for each character and league. Without character detection, data may not be properly isolated.</p>
+                    <h4>If that didn't work</h4>
+                    <p>On some sessions the game records only a truncated placeholder (<code>+player+...</code>) for your character even with logging on. Resetting the client usually clears this:</p>
+                    <ol>
+                        <li>Fully close Torchlight Infinite (quit to desktop — not just log out).</li>
+                        <li>Reopen the client and log in to your character.</li>
+                        <li>Open <strong>Settings</strong> and turn on <strong>Enable Log</strong>.</li>
+                        <li>Exit to <strong>Select Character</strong> and log back in.</li>
+                    </ol>
+                    <p class="help-note">A sort of your inventory (click the Sort button in your bag) also forces a fresh inventory dump, which is a useful extra nudge if detection still doesn't fire.</p>
+                </section>
+                <section class="help-section">
+                    <h4>Other things to check</h4>
+                    <ul>
+                        <li><strong>Wrong log file.</strong> If you have both the Steam and standalone Torchlight client installed, TITrack may be watching the log for the client you aren't currently playing on. The diagnostic above will suggest a switch when it detects a newer log elsewhere.</li>
+                        <li><strong>Game closed.</strong> Torchlight only writes to its log while it's running. If you quit the game, the log stops updating and TITrack will flag it as stale.</li>
+                        <li><strong>Enable Log doesn't persist.</strong> Torchlight resets this toggle to off every time the client restarts. You need to turn it back on each session.</li>
+                    </ul>
                 </section>
                 <div class="modal-actions">
                     <button onclick="closeNoCharacterModal()" class="dismiss-btn">Dismiss</button>

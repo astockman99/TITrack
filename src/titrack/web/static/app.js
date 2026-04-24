@@ -73,6 +73,10 @@ async function fetchStatus() {
     return fetchJson('/status');
 }
 
+async function fetchDiagnose() {
+    return fetchJson('/collector/diagnose');
+}
+
 async function fetchStats() {
     return fetchJson('/runs/stats');
 }
@@ -1201,11 +1205,14 @@ function renderStatus(status) {
         collectorStatus.textContent = 'Collector: Stopped';
     }
 
-    // Show/hide awaiting player message
+    // Show/hide awaiting player summary (inline header).
+    // The detailed diagnostics live in the Character Not Detected modal,
+    // which the user opens from the "See details" link here.
     const awaitingMessage = document.getElementById('awaiting-player-message');
     if (awaitingMessage) {
         if (status?.awaiting_player && !status?.log_path_missing) {
             awaitingMessage.classList.remove('hidden');
+            refreshAwaitingDiagnostic();
         } else {
             awaitingMessage.classList.add('hidden');
         }
@@ -1215,6 +1222,133 @@ function renderStatus(status) {
     if (status?.log_path_missing) {
         showLogPathModal();
     }
+}
+
+let _awaitingDiagnosticInflight = false;
+let _lastDiagnostic = null;
+async function refreshAwaitingDiagnostic() {
+    if (_awaitingDiagnosticInflight) return;
+    _awaitingDiagnosticInflight = true;
+    try {
+        const diag = await fetchDiagnose();
+        if (diag) {
+            _lastDiagnostic = diag;
+            renderAwaitingSummary(diag);
+            // Refresh modal content if it's open
+            if (!document.getElementById('no-character-modal').classList.contains('hidden')) {
+                renderNoCharacterDiagnostic(diag);
+            }
+        }
+    } finally {
+        _awaitingDiagnosticInflight = false;
+    }
+}
+
+function _formatAgo(seconds) {
+    if (seconds == null) return 'unknown';
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+}
+
+function _escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+}
+
+/**
+ * Pure function: given a diagnose payload, pick the branch and return
+ * {kind, summary, message, actionHtml} for rendering into either the
+ * inline summary or the modal.
+ *   kind: short label ("missing" | "not-ti" | "newer" | "stale" | "partial" | "active")
+ *   summary: short single-line text for the inline header
+ *   message: rich HTML for the modal body
+ *   actionHtml: button(s) HTML (empty string if no action)
+ */
+function _pickAwaitingDiagnostic(diag) {
+    const STALE_SECONDS = 300;
+    const logAge = diag.log_seconds_since_modified;
+    const logIsStale = logAge != null && logAge > STALE_SECONDS;
+
+    // A candidate is "better" if it was modified in the last 5 min AND
+    // (either the current log is stale or the candidate is meaningfully newer).
+    const newerCandidate = (diag.other_candidates || []).find(c => {
+        if (c.seconds_since_modified == null) return false;
+        if (c.seconds_since_modified > STALE_SECONDS) return false;
+        if (logIsStale) return true;
+        if (logAge != null && c.seconds_since_modified < logAge - 30) return true;
+        return logAge == null;
+    });
+
+    if (!diag.log_path_configured || !diag.log_exists) {
+        const path = diag.log_path ? ` (<code>${_escapeHtml(diag.log_path)}</code>)` : '';
+        return {
+            kind: 'missing',
+            summary: 'Log file not found',
+            message: `Log file not found${path}. Tell TITrack where Torchlight Infinite is installed.`,
+            actionHtml: `<button onclick="openSettingsModal()" class="awaiting-btn primary">Configure log path</button>`,
+        };
+    }
+    if (diag.looks_like_ti_log === false) {
+        return {
+            kind: 'not-ti',
+            summary: 'Log file doesn’t look like a Torchlight log',
+            message: `This file doesn't look like a Torchlight Infinite log (<code>${_escapeHtml(diag.log_path)}</code>). Point TITrack at the correct game install.`,
+            actionHtml: `<button onclick="openSettingsModal()" class="awaiting-btn primary">Configure log path</button>`,
+        };
+    }
+    if (newerCandidate) {
+        const ago = _formatAgo(newerCandidate.seconds_since_modified);
+        const currentAgo = _formatAgo(logAge);
+        return {
+            kind: 'newer',
+            summary: 'Newer log detected elsewhere — may be watching the wrong client',
+            message: `The watched log was last updated ${currentAgo}, but a newer log exists at <code>${_escapeHtml(newerCandidate.path)}</code> (updated ${ago}). You may have two game clients installed — try switching.`,
+            actionHtml: `<button onclick="openSettingsModal(${JSON.stringify(newerCandidate.path)})" class="awaiting-btn primary">Switch to newer log</button>`,
+        };
+    }
+    if (logIsStale) {
+        const ago = _formatAgo(logAge);
+        return {
+            kind: 'stale',
+            summary: `Log was last updated ${ago}`,
+            message: `The log was last updated ${ago}. If you're in-game right now, Torchlight Infinite may not be writing to this log — verify logging is enabled (see general troubleshooting below).`,
+            actionHtml: `<button onclick="openSettingsModal()" class="awaiting-btn">Change log path</button>`,
+        };
+    }
+    if (diag.player_lines_seen && !diag.player_detected) {
+        return {
+            kind: 'partial',
+            summary: 'Saw partial character data — try relogging from Select Character',
+            message: `Saw partial character data in the log but couldn't match a full character yet. Exit to the <strong>Select Character</strong> screen and log back in — that forces the game to re-send your full character data. Full steps are below.`,
+            actionHtml: '',
+        };
+    }
+    return {
+        kind: 'active',
+        summary: 'Log active but no character data yet — Enable Log then relog from Select Character',
+        message: `The log file is being written to, but Torchlight hasn't logged your character details yet. Most likely <strong>Enable Log</strong> is off in-game, or it was off when you last logged in. Turn it on in the in-game Settings menu, exit to the <strong>Select Character</strong> screen, then log back in. Full steps are below.`,
+        actionHtml: '',
+    };
+}
+
+function renderAwaitingSummary(diag) {
+    const summaryEl = document.getElementById('awaiting-player-summary');
+    if (!summaryEl) return;
+    const pick = _pickAwaitingDiagnostic(diag);
+    summaryEl.textContent = pick.summary;
+}
+
+function renderNoCharacterDiagnostic(diag) {
+    const body = document.getElementById('no-character-diagnostic-body');
+    const actions = document.getElementById('no-character-diagnostic-actions');
+    if (!body || !actions) return;
+    const pick = _pickAwaitingDiagnostic(diag);
+    body.innerHTML = pick.message;
+    actions.innerHTML = pick.actionHtml;
+    actions.classList.toggle('hidden', !pick.actionHtml);
 }
 
 function renderPlayer(player) {
@@ -1324,13 +1458,24 @@ async function loadCloudPrices() {
 
 // --- No Character Modal ---
 
+// Tracks whether the auto-show on startup has fired. The modal can still be
+// reopened manually via the "See details" link in the header after dismiss.
 let noCharacterModalShown = false;
 
-function showNoCharacterModal() {
-    // Only show once per session
-    if (noCharacterModalShown) return;
+function showNoCharacterModal(options) {
+    // `auto`: only open once per session (used by startup). Manual opens from
+    // the "See details" link always open the modal.
+    const auto = !!(options && options.auto);
+    if (auto && noCharacterModalShown) return;
     noCharacterModalShown = true;
     document.getElementById('no-character-modal').classList.remove('hidden');
+
+    // Paint immediately from the last known diagnostic so the modal doesn't
+    // flash the placeholder, then refresh in the background for the latest state.
+    if (_lastDiagnostic) {
+        renderNoCharacterDiagnostic(_lastDiagnostic);
+    }
+    refreshAwaitingDiagnostic();
 }
 
 function closeNoCharacterModal() {
@@ -1349,7 +1494,7 @@ document.addEventListener('click', (e) => {
 let settingsModalShown = false;
 let validatedLogPath = null;
 
-async function openSettingsModal() {
+async function openSettingsModal(prefillLogPath) {
     const modal = document.getElementById('settings-modal');
     const currentPathEl = document.getElementById('current-log-path');
     const inputEl = document.getElementById('log-directory-input');
@@ -1411,6 +1556,14 @@ async function openSettingsModal() {
         }
     } catch (error) {
         currentPathEl.textContent = 'Unable to fetch current path';
+    }
+
+    // If a prefill path was passed (e.g. "Switch to newer log" from the
+    // character-detection panel), override the input and auto-validate so
+    // the user can just click Save.
+    if (prefillLogPath) {
+        inputEl.value = prefillLogPath;
+        try { validateLogDirectory(); } catch (_) {}
     }
 
     modal.classList.remove('hidden');
@@ -3099,7 +3252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Show warning modal if no character detected
     if (!player) {
-        showNoCharacterModal();
+        showNoCharacterModal({auto: true});
     }
 
     // Set up settings modal toggles
