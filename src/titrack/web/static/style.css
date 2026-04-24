@@ -1159,6 +1159,22 @@ tr.nightmare .zone-name {
     font-weight: bold;
 }
 
+.update-install-warning {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    color: #fbbf24;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.update-install-warning::before {
+    content: "\26A0  ";
+    margin-right: 4px;
+}
+
 .update-release-notes {
     margin-bottom: 20px;
 }

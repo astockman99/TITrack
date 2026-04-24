@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Install location warning**: TITrack now detects when it's installed inside a cloud-synced folder (OneDrive, Dropbox, Google Drive, iCloud Drive, pCloud, Box Sync, MEGA) or under Program Files and warns before applying an auto-update. These locations can silently revert or redirect the updated files, leaving the user stuck on the old version after restart. The warning appears in the update modal and is logged at startup for support diagnosis.
+
 ---
 
 ## [0.5.8] - 2026-04-22

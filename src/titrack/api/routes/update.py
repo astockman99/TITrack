@@ -23,6 +23,7 @@ class UpdateStatusResponse(BaseModel):
     error_message: Optional[str] = None
     checked_at: Optional[datetime] = None
     can_update: bool = False
+    install_path_warning: Optional[str] = None
 
 
 class ActionResponse(BaseModel):
@@ -43,6 +44,8 @@ def _get_update_manager(request: Request):
 @router.get("/status", response_model=UpdateStatusResponse)
 def get_update_status(request: Request) -> UpdateStatusResponse:
     """Get current update status and version information."""
+    from titrack.config.paths import get_install_path_warning
+
     try:
         manager = _get_update_manager(request)
         info = manager.get_status()
@@ -59,6 +62,7 @@ def get_update_status(request: Request) -> UpdateStatusResponse:
             error_message=info.error_message,
             checked_at=info.checked_at,
             can_update=manager.can_update,
+            install_path_warning=get_install_path_warning(),
         )
     except HTTPException:
         # If manager not available, return basic version info
@@ -69,6 +73,7 @@ def get_update_status(request: Request) -> UpdateStatusResponse:
             status="idle",
             current_version=__version__,
             can_update=is_frozen(),
+            install_path_warning=get_install_path_warning(),
         )
 
 

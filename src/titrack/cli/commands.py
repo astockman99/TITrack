@@ -449,6 +449,11 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     logger.info(f"TITrack v{__version__} starting...")
 
+    from titrack.config.paths import get_install_path_warning
+    install_warning = get_install_path_warning()
+    if install_warning:
+        logger.warning(install_warning)
+
     # Import here to avoid loading FastAPI when not needed
     try:
         import uvicorn

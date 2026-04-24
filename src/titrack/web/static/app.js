@@ -2910,6 +2910,17 @@ function showUpdateModal(status) {
     currentVersionEl.textContent = `v${status.current_version}`;
     newVersionEl.textContent = `v${status.latest_version}`;
 
+    const warningEl = document.getElementById('update-install-warning');
+    if (warningEl) {
+        if (status.install_path_warning) {
+            warningEl.textContent = status.install_path_warning;
+            warningEl.classList.remove('hidden');
+        } else {
+            warningEl.textContent = '';
+            warningEl.classList.add('hidden');
+        }
+    }
+
     // Show release notes (simple markdown to HTML)
     if (status.release_notes) {
         releaseNotesEl.innerHTML = simpleMarkdown(status.release_notes);
