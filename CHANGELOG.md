@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.5.9] - 2026-04-24
+
 ### Added
 - **Install location warning**: TITrack now detects when it's installed inside a cloud-synced folder (OneDrive, Dropbox, Google Drive, iCloud Drive, pCloud, Box Sync, MEGA) or under Program Files and warns before applying an auto-update. These locations can silently revert or redirect the updated files, leaving the user stuck on the old version after restart. The warning appears in the update modal and is logged at startup for support diagnosis.
 - **Character detection diagnostics**: Replaced the generic "Waiting for character detection..." message with a panel that explains *why* detection hasn't happened yet. It distinguishes a missing/invalid log path, a log that doesn't look like a Torchlight log, a stale log (game closed or logging disabled), a log that's active but awaiting login, and — the common case — the user has both the Steam and standalone client installed and TITrack is watching the wrong one's log. When a newer `UE_game.log` is found elsewhere, the panel surfaces a one-click "Switch to newer log" button that pre-fills the settings modal with the suggested path so the user can confirm before saving.
