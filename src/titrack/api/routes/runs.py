@@ -72,6 +72,10 @@ def _build_loot(summary: dict[int, int], repo: Repository) -> list[LootItem]:
                 LootItem(
                     config_base_id=config_id,
                     name=item.name_en if item else f"Unknown {config_id}",
+                    name_en=item.name_en if item else None,
+                    name_cn=item.name_cn if item else None,
+                    url_en=item.url_en if item else None,
+                    url_cn=item.url_cn if item else None,
                     quantity=quantity,
                     icon_url=item.icon_url if item else None,
                     price_fe=item_price_fe,
@@ -97,6 +101,10 @@ def _build_cost_items(cost_summary: dict[int, int], repo: Repository) -> list[Lo
                 LootItem(
                     config_base_id=config_id,
                     name=item.name_en if item else f"Unknown {config_id}",
+                    name_en=item.name_en if item else None,
+                    name_cn=item.name_cn if item else None,
+                    url_en=item.url_en if item else None,
+                    url_cn=item.url_cn if item else None,
                     quantity=quantity,  # Keep negative to indicate consumption
                     icon_url=item.icon_url if item else None,
                     price_fe=item_price_fe,
@@ -766,6 +774,10 @@ def get_loot_report(
             LootReportItem(
                 config_base_id=config_id,
                 name=item.name_en if item else f"Unknown {config_id}",
+                name_en=item.name_en if item else None,
+                name_cn=item.name_cn if item else None,
+                url_en=item.url_en if item else None,
+                url_cn=item.url_cn if item else None,
                 quantity=quantity,
                 icon_url=item.icon_url if item else None,
                 price_fe=price_fe,

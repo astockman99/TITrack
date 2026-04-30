@@ -403,7 +403,7 @@ async function checkLowSupplyAlerts() {
         const alertKey = String(item.config_base_id);
 
         if (item.quantity <= threshold && !supplyAlertedCategories.has(alertKey)) {
-            showToast(`Low Supply: ${item.name} — ${item.quantity} remaining (threshold: ${threshold})`, 'warning');
+            showToast(t('toast.low_supply', { name: pickItemName(item), qty: item.quantity, threshold: threshold }), 'warning');
             supplyAlertedCategories.add(alertKey);
         } else if (item.quantity > threshold && supplyAlertedCategories.has(alertKey)) {
             // Re-arm alert when quantity goes back above threshold
@@ -723,7 +723,7 @@ function buildCostTooltip(costItems) {
         const value = item.total_value_fe !== null
             ? `${item.total_value_fe.toFixed(2)} FE`
             : '? FE';
-        return `${item.name} x${qty} = ${value}`;
+        return t('misc.cost_line', { name: pickItemName(item), qty: qty, value: value });
     });
     // Escape for HTML attribute and use newline character
     return escapeAttr(lines.join('\n'));
@@ -863,7 +863,7 @@ function renderRuns(data, forceRender = false) {
 
         return `
             <tr class="${nightmareClass}${ignoredClass}">
-                <td class="zone-name" title="${run.zone_signature}${consolidatedInfo}">${escapeHtml(run.zone_name)}</td>
+                <td class="zone-name" title="${run.zone_signature}${consolidatedInfo}">${escapeHtml(tZone(run.zone_name))}</td>
                 <td class="duration">${formatDuration(run.duration_seconds)}</td>
                 <td>${valueDisplay}</td>
                 <td>
@@ -917,7 +917,7 @@ function renderActiveRun(data, forceRender = false) {
 
     // Show panel and update content
     panel.classList.remove('hidden');
-    zoneEl.textContent = data.zone_name;
+    zoneEl.textContent = tZone(data.zone_name);
     durationEl.textContent = `(${formatDuration(data.duration_seconds)})`;
 
     // Show value with cost info if map costs are enabled
@@ -951,7 +951,7 @@ function renderActiveRun(data, forceRender = false) {
             return `
                 <div class="loot-item${negativeClass}">
                     ${iconHtml}
-                    <span class="loot-name">${escapeHtml(item.name)}</span>
+                    <span class="loot-name">${escapeHtml(pickItemName(item))}</span>
                     <span class="loot-qty">${qtyPrefix}${item.quantity}</span>
                     <span class="loot-value">${valueText}</span>
                 </div>
@@ -1013,7 +1013,7 @@ function renderInventory(data, forceRender = false) {
                 <td>
                     <div class="item-row">
                         ${iconHtml}
-                        <a href="https://titrack.ninja/item/${item.config_base_id}" target="_blank" class="item-name item-name-link ${isFE ? 'fe' : ''}">${escapeHtml(item.name)}${cloudIndicator}</a>
+                        <a href="${pickItemUrl(item) || ('https://titrack.ninja/item/' + item.config_base_id)}" target="_blank" class="item-name item-name-link ${isFE ? 'fe' : ''}">${escapeHtml(pickItemName(item))}${cloudIndicator}</a>
                     </div>
                 </td>
                 <td>${formatNumber(item.quantity)}</td>
@@ -1199,10 +1199,10 @@ function renderStatus(status) {
 
     if (status?.collector_running) {
         indicator.classList.add('active');
-        collectorStatus.textContent = 'Collector: Running';
+        collectorStatus.textContent = t('footer.collector', { state: t('footer.collector_running') });
     } else {
         indicator.classList.remove('active');
-        collectorStatus.textContent = 'Collector: Stopped';
+        collectorStatus.textContent = t('footer.collector', { state: t('footer.collector_stopped') });
     }
 
     // Show/hide awaiting player summary (inline header).
@@ -1358,7 +1358,7 @@ function renderPlayer(player) {
 
     if (player) {
         playerName.textContent = player.name;
-        playerDetails.textContent = player.season_name;
+        playerDetails.textContent = pickSeasonName(player);
         playerInfo.classList.remove('hidden');
     } else {
         playerInfo.classList.add('hidden');
@@ -1538,6 +1538,14 @@ async function openSettingsModal(prefillLogPath) {
     document.getElementById('settings-supply-beacon').value = supplyAlertThresholds.beacons;
     document.getElementById('settings-supply-compass').value = supplyAlertThresholds.compasses;
     document.getElementById('settings-supply-resonance').value = supplyAlertThresholds.resonance;
+
+    // Load current language
+    try {
+        const langSel = document.getElementById('settings-language');
+        if (langSel) {
+            langSel.value = (typeof i18n !== 'undefined' && i18n.getLang()) || 'en';
+        }
+    } catch (_) { /* ignore */ }
 
     // Fetch current log path from status
     try {
@@ -1944,7 +1952,7 @@ async function showRunDetails(runId) {
     const title = document.getElementById('modal-title');
     const body = document.getElementById('modal-body');
 
-    title.textContent = `${run.zone_name} - ${formatDuration(run.duration_seconds)}`;
+    title.textContent = `${tZone(run.zone_name)} - ${formatDuration(run.duration_seconds)}`;
 
     // Track ignored items state for this modal
     const ignoredItems = new Set(run.ignored_items || []);
@@ -1982,7 +1990,7 @@ async function showRunDetails(runId) {
                         <li class="loot-item${itemIgnoredClass}" data-config-id="${item.config_base_id}">
                             <div class="loot-item-name">
                                 ${iconHtml}
-                                <span>${escapeHtml(item.name)}</span>
+                                <span>${escapeHtml(pickItemName(item))}</span>
                             </div>
                             <div class="loot-item-values">
                                 <span class="loot-item-qty ${item.total_value_fe !== null ? (item.total_value_fe > 0 ? 'positive' : 'negative') : ''}">${valueStr}</span>
@@ -2227,7 +2235,7 @@ function renderHideItemsTable() {
     const pending = modal._pendingHidden || new Set();
 
     if (searchTerm) {
-        items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
+        items = items.filter(item => pickItemName(item).toLowerCase().includes(searchTerm));
     }
 
     // Sort
@@ -2252,7 +2260,7 @@ function renderHideItemsTable() {
             <tr class="${checked ? 'hide-items-row-hidden' : ''}">
                 <td><input type="checkbox" data-id="${item.config_base_id}" ${checked ? 'checked' : ''}
                     onchange="toggleHideItem(${item.config_base_id}, this.checked)"></td>
-                <td><div class="item-name-cell">${iconHtml}<span>${escapeHtml(item.name)}</span></div></td>
+                <td><div class="item-name-cell">${iconHtml}<span>${escapeHtml(pickItemName(item))}</span></div></td>
                 <td>${formatNumber(item.quantity)}</td>
                 <td>${valueStr}</td>
             </tr>`;
@@ -2395,7 +2403,7 @@ async function showLootReport() {
                 <td>
                     <div class="item-col">
                         ${iconHtml}
-                        <a href="https://titrack.ninja/item/${item.config_base_id}" target="_blank" class="item-name-link">${escapeHtml(item.name)}</a>
+                        <a href="${pickItemUrl(item) || ('https://titrack.ninja/item/' + item.config_base_id)}" target="_blank" class="item-name-link">${escapeHtml(pickItemName(item))}</a>
                     </div>
                 </td>
                 <td>${formatNumber(item.quantity)}</td>
@@ -2518,7 +2526,7 @@ function renderLootReportChart(data) {
     const top10 = pricedItems.slice(0, 10);
     const others = pricedItems.slice(10);
 
-    const labels = top10.map(item => item.name);
+    const labels = top10.map(item => pickItemName(item));
     const values = top10.map(item => item.total_value_fe);
 
     // Add "Other" category if there are more items
@@ -2774,12 +2782,12 @@ async function resetStats() {
 
     const btn = document.getElementById('reset-stats-btn');
     btn.disabled = true;
-    btn.textContent = 'Resetting...';
+    btn.textContent = t('controls.resetting');
 
     const result = await postResetStats();
 
     btn.disabled = false;
-    btn.textContent = 'Reset Stats';
+    btn.textContent = t('controls.reset_stats');
 
     if (result && result.success) {
         // Clear chart data hashes to force re-render
@@ -3221,6 +3229,33 @@ async function exitApp() {
 // --- Initialization ---
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Apply persisted language to static text BEFORE first render. Try to
+    // sync with the server-side `language` setting (this may override the
+    // localStorage cache if the user changed language on another device).
+    try {
+        const resp = await fetch(`${API_BASE}/settings/language`);
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data && data.value) {
+                i18n.setLang(data.value);
+            }
+        }
+    } catch (_) { /* offline-friendly */ }
+
+    // Re-render dynamic content when the language changes.
+    document.addEventListener('langchange', () => {
+        try {
+            i18n.loadZoneTranslations().then(() => {
+                if (typeof refreshAll === 'function') refreshAll(true);
+                if (typeof fetchPlayer === 'function') {
+                    fetchPlayer().then(p => {
+                        if (typeof renderPlayer === 'function') renderPlayer(p);
+                    });
+                }
+            });
+        } catch (e) { console.error('langchange handler:', e); }
+    });
+
     // Set initial sort indicators
     updateSortIndicators();
 
@@ -3258,6 +3293,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up settings modal toggles
     const settingsTradeTaxToggle = document.getElementById('settings-trade-tax');
     settingsTradeTaxToggle.addEventListener('change', handleTradeTaxToggle);
+    // Wire language <select>: persist to server and switch UI language.
+    const settingsLanguage = document.getElementById('settings-language');
+    if (settingsLanguage) {
+        settingsLanguage.addEventListener('change', async (e) => {
+            const lang = e.target.value || 'en';
+            try {
+                await fetch(`${API_BASE}/settings/language`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: lang }),
+                });
+            } catch (err) {
+                console.error('Failed to save language setting:', err);
+            }
+            i18n.setLang(lang);
+        });
+    }
 
     const settingsMapCostsToggle = document.getElementById('settings-map-costs');
     settingsMapCostsToggle.addEventListener('change', handleMapCostsToggle);

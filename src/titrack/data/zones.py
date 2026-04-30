@@ -221,3 +221,146 @@ def get_zone_display_name(zone_path: str, level_id: int | None = None) -> str:
             return cleaned if cleaned else part
 
     return zone_path
+
+
+# Chinese translations of zone display names (the English values from
+# ZONE_NAMES / AMBIGUOUS_ZONES / LEVEL_ID_ZONES). Keyed by the *English*
+# display string so the web client can translate without re-implementing
+# zone-path resolution. Missing keys fall back to the English string.
+ZONE_NAMES_CN: dict[str, str] = {
+    # Hideouts
+    "Hideout - Ember's Rest": "驻地 - 余烬避难所",
+    "Hideout - Sacred Court Manor": "驻地 - 圣庭庄园",
+
+    # Sandlord
+    "Cloud Oasis (Sandlord)": "云端绿洲（沙王）",
+    "Quicksand Treasure Stash (Sandlord)": "流沙中的琳琅宝库（沙王）",
+
+    # Blistering Lava Sea
+    "Blistering Lava Sea - Elemental Mine": "沸涌炎海 - 元素矿洞",
+    "Blistering Lava Sea - Path of Sacrifice": "沸涌炎海 - 献身之路",
+    "Blistering Lava Sea - Dragonrest Cavern": "沸涌炎海 - 龙眠峡谷",
+    "Blistering Lava Sea - Where Lies Confession": "沸涌炎海 - 告罪之间",
+    "Blistering Lava Sea - Sunset Dome Bottom": "沸涌炎海 - 落日穹底",
+    "Blistering Lava Sea - Savage Grasslands": "沸涌炎海 - 蛮荒原野",
+    "Blistering Lava Sea - Shimmering Hall": "沸涌炎海 - 微光礼堂",
+    "Blistering Lava Sea - Heart of the Mountains": "沸涌炎海 - 群山之心",
+    "Blistering Lava Sea - Confession Chapel": "沸涌炎海 - 忽罪学院",
+    "Blistering Lava Sea - Twisted Valley": "沸涌炎海 - 曲折谷地",
+    "Blistering Lava Sea - Court of Darkness": "沸涌炎海 - 暗夜王庭",
+    "Blistering Lava Sea - Smelting Plant": "沸涌炎海 - 熔铁工厂",
+    "Blistering Lava Sea - Hellfire Chasm": "沸涌炎海 - 焰狱之谷",
+
+    # Glacial Abyss
+    "Glacial Abyss - High Court Maze": "冰封寒渊 - 圣庭迷宫",
+    "Glacial Abyss - Defiled Side Chamber": "冰封寒渊 - 渎神偏殿",
+    "Glacial Abyss - Deserted District": "冰封寒渊 - 杂芜街区",
+    "Glacial Abyss - Singing Sand": "冰封寒渊 - 鸣沙村落",
+    "Glacial Abyss - Shadow Outpost": "冰封寒渊 - 暗影前哨",
+    "Demiman Village": "亚人村落",
+    "Glacial Abyss - Demiman Village": "冰封寒渊 - 亚人村落",
+    "Glacial Abyss - Abandoned Mines": "冰封寒渊 - 荒弃矿场",
+    "Glacial Abyss - Rainforest of Divine Legacy": "冰封寒渊 - 神遗雨林",
+    "Glacial Abyss - Swirling Mines": "冰封寒渊 - 回旋矿场",
+    "Grimwind Woods": "悲风林地",
+    "Glacial Abyss - Grimwind Woods": "冰封寒渊 - 悲风林地",
+    "Glacial Abyss - Wall of the Last Breath": "冰封寒渊 - 终息高墙",
+    "Glacial Abyss - Blustery Canyon": "冰封寒渊 - 风鸣峡谷",
+    "Glacial Abyss - Throne of Winter": "冰封寒渊 - 永霜冰魄",
+
+    # Boss zones
+    "Rusted Abyss": "锈蚀深渊",
+
+    # Ruins of Aeterna
+    "Ruins of Aeterna: Boundless": "永恒废墟：无尽",
+    "The Frozen Canvas": "雪域熔炉",
+
+    # Vorax
+    "Vorax - Shelly's Operating Theater": "灭世之喙 - 谢莉的手术室",
+
+    # Steel Forge
+    "Steel Forge - Shrine of Despair": "钢铁炼境 - 绝望秘殿",
+    "Steel Forge - Shrine of Punishment": "钢铁炼境 - 苦罚秘殿",
+    "Steel Forge - Beast Plains": "钢铁炼境 - 聚兽平原",
+    "Steel Forge - Thorny Filth": "钢铁炼境 - 荆棘秽土",
+    "Steel Forge - Weeping Mines": "钢铁炼境 - 悲鸣矿区",
+    "Steel Forge - Cloud Walls": "钢铁炼境 - 云间高墙",
+    "Steel Forge - Alleys of the Lost": "钢铁炼境 - 遗落街巷",
+    "Steel Forge - City of Eternal Fire": "钢铁炼境 - 长明宫城",
+    "Steel Forge - Wall of the Pure": "钢铁炼境 - 无垢之墙",
+    "Steel Forge - Sun Temple": "钢铁炼境 - 日栖神庙",
+    "Steel Forge - Corona Shrine": "钢铁炼境 - 日冕神殿",
+    "Steel Forge - Windbreath Cliff": "钢铁炼境 - 风息峦壁",
+    "Steel Forge - Imaginary Monument": "钢铁炼境 - 赤魂武士",
+
+    # Thunder Wastes
+    "Thunder Wastes - Wall of Sorrows": "雷鸣废土 - 悲歌之墙",
+    "Thunder Wastes - Alleys of Pilgrims": "雷鸣废土 - 朝圣街巷",
+    "Thunder Wastes - Desolate Village": "雷鸣废土 - 恶武荒村",
+    "Thunder Wastes - Hall in the Mirror": "雷鸣废土 - 镜中礼堂",
+    "Thunder Wastes - Defiled Oasis": "雷鸣废土 - 不洁绿洲",
+    "Thunder Wastes - King's Hub": "雷鸣废土 - 王者枢纽",
+    "Thunder Wastes - Thirsty Mines": "雷鸣废土 - 干涃矿场",
+    "Thunder Wastes - Rainmist Jungle": "雷鸣废土 - 雾雨密林",
+    "Thunder Wastes - Prayer Sanctuary": "雷鸣废土 - 祷告圣堂",
+    "Thunder Wastes - Sacred Courtyard": "雷鸣废土 - 圣教庭院",
+    "Thunder Wastes - Gallery of Moon": "雷鸣废土 - 新月长廊",
+    "Thunder Wastes - Summit of Thunder": "雷鸣废土 - 灾厄之林",
+
+    # Rift of Dimensions
+    "Rift of Dimensions": "裂隙空境",
+
+    # Secret Realms
+    "Secret Realm - Invaluable Time": "秘境 - 莹光殿堂",
+    "Secret Realm - Sea of Rites": "秘境 - 噩梦之匣",
+    "Secret Realm - Unholy Pedestal": "秘境 - 污秽王座",
+    "Secret Realm - Abyssal Vault": "秘境 - 降神巢",
+
+    # Misc
+    "Supreme Showdown": "巅峰对决",
+    "Fateful Contest": "宿命对局",
+    "Mistville": "雾都遗址",
+    "Void Sea Terminal": "虚空终港",
+
+    # Deep Space
+    "Deep Space - Boundless Hunting Ground": "深空 - 广袤猎场",
+    "Deep Space - Core Mine": "深空 - 地心矿场",
+    "Deep Space - Desert Pasture": "深空 - 沙中牧原",
+    "Deep Space - Barren Wilderness": "深空 - 大荒之野",
+    "Deep Space - Vast Wasteland": "深空 - 万顷荒林",
+
+    # Voidlands
+    "Voidlands - Mundane Palace": "幽夜暗域 - 常世宫闱",
+    "Voidlands - Grimwind Woods": "幽夜暗域 - 悲风林地",
+    "Voidlands - Elemental Mine": "幽夜暗域 - 元素矿洞",
+    "Voidlands - Grim Alleys": "幽夜暗域 - 幽暗街巷",
+    "Voidlands - Filthy Forest": "幽夜暗域 - 污浊丛林",
+    "Voidlands - Dreamless Thicket": "幽夜暗域 - 迷雾雨林",
+    "Voidlands - Luminescent Throne": "幽夜暗域 - 流光神座",
+    "Voidlands - Shrine of Agony": "幽夜暗域 - 苦痛秘殿",
+    "Voidlands - Shimmering Swamp": "幽夜暗域 - 微光沼泽",
+    "Voidlands - Jungle of the Brood": "幽夜暗域 - 母巢密林",
+    "Voidlands - Gallery of Stars": "幽夜暗域 - 群星长廊",
+    "Voidlands - Yesterday Chamber": "幽夜暗域 - 昔日之所",
+    "Voidlands - Dreamless Abyss": "幽夜暗域 - 凋零妄域",
+
+    # Trial of Divinity / Path of the Brave
+    "Trial of Divinity": "神威试炼",
+    "Path of the Brave": "勇者之路",
+
+    # Suffixes used at runtime
+    "(Nightmare)": "（梦魇）",
+}
+
+
+def get_zone_display_name_cn(english_name: str) -> str:
+    """
+    Return the Chinese translation of an English zone display name.
+
+    Falls back to the English string if no translation exists. Also handles
+    the runtime-appended " (Nightmare)" suffix.
+    """
+    if english_name.endswith(" (Nightmare)"):
+        base = english_name[: -len(" (Nightmare)")]
+        return f"{ZONE_NAMES_CN.get(base, base)}（梦魇）"
+    return ZONE_NAMES_CN.get(english_name, english_name)

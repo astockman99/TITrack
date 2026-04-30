@@ -10,7 +10,11 @@ class LootItem(BaseModel):
     """Single item in loot breakdown."""
 
     config_base_id: int
-    name: str
+    name: str  # Backwards-compat: equals name_en
+    name_en: Optional[str] = None
+    name_cn: Optional[str] = None
+    url_en: Optional[str] = None
+    url_cn: Optional[str] = None
     quantity: int
     icon_url: Optional[str] = None
     price_fe: Optional[float] = None  # Price per unit
@@ -89,7 +93,11 @@ class InventoryItem(BaseModel):
     """Single item in inventory."""
 
     config_base_id: int
-    name: str
+    name: str  # Backwards-compat: equals name_en
+    name_en: Optional[str] = None
+    name_cn: Optional[str] = None
+    url_en: Optional[str] = None
+    url_cn: Optional[str] = None
     quantity: int
     page_id: int = 0
     icon_url: Optional[str] = None
@@ -185,9 +193,13 @@ class PlayerResponse(BaseModel):
     name: str
     level: int
     season_id: int
-    season_name: str
+    season_name: str  # Backwards-compat: equals season_name_en
+    season_name_en: Optional[str] = None
+    season_name_cn: Optional[str] = None
     hero_id: int
-    hero_name: str
+    hero_name: str  # Backwards-compat: equals hero_name_en
+    hero_name_en: Optional[str] = None
+    hero_name_cn: Optional[str] = None
     player_id: Optional[str] = None
 
 
@@ -195,7 +207,11 @@ class LootReportItem(BaseModel):
     """Single item in loot report."""
 
     config_base_id: int
-    name: str
+    name: str  # Backwards-compat: equals name_en
+    name_en: Optional[str] = None
+    name_cn: Optional[str] = None
+    url_en: Optional[str] = None
+    url_cn: Optional[str] = None
     quantity: int
     icon_url: Optional[str] = None
     price_fe: Optional[float] = None  # Price per unit
@@ -242,7 +258,9 @@ class SupplyItem(BaseModel):
     """A single supply item with its current quantity."""
 
     config_base_id: int
-    name: str
+    name: str  # Backwards-compat: equals name_en
+    name_en: Optional[str] = None
+    name_cn: Optional[str] = None
     category: str
     quantity: int
 

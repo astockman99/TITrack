@@ -1570,6 +1570,23 @@ tr.nightmare .zone-name {
     flex-shrink: 0;
 }
 
+.settings-toggle .settings-select,
+.settings-select {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text, #e0e0e0);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.settings-select:hover {
+    border-color: var(--accent);
+}
+
 .toggle-info {
     display: flex;
     flex-direction: column;
