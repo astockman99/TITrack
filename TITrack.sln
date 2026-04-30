@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "overlay", "overlay", "{178A59AB-26FA-0D53-5A85-CE27EDD23CDA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "setup", "setup", "{8234297F-5141-16AD-017A-2883AE030302}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TITrackOverlay", "overlay\TITrackOverlay.csproj", "{54454BF6-7EC8-5B4A-1788-F171EE4F837C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TITrackSetup", "setup\TITrackSetup.csproj", "{8187A547-BAF4-F41E-8E9C-E73E12C3C4BE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54454BF6-7EC8-5B4A-1788-F171EE4F837C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54454BF6-7EC8-5B4A-1788-F171EE4F837C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54454BF6-7EC8-5B4A-1788-F171EE4F837C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54454BF6-7EC8-5B4A-1788-F171EE4F837C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8187A547-BAF4-F41E-8E9C-E73E12C3C4BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8187A547-BAF4-F41E-8E9C-E73E12C3C4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8187A547-BAF4-F41E-8E9C-E73E12C3C4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8187A547-BAF4-F41E-8E9C-E73E12C3C4BE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{54454BF6-7EC8-5B4A-1788-F171EE4F837C} = {178A59AB-26FA-0D53-5A85-CE27EDD23CDA}
+		{8187A547-BAF4-F41E-8E9C-E73E12C3C4BE} = {8234297F-5141-16AD-017A-2883AE030302}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9A016221-21FB-4B78-AEAB-275D6DE9F059}
+	EndGlobalSection
+EndGlobal

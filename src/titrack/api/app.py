@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from titrack.api.routes import cloud, collector as collector_routes, icons, inventory, items, prices, runs, settings, stats, update
+from titrack.api.routes import cloud, collector as collector_routes, i18n, icons, inventory, items, prices, runs, settings, stats, update
 from titrack.api.schemas import PlayerResponse, StatusResponse
 from titrack.config.paths import get_static_dir
 from titrack.db.connection import Database
@@ -85,6 +85,7 @@ def create_app(
     app.include_router(cloud.router)
     app.include_router(update.router)
     app.include_router(collector_routes.router)
+    app.include_router(i18n.router)
 
     # Initialize update manager
     try:
@@ -156,8 +157,12 @@ def create_app(
             level=pi.level,
             season_id=pi.season_id,
             season_name=pi.season_name,
+            season_name_en=pi.season_name,
+            season_name_cn=pi.season_name_cn,
             hero_id=pi.hero_id,
             hero_name=pi.hero_name,
+            hero_name_en=pi.hero_name,
+            hero_name_cn=pi.hero_name_cn,
             player_id=pi.player_id,
         )
 

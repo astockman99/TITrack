@@ -596,6 +596,15 @@ def _serve_browser_mode(args: argparse.Namespace, settings: Settings, logger, sh
         api_db = Database(settings.db_path)
         api_db.connect()
 
+        # Ensure cloud sync is available even when no log file has been seen
+        # yet (collector hasn't started). This lets the dashboard's Cloud Sync
+        # toggle work on a fresh install before the game has been launched.
+        if sync_manager is None:
+            sync_manager = SyncManager(api_db)
+            sync_manager.initialize()
+            if player_info:
+                sync_manager.set_season_context(player_info.season_id)
+
         # Create FastAPI app
         app = create_app(
             db=api_db,
@@ -1042,6 +1051,15 @@ def _serve_with_window(args: argparse.Namespace, settings: Settings, logger, sho
         # API gets its own database connection
         api_db = Database(settings.db_path)
         api_db.connect()
+
+        # Ensure cloud sync is available even when no log file has been seen
+        # yet (collector hasn't started). This lets the dashboard's Cloud Sync
+        # toggle work on a fresh install before the game has been launched.
+        if sync_manager is None:
+            sync_manager = SyncManager(api_db)
+            sync_manager.initialize()
+            if player_info:
+                sync_manager.set_season_context(player_info.season_id)
 
         # Create FastAPI app (window mode, not browser fallback)
         app = create_app(

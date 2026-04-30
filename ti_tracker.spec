@@ -59,6 +59,14 @@ hiddenimports = [
     'webview.platforms.edgechromium',
     'clr_loader',
     'pythonnet',
+    # Optional cloud sync (Supabase) — included so the in-app toggle works
+    # in the packaged build when the user enables Cloud Sync.
+    'supabase',
+    'gotrue',
+    'postgrest',
+    'realtime',
+    'storage3',
+    'supafunc',
 ]
 
 # Exclude unnecessary modules to reduce size

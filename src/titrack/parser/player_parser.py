@@ -18,13 +18,23 @@ class PlayerInfo:
 
     @property
     def season_name(self) -> str:
-        """Get human-readable season/league name."""
+        """Get human-readable season/league name (English)."""
         return SEASON_NAMES.get(self.season_id, f"Season {self.season_id}")
 
     @property
+    def season_name_cn(self) -> str:
+        """Get human-readable season/league name (Chinese)."""
+        return SEASON_NAMES_CN.get(self.season_id, self.season_name)
+
+    @property
     def hero_name(self) -> str:
-        """Get human-readable hero/class name."""
+        """Get human-readable hero/class name (English)."""
         return HERO_NAMES.get(self.hero_id, f"Hero {self.hero_id}")
+
+    @property
+    def hero_name_cn(self) -> str:
+        """Get human-readable hero/class name (Chinese)."""
+        return HERO_NAMES_CN.get(self.hero_id, self.hero_name)
 
 
 # Patterns for parsing player data from enter log
@@ -73,6 +83,31 @@ HERO_NAMES = {
     2000: "Oracle",
     2100: "Leonel",
     2200: "Cateye",
+}
+
+
+# Season ID to Chinese name mapping
+SEASON_NAMES_CN = {
+    1: "永久服",
+    1301: "SS11 灭世之喉",
+    1401: "SS12 月华",
+}
+
+
+# Hero ID to Chinese name mapping
+HERO_NAMES_CN = {
+    1100: "雷汉",
+    1200: "卡里诺",
+    1300: "吉玛",
+    1400: "游厄",
+    1500: "莫托",
+    1600: "伊莉丝",
+    1700: "妮亚",
+    1800: "艾莉卡",
+    1900: "冰",
+    2000: "奥拉克尔",
+    2100: "莱昂",
+    2200: "貓眼",
 }
 
 

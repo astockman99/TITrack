@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="i18n.js"></script>
 </head>
 <body>
     <div class="container">
@@ -18,59 +19,59 @@
                     <span id="player-details" class="player-details"></span>
                 </div>
                 <div id="awaiting-player-message" class="awaiting-message hidden">
-                    <span id="awaiting-player-summary">Waiting for character detection... (log in or sort your inventory)</span>
-                    <button type="button" class="awaiting-link" onclick="showNoCharacterModal()">See details</button>
+                    <span id="awaiting-player-summary" data-i18n="header.awaiting_player">Waiting for character detection... (log in or sort your inventory)</span>
+                    <button type="button" class="awaiting-link" onclick="showNoCharacterModal()" data-i18n="header.see_details">See details</button>
                 </div>
             </div>
             <div class="header-stats">
                 <div class="stat-card primary">
-                    <span class="stat-label">Net Worth</span>
+                    <span class="stat-label" data-i18n="header.net_worth">Net Worth</span>
                     <span id="net-worth" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Cumulative Value</span>
+                    <span class="stat-label" data-i18n="header.cumulative_value">Cumulative Value</span>
                     <span id="cumulative-value" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">FE/Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></span>
+                    <span class="stat-label"><span data-i18n="header.fe_per_hour">FE/Hour</span> <span class="info-icon" data-i18n-title="header.fe_per_hour_tooltip" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></span>
                     <span id="value-per-hour" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">FE/Map</span>
+                    <span class="stat-label" data-i18n="header.fe_per_map">FE/Map</span>
                     <span id="value-per-map" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Runs</span>
+                    <span class="stat-label" data-i18n="header.runs">Runs</span>
                     <span id="total-runs" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Avg Run Time</span>
+                    <span class="stat-label" data-i18n="header.avg_run_time">Avg Run Time</span>
                     <span id="avg-run-time" class="stat-value">--</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Total Time</span>
+                    <span class="stat-label" data-i18n="header.total_time">Total Time</span>
                     <span class="total-time-row">
                         <span id="total-time" class="stat-value">--</span>
-                        <button id="pause-btn" class="pause-btn hidden" onclick="togglePause()" title="Pause tracking">⏸</button>
+                        <button id="pause-btn" class="pause-btn hidden" onclick="togglePause()" data-i18n-title="header.pause_tracking" title="Pause tracking">⏸</button>
                     </span>
                 </div>
             </div>
             <div class="header-controls">
-                <button id="overlay-btn" class="overlay-btn hidden" onclick="launchOverlay()" title="Open mini overlay">Overlay</button>
-                <button class="economy-btn" onclick="openEconomy()" title="Open titrack.ninja economy data">Economy</button>
+                <button id="overlay-btn" class="overlay-btn hidden" onclick="launchOverlay()" data-i18n="controls.overlay" data-i18n-title="controls.overlay_tooltip" title="Open mini overlay">Overlay</button>
+                <button class="economy-btn" onclick="openEconomy()" data-i18n="controls.economy" data-i18n-title="controls.economy_tooltip" title="Open titrack.ninja economy data">Economy</button>
                 <div class="cloud-sync-control">
                     <label class="toggle cloud-toggle">
                         <input type="checkbox" id="cloud-sync-toggle">
-                        <span>Cloud Sync</span>
+                        <span data-i18n="controls.cloud_sync">Cloud Sync</span>
                     </label>
-                    <span id="cloud-sync-status" class="cloud-status-indicator" title="Cloud sync status"></span>
+                    <span id="cloud-sync-status" class="cloud-status-indicator" data-i18n-title="controls.cloud_sync_tooltip" title="Cloud sync status"></span>
                 </div>
-                <button class="settings-btn" onclick="openSettingsModal()" title="Settings">&#9881;</button>
-                <button class="help-btn" onclick="openHelpModal()">Instructions</button>
-                <button id="reset-stats-btn" class="reset-btn" onclick="resetStats()">Reset Stats</button>
+                <button class="settings-btn" onclick="openSettingsModal()" data-i18n-title="controls.settings" title="Settings">&#9881;</button>
+                <button class="help-btn" onclick="openHelpModal()" data-i18n="controls.instructions">Instructions</button>
+                <button id="reset-stats-btn" class="reset-btn" onclick="resetStats()" data-i18n="controls.reset_stats">Reset Stats</button>
                 <label class="toggle">
                     <input type="checkbox" id="auto-refresh" checked>
-                    <span>Auto-refresh</span>
+                    <span data-i18n="controls.auto_refresh">Auto-refresh</span>
                 </label>
                 <span id="status-indicator" class="status-dot"></span>
             </div>
@@ -78,11 +79,11 @@
 
         <section class="charts-row">
             <div class="chart-panel">
-                <h2>Cumulative Value</h2>
+                <h2 data-i18n="charts.cumulative_value">Cumulative Value</h2>
                 <canvas id="cumulative-value-chart"></canvas>
             </div>
             <div class="chart-panel">
-                <h2>FE / Hour <span class="info-icon" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></h2>
+                <h2><span data-i18n="charts.fe_per_hour">FE / Hour</span> <span class="info-icon" data-i18n-title="header.fe_per_hour_tooltip" title="Calculated from active run time only. Time spent in town, hideout, or between runs is not counted. This measures your farming efficiency, not total session time.">ⓘ</span></h2>
                 <canvas id="value-rate-chart"></canvas>
             </div>
         </section>
@@ -92,11 +93,11 @@
                 <section id="active-run-panel" class="panel active-run-panel hidden">
                     <h2>
                         <span class="active-indicator"></span>
-                        Current Run: <span id="active-run-zone">--</span>
+                        <span data-i18n="active_run.title_prefix">Current Run:</span> <span id="active-run-zone">--</span>
                         <span id="active-run-duration" class="active-run-duration">--</span>
                     </h2>
                     <div class="active-run-stats">
-                        <span class="active-run-value">Value: <strong id="active-run-value">0</strong> FE</span>
+                        <span class="active-run-value"><span data-i18n="active_run.value">Value:</span> <strong id="active-run-value">0</strong> <span data-i18n="unit.fe">FE</span></span>
                     </div>
                     <div id="active-run-loot" class="active-run-loot">
                         <!-- Live drops will appear here -->
@@ -105,21 +106,21 @@
 
                 <section class="panel">
                     <div class="section-header">
-                        <h2>Recent Runs</h2>
-                        <button class="report-btn" onclick="showLootReport()">Report</button>
+                        <h2 data-i18n="runs.title">Recent Runs</h2>
+                        <button class="report-btn" onclick="showLootReport()" data-i18n="runs.report">Report</button>
                     </div>
                 <div class="runs-scroll-container">
                 <table id="runs-table">
                     <thead>
                         <tr>
-                            <th>Zone</th>
-                            <th>Duration</th>
-                            <th>Value</th>
+                            <th data-i18n="runs.col_zone">Zone</th>
+                            <th data-i18n="runs.col_duration">Duration</th>
+                            <th data-i18n="runs.col_value">Value</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody id="runs-body">
-                        <tr><td colspan="4" class="loading">Loading...</td></tr>
+                        <tr><td colspan="4" class="loading" data-i18n="runs.loading">Loading...</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -127,36 +128,36 @@
             </div>
 
             <section class="panel">
-                <h2>Current Inventory
-                    <button class="hide-items-btn" id="hide-items-btn" onclick="openHideItemsModal()">Hide Items</button>
+                <h2><span data-i18n="inventory.title">Current Inventory</span>
+                    <button class="hide-items-btn" id="hide-items-btn" onclick="openHideItemsModal()" data-i18n="inventory.hide_items">Hide Items</button>
                     <span class="inv-filter-wrap">
-                        <button class="inv-filter-btn" id="inv-filter-btn" onclick="toggleInvFilterMenu()" title="Filter by tab">
+                        <button class="inv-filter-btn" id="inv-filter-btn" onclick="toggleInvFilterMenu()" data-i18n-title="inventory.filter_tooltip" title="Filter by tab">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         </button>
                         <div class="inv-filter-menu hidden" id="inv-filter-menu">
-                            <button class="inv-filter-option active" data-tab="" onclick="filterInventoryTab(this)">All</button>
-                            <button class="inv-filter-option" data-tab="100" onclick="filterInventoryTab(this)">Gear</button>
-                            <button class="inv-filter-option" data-tab="101" onclick="filterInventoryTab(this)">Skill</button>
-                            <button class="inv-filter-option" data-tab="102" onclick="filterInventoryTab(this)">Commodity</button>
-                            <button class="inv-filter-option" data-tab="103" onclick="filterInventoryTab(this)">Others</button>
+                            <button class="inv-filter-option active" data-tab="" onclick="filterInventoryTab(this)" data-i18n="inventory.tab_all">All</button>
+                            <button class="inv-filter-option" data-tab="100" onclick="filterInventoryTab(this)" data-i18n="inventory.tab_gear">Gear</button>
+                            <button class="inv-filter-option" data-tab="101" onclick="filterInventoryTab(this)" data-i18n="inventory.tab_skill">Skill</button>
+                            <button class="inv-filter-option" data-tab="102" onclick="filterInventoryTab(this)" data-i18n="inventory.tab_commodity">Commodity</button>
+                            <button class="inv-filter-option" data-tab="103" onclick="filterInventoryTab(this)" data-i18n="inventory.tab_others">Others</button>
                         </div>
                     </span>
                 </h2>
                 <table id="inventory-table">
                     <thead>
                         <tr>
-                            <th>Item</th>
+                            <th data-i18n="inventory.col_item">Item</th>
                             <th class="sortable" data-sort="quantity" onclick="sortInventory('quantity')">
-                                Qty <span class="sort-indicator" id="sort-quantity"></span>
+                                <span data-i18n="inventory.col_qty">Qty</span> <span class="sort-indicator" id="sort-quantity"></span>
                             </th>
                             <th class="sortable active" data-sort="value" onclick="sortInventory('value')">
-                                Value <span class="sort-indicator" id="sort-value"></span>
+                                <span data-i18n="inventory.col_value">Value</span> <span class="sort-indicator" id="sort-value"></span>
                             </th>
-                            <th id="sparkline-header" class="sparkline-header hidden" title="Price trend (72h)">Trend</th>
+                            <th id="sparkline-header" class="sparkline-header hidden" data-i18n="inventory.col_trend" data-i18n-title="inventory.trend_tooltip" title="Price trend (72h)">Trend</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
-                        <tr><td colspan="4" class="loading">Loading...</td></tr>
+                        <tr><td colspan="4" class="loading" data-i18n="runs.loading">Loading...</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -167,17 +168,17 @@
             <span id="collector-status">Collector: --</span>
             <span class="footer-version">
                 <span id="app-version">v--</span>
-                <a href="https://discord.gg/39W7YEywe5" target="_blank" class="discord-link" title="Join the TITrack Discord">
+                <a href="https://discord.gg/39W7YEywe5" target="_blank" class="discord-link" data-i18n-title="footer.discord_tooltip" title="Join the TITrack Discord">
                     <svg width="16" height="12" viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0 105.89 105.89 0 0 0 19.39 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2.03a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2.03a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45 65.69C36.18 65.69 31 60 31 53.05s5-12.68 11.45-12.68S54 46.07 53.89 53.05 48.84 65.69 42.45 65.69Zm42.24 0C78.41 65.69 73.25 60 73.25 53.05s5-12.68 11.44-12.68S96.23 46.07 96.12 53.05 91.08 65.69 84.69 65.69Z"/></svg>
                     Discord
                 </a>
-                <a href="https://ko-fi.com/titrack" target="_blank" class="kofi-link" title="Help cover server costs">
+                <a href="https://ko-fi.com/titrack" target="_blank" class="kofi-link" data-i18n-title="footer.kofi_tooltip" title="Help cover server costs">
                     <svg width="16" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.776-4.011 3.776s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.511zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
-                    Help cover server costs
+                    <span data-i18n="footer.kofi">Help cover server costs</span>
                 </a>
-                <button id="check-updates-btn" class="update-btn" onclick="checkForUpdates()">Check for Updates</button>
-                <span id="update-badge" class="update-badge hidden" title="Update available"></span>
-                <button id="exit-app-btn" class="exit-btn hidden" onclick="exitApp()">Exit App</button>
+                <button id="check-updates-btn" class="update-btn" onclick="checkForUpdates()" data-i18n="footer.check_updates">Check for Updates</button>
+                <span id="update-badge" class="update-badge hidden" data-i18n-title="footer.update_tooltip" title="Update available"></span>
+                <button id="exit-app-btn" class="exit-btn hidden" onclick="exitApp()" data-i18n="footer.exit">Exit App</button>
             </span>
         </footer>
     </div>
@@ -185,7 +186,7 @@
     <div id="loot-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modal-title">Run Details</h3>
+                <h3 id="modal-title" data-i18n="modal.run_details">Run Details</h3>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div id="modal-body"></div>
@@ -195,80 +196,80 @@
     <div id="help-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>How to Use TITrack</h3>
+                <h3 data-i18n="help.title">How to Use TITrack</h3>
                 <button class="close-btn" onclick="closeHelpModal()">&times;</button>
             </div>
             <div class="help-body">
                 <section class="help-section">
-                    <h4>1. Enable Game Logging</h4>
-                    <p>TITrack reads the game's log file to track your loot. To enable logging:</p>
+                    <h4 data-i18n="help.s1.title">1. Enable Game Logging</h4>
+                    <p data-i18n="help.s1.intro">TITrack reads the game's log file to track your loot. To enable logging:</p>
                     <ol>
-                        <li>Open Torchlight Infinite</li>
-                        <li>Go to <strong>Settings</strong></li>
-                        <li>Find and click the <strong>"Enable Log"</strong> button</li>
+                        <li data-i18n-html="help.s1.step1">Open Torchlight Infinite</li>
+                        <li data-i18n-html="help.s1.step2">Go to <strong>Settings</strong></li>
+                        <li data-i18n-html="help.s1.step3">Find and click the <strong>"Enable Log"</strong> button</li>
                     </ol>
-                    <p class="help-note">Without this enabled, TITrack cannot capture any data.</p>
+                    <p class="help-note" data-i18n="help.s1.note">Without this enabled, TITrack cannot capture any data.</p>
                 </section>
 
                 <section class="help-section">
-                    <h4>2. Character Detection</h4>
-                    <p>TITrack automatically detects your character from the game log:</p>
+                    <h4 data-i18n="help.s2.title">2. Character Detection</h4>
+                    <p data-i18n="help.s2.intro">TITrack automatically detects your character from the game log:</p>
                     <ul>
-                        <li>If you've played before with logging enabled, your character is detected <strong>automatically</strong> on startup</li>
-                        <li>If this is your first time, log in with your character and TITrack will detect it</li>
-                        <li>To switch characters, just log out and back in (do NOT close the game)</li>
+                        <li data-i18n-html="help.s2.b1">If you've played before with logging enabled, your character is detected <strong>automatically</strong> on startup</li>
+                        <li data-i18n-html="help.s2.b2">If this is your first time, log in with your character and TITrack will detect it</li>
+                        <li data-i18n-html="help.s2.b3">To switch characters, just log out and back in (do NOT close the game)</li>
                     </ul>
-                    <p class="help-note">TITrack tracks data separately for each character and league.</p>
+                    <p class="help-note" data-i18n="help.s2.note">TITrack tracks data separately for each character and league.</p>
                 </section>
 
                 <section class="help-section">
-                    <h4>3. Sync Your Inventory</h4>
-                    <p>To populate the inventory display with your current items:</p>
+                    <h4 data-i18n="help.s3.title">3. Sync Your Inventory</h4>
+                    <p data-i18n="help.s3.intro">To populate the inventory display with your current items:</p>
                     <ol>
-                        <li>Open your inventory in-game</li>
-                        <li>Click the <strong>Sort</strong> button (auto-arranges items)</li>
-                        <li>Repeat for each tab you want to track (Skill, Commodity, Others)</li>
+                        <li data-i18n-html="help.s3.step1">Open your inventory in-game</li>
+                        <li data-i18n-html="help.s3.step2">Click the <strong>Sort</strong> button (auto-arranges items)</li>
+                        <li data-i18n-html="help.s3.step3">Repeat for each tab you want to track (Skill, Commodity, Others)</li>
                     </ol>
-                    <p class="help-note">The Gear tab is not tracked because gear prices depend heavily on specific affixes.</p>
+                    <p class="help-note" data-i18n="help.s3.note">The Gear tab is not tracked because gear prices depend heavily on specific affixes.</p>
                 </section>
 
                 <section class="help-section">
-                    <h4>4. Automatic Price Learning</h4>
-                    <p>TITrack learns item prices automatically when you use the in-game Exchange:</p>
+                    <h4 data-i18n="help.s4.title">4. Automatic Price Learning</h4>
+                    <p data-i18n="help.s4.intro">TITrack learns item prices automatically when you use the in-game Exchange:</p>
                     <ol>
-                        <li>Open the Exchange in-game</li>
-                        <li>Search for any item you want to price</li>
-                        <li>TITrack captures the listed prices and calculates a reference price (10th percentile)</li>
+                        <li data-i18n-html="help.s4.step1">Open the Exchange in-game</li>
+                        <li data-i18n-html="help.s4.step2">Search for any item you want to price</li>
+                        <li data-i18n-html="help.s4.step3">TITrack captures the listed prices and calculates a reference price (10th percentile)</li>
                     </ol>
-                    <p class="help-note">Prices are saved locally and used to calculate your loot value and net worth.</p>
+                    <p class="help-note" data-i18n="help.s4.note">Prices are saved locally and used to calculate your loot value and net worth.</p>
                 </section>
 
                 <section class="help-section">
-                    <h4>5. Tracking Runs</h4>
-                    <p>Once logging is enabled, TITrack automatically:</p>
+                    <h4 data-i18n="help.s5.title">5. Tracking Runs</h4>
+                    <p data-i18n="help.s5.intro">Once logging is enabled, TITrack automatically:</p>
                     <ul>
-                        <li>Detects when you enter and leave maps</li>
-                        <li>Tracks all items picked up during each run</li>
-                        <li>Calculates value based on learned prices</li>
-                        <li>Shows your FE/Hour based on active run time only</li>
+                        <li data-i18n-html="help.s5.b1">Detects when you enter and leave maps</li>
+                        <li data-i18n-html="help.s5.b2">Tracks all items picked up during each run</li>
+                        <li data-i18n-html="help.s5.b3">Calculates value based on learned prices</li>
+                        <li data-i18n-html="help.s5.b4">Shows your FE/Hour based on active run time only</li>
                     </ul>
                 </section>
 
                 <section class="help-section">
-                    <h4>6. Cloud Sync (Optional)</h4>
-                    <p>Share and receive community pricing data by enabling Cloud Sync:</p>
+                    <h4 data-i18n="help.s6.title">6. Cloud Sync (Optional)</h4>
+                    <p data-i18n="help.s6.intro">Share and receive community pricing data by enabling Cloud Sync:</p>
                     <ol>
-                        <li>Click the <strong>Cloud Sync</strong> toggle in the header</li>
-                        <li>When enabled, your Exchange searches are anonymously shared</li>
-                        <li>You'll receive aggregated prices from other users</li>
+                        <li data-i18n-html="help.s6.step1">Click the <strong>Cloud Sync</strong> toggle in the header</li>
+                        <li data-i18n-html="help.s6.step2">When enabled, your Exchange searches are anonymously shared</li>
+                        <li data-i18n-html="help.s6.step3">You'll receive aggregated prices from other users</li>
                     </ol>
-                    <p>Benefits:</p>
+                    <p data-i18n="help.s6.benefits">Benefits:</p>
                     <ul>
-                        <li>Get prices for items you haven't searched yet</li>
-                        <li>See price trends with sparkline charts</li>
-                        <li>Help the community by contributing your data</li>
+                        <li data-i18n-html="help.s6.b1">Get prices for items you haven't searched yet</li>
+                        <li data-i18n-html="help.s6.b2">See price trends with sparkline charts</li>
+                        <li data-i18n-html="help.s6.b3">Help the community by contributing your data</li>
                     </ul>
-                    <p class="help-note">Cloud Sync is completely optional and anonymous. No account required. Only Exchange prices are shared, never manual edits. Data requires 3+ contributors before being shown.</p>
+                    <p class="help-note" data-i18n="help.s6.note">Cloud Sync is completely optional and anonymous. No account required. Only Exchange prices are shared, never manual edits. Data requires 3+ contributors before being shown.</p>
                 </section>
             </div>
         </div>
@@ -277,54 +278,54 @@
     <div id="no-character-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Character Not Detected</h3>
+                <h3 data-i18n="nochar.title">Character Not Detected</h3>
                 <button class="close-btn" onclick="closeNoCharacterModal()">&times;</button>
             </div>
             <div class="help-body">
                 <section class="help-section">
                     <div id="no-character-diagnostic" class="awaiting-panel">
-                        <div class="awaiting-title">Diagnostics</div>
-                        <div id="no-character-diagnostic-body" class="awaiting-message-body">
+                        <div class="awaiting-title" data-i18n="nochar.diagnostics">Diagnostics</div>
+                        <div id="no-character-diagnostic-body" class="awaiting-message-body" data-i18n="nochar.checking">
                             Checking log activity...
                         </div>
                         <div id="no-character-diagnostic-actions" class="awaiting-actions hidden"></div>
                     </div>
                 </section>
                 <section class="help-section">
-                    <h4>How character detection works</h4>
-                    <p>TITrack reads your character name and season from the game log, but Torchlight only writes those details when its <strong>Enable Log</strong> setting is on <em>at the exact moment</em> the game's login-time data packet arrives. Enabling the log after you're already logged in is not enough — you need to trigger a new login while the log is on.</p>
+                    <h4 data-i18n="nochar.detect_title">How character detection works</h4>
+                    <p data-i18n-html="nochar.detect_intro">TITrack reads your character name and season from the game log, but Torchlight only writes those details when its <strong>Enable Log</strong> setting is on <em>at the exact moment</em> the game's login-time data packet arrives. Enabling the log after you're already logged in is not enough — you need to trigger a new login while the log is on.</p>
                 </section>
                 <section class="help-section">
-                    <h4>Try this first</h4>
+                    <h4 data-i18n="nochar.try_title">Try this first</h4>
                     <ol>
-                        <li>Open Torchlight Infinite and log in to your character as usual.</li>
-                        <li>Open the in-game <strong>Settings</strong> menu and turn on <strong>Enable Log</strong>.</li>
-                        <li>Exit all the way back to the <strong>Select Character</strong> screen (you don't need to quit the client).</li>
-                        <li>Click your character to log back in.</li>
+                        <li data-i18n-html="nochar.try_step1">Open Torchlight Infinite and log in to your character as usual.</li>
+                        <li data-i18n-html="nochar.try_step2">Open the in-game <strong>Settings</strong> menu and turn on <strong>Enable Log</strong>.</li>
+                        <li data-i18n-html="nochar.try_step3">Exit all the way back to the <strong>Select Character</strong> screen (you don't need to quit the client).</li>
+                        <li data-i18n-html="nochar.try_step4">Click your character to log back in.</li>
                     </ol>
-                    <p class="help-note">This works because the server re-sends your full character data on every login, and Torchlight only writes it to the log when Enable Log is already on when that packet arrives.</p>
+                    <p class="help-note" data-i18n="nochar.try_note">This works because the server re-sends your full character data on every login, and Torchlight only writes it to the log when Enable Log is already on when that packet arrives.</p>
                 </section>
                 <section class="help-section">
-                    <h4>If that didn't work</h4>
-                    <p>On some sessions the game records only a truncated placeholder (<code>+player+...</code>) for your character even with logging on. Resetting the client usually clears this:</p>
+                    <h4 data-i18n="nochar.fail_title">If that didn't work</h4>
+                    <p data-i18n-html="nochar.fail_intro">On some sessions the game records only a truncated placeholder (<code>+player+...</code>) for your character even with logging on. Resetting the client usually clears this:</p>
                     <ol>
-                        <li>Fully close Torchlight Infinite (quit to desktop — not just log out).</li>
-                        <li>Reopen the client and log in to your character.</li>
-                        <li>Open <strong>Settings</strong> and turn on <strong>Enable Log</strong>.</li>
-                        <li>Exit to <strong>Select Character</strong> and log back in.</li>
+                        <li data-i18n-html="nochar.fail_step1">Fully close Torchlight Infinite (quit to desktop — not just log out).</li>
+                        <li data-i18n-html="nochar.fail_step2">Reopen the client and log in to your character.</li>
+                        <li data-i18n-html="nochar.fail_step3">Open <strong>Settings</strong> and turn on <strong>Enable Log</strong>.</li>
+                        <li data-i18n-html="nochar.fail_step4">Exit to <strong>Select Character</strong> and log back in.</li>
                     </ol>
-                    <p class="help-note">A sort of your inventory (click the Sort button in your bag) also forces a fresh inventory dump, which is a useful extra nudge if detection still doesn't fire.</p>
+                    <p class="help-note" data-i18n="nochar.fail_note">A sort of your inventory (click the Sort button in your bag) also forces a fresh inventory dump, which is a useful extra nudge if detection still doesn't fire.</p>
                 </section>
                 <section class="help-section">
-                    <h4>Other things to check</h4>
+                    <h4 data-i18n="nochar.other_title">Other things to check</h4>
                     <ul>
-                        <li><strong>Wrong log file.</strong> If you have both the Steam and standalone Torchlight client installed, TITrack may be watching the log for the client you aren't currently playing on. The diagnostic above will suggest a switch when it detects a newer log elsewhere.</li>
-                        <li><strong>Game closed.</strong> Torchlight only writes to its log while it's running. If you quit the game, the log stops updating and TITrack will flag it as stale.</li>
-                        <li><strong>Enable Log doesn't persist.</strong> Torchlight resets this toggle to off every time the client restarts. You need to turn it back on each session.</li>
+                        <li data-i18n-html="nochar.other_b1"><strong>Wrong log file.</strong> If you have both the Steam and standalone Torchlight client installed, TITrack may be watching the log for the client you aren't currently playing on. The diagnostic above will suggest a switch when it detects a newer log elsewhere.</li>
+                        <li data-i18n-html="nochar.other_b2"><strong>Game closed.</strong> Torchlight only writes to its log while it's running. If you quit the game, the log stops updating and TITrack will flag it as stale.</li>
+                        <li data-i18n-html="nochar.other_b3"><strong>Enable Log doesn't persist.</strong> Torchlight resets this toggle to off every time the client restarts. You need to turn it back on each session.</li>
                     </ul>
                 </section>
                 <div class="modal-actions">
-                    <button onclick="closeNoCharacterModal()" class="dismiss-btn">Dismiss</button>
+                    <button onclick="closeNoCharacterModal()" class="dismiss-btn" data-i18n="nochar.dismiss">Dismiss</button>
                 </div>
             </div>
         </div>
@@ -333,102 +334,117 @@
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Settings</h3>
+                <h3 data-i18n="settings.title">Settings</h3>
                 <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
             </div>
             <div class="settings-body">
+                <!-- Language Section -->
+                <section class="settings-section">
+                    <h4 data-i18n="settings.section_language">Language</h4>
+                    <label class="settings-toggle">
+                        <select id="settings-language" class="settings-select">
+                            <option value="en">English</option>
+                            <option value="zh-CN">简体中文</option>
+                        </select>
+                        <div class="toggle-info">
+                            <span class="toggle-label" data-i18n="settings.language_label">Language</span>
+                            <span class="toggle-desc" data-i18n="settings.language_desc">Display language for the dashboard and overlay</span>
+                        </div>
+                    </label>
+                </section>
+
                 <!-- Value Calculations Section -->
                 <section class="settings-section">
-                    <h4>Value Calculations</h4>
+                    <h4 data-i18n="settings.section_value">Value Calculations</h4>
                     <label class="settings-toggle">
                         <input type="checkbox" id="settings-trade-tax">
                         <div class="toggle-info">
-                            <span class="toggle-label">Trade Tax</span>
-                            <span class="toggle-desc">Apply 12.5% trade house tax to item values</span>
+                            <span class="toggle-label" data-i18n="settings.trade_tax">Trade Tax</span>
+                            <span class="toggle-desc" data-i18n="settings.trade_tax_desc">Apply 12.5% trade house tax to item values</span>
                         </div>
                     </label>
                     <label class="settings-toggle">
                         <input type="checkbox" id="settings-map-costs">
                         <div class="toggle-info">
-                            <span class="toggle-label">Map Costs</span>
-                            <span class="toggle-desc">Track and subtract compass/beacon costs from run values</span>
+                            <span class="toggle-label" data-i18n="settings.map_costs">Map Costs</span>
+                            <span class="toggle-desc" data-i18n="settings.map_costs_desc">Track and subtract compass/beacon costs from run values</span>
                         </div>
                     </label>
                     <label class="settings-toggle">
                         <input type="checkbox" id="settings-realtime-tracking">
                         <div class="toggle-info">
-                            <span class="toggle-label">Real-Time Tracking</span>
-                            <span class="toggle-desc">Use wall-clock time for FE/Hour and Total Time instead of in-map time only</span>
+                            <span class="toggle-label" data-i18n="settings.realtime">Real-Time Tracking</span>
+                            <span class="toggle-desc" data-i18n="settings.realtime_desc">Use wall-clock time for FE/Hour and Total Time instead of in-map time only</span>
                         </div>
                     </label>
                 </section>
 
                 <!-- Overlay Section -->
                 <section class="settings-section">
-                    <h4>Overlay</h4>
+                    <h4 data-i18n="settings.section_overlay">Overlay</h4>
                     <label class="settings-toggle">
                         <input type="checkbox" id="settings-overlay-hide-loot">
                         <div class="toggle-info">
-                            <span class="toggle-label">Hide Loot Pickups</span>
-                            <span class="toggle-desc">Hide the loot section in the overlay for a more compact view (stats only)</span>
+                            <span class="toggle-label" data-i18n="settings.overlay_hide_loot">Hide Loot Pickups</span>
+                            <span class="toggle-desc" data-i18n="settings.overlay_hide_loot_desc">Hide the loot section in the overlay for a more compact view (stats only)</span>
                         </div>
                     </label>
                     <label class="settings-toggle">
                         <input type="checkbox" id="settings-overlay-micro-mode">
                         <div class="toggle-info">
-                            <span class="toggle-label">Micro Overlay</span>
-                            <span class="toggle-desc">Show a compact overlay with only key stats instead of the full overlay</span>
+                            <span class="toggle-label" data-i18n="settings.overlay_micro">Micro Overlay</span>
+                            <span class="toggle-desc" data-i18n="settings.overlay_micro_desc">Show a compact overlay with only key stats instead of the full overlay</span>
                         </div>
                     </label>
                     <div id="micro-stats-picker" class="micro-stats-picker hidden">
                         <div class="micro-orientation-row">
-                            <span class="micro-stats-label">Layout:</span>
+                            <span class="micro-stats-label" data-i18n="settings.layout">Layout:</span>
                             <div class="micro-orientation-buttons">
-                                <button class="micro-orientation-btn active" id="micro-orient-horizontal" onclick="setMicroOrientation('horizontal')">Horizontal</button>
-                                <button class="micro-orientation-btn" id="micro-orient-vertical" onclick="setMicroOrientation('vertical')">Vertical</button>
+                                <button class="micro-orientation-btn active" id="micro-orient-horizontal" onclick="setMicroOrientation('horizontal')" data-i18n="settings.layout_horizontal">Horizontal</button>
+                                <button class="micro-orientation-btn" id="micro-orient-vertical" onclick="setMicroOrientation('vertical')" data-i18n="settings.layout_vertical">Vertical</button>
                             </div>
                         </div>
                         <div class="micro-font-scale-row">
-                            <span class="micro-stats-label">Font size:</span>
+                            <span class="micro-stats-label" data-i18n="settings.font_size">Font size:</span>
                             <input type="range" id="micro-font-scale-slider" min="70" max="160" value="100" step="10">
                             <span id="micro-font-scale-value">100%</span>
                         </div>
-                        <span class="micro-stats-label">Visible stats: <span class="micro-stats-hint">(drag to reorder)</span></span>
+                        <span class="micro-stats-label"><span data-i18n="settings.visible_stats">Visible stats:</span> <span class="micro-stats-hint" data-i18n="settings.drag_to_reorder">(drag to reorder)</span></span>
                         <div id="micro-stats-chips" class="micro-stats-chips"></div>
                     </div>
                 </section>
 
                 <!-- Low Supply Alerts Section -->
                 <section class="settings-section">
-                    <h4>Low Supply Alerts</h4>
-                    <p class="settings-desc">Get notified when map supplies drop to a threshold. Set to 0 to disable.</p>
+                    <h4 data-i18n="settings.section_supply">Low Supply Alerts</h4>
+                    <p class="settings-desc" data-i18n="settings.supply_desc">Get notified when map supplies drop to a threshold. Set to 0 to disable.</p>
                     <div class="supply-threshold-row">
-                        <label for="settings-supply-beacon">Beacons</label>
+                        <label for="settings-supply-beacon" data-i18n="settings.supply_beacons">Beacons</label>
                         <input type="number" id="settings-supply-beacon" class="supply-threshold-input" min="0" step="1" value="0">
                     </div>
                     <div class="supply-threshold-row">
-                        <label for="settings-supply-compass">Compasses</label>
+                        <label for="settings-supply-compass" data-i18n="settings.supply_compasses">Compasses</label>
                         <input type="number" id="settings-supply-compass" class="supply-threshold-input" min="0" step="1" value="0">
                     </div>
                     <div class="supply-threshold-row">
-                        <label for="settings-supply-resonance">Resonance</label>
+                        <label for="settings-supply-resonance" data-i18n="settings.supply_resonance">Resonance</label>
                         <input type="number" id="settings-supply-resonance" class="supply-threshold-input" min="0" step="1" value="0">
                     </div>
                 </section>
 
                 <!-- Game Directory Section -->
                 <section class="settings-section">
-                    <h4>Game Directory</h4>
-                    <p id="settings-log-path-current">Current: <code id="current-log-path">Loading...</code></p>
+                    <h4 data-i18n="settings.section_game_dir">Game Directory</h4>
+                    <p id="settings-log-path-current"><span data-i18n="settings.current_path">Current:</span> <code id="current-log-path" data-i18n="settings.path_loading">Loading...</code></p>
                     <div class="log-path-input-group">
-                        <input type="text" id="log-directory-input" placeholder="C:\Torchlight Infinite or C:\...\Logs\UE_game.log" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
-                        <button onclick="browseForGameFolder()" class="browse-btn" id="browse-folder-btn" style="display: none;">Browse</button>
-                        <button onclick="validateLogDirectory()" class="validate-btn">Validate</button>
+                        <input type="text" id="log-directory-input" data-i18n-placeholder="settings.path_placeholder" placeholder="C:\Torchlight Infinite or C:\...\Logs\UE_game.log" onkeyup="if(event.key === 'Enter') validateLogDirectory()">
+                        <button onclick="browseForGameFolder()" class="browse-btn" id="browse-folder-btn" style="display: none;" data-i18n="settings.browse">Browse</button>
+                        <button onclick="validateLogDirectory()" class="validate-btn" data-i18n="settings.validate">Validate</button>
                     </div>
                     <p id="log-path-status" class="log-path-status"></p>
-                    <p class="help-note">You can enter the game folder, the Logs folder, or the full path to UE_game.log</p>
+                    <p class="help-note" data-i18n="settings.path_help">You can enter the game folder, the Logs folder, or the full path to UE_game.log</p>
                     <div class="settings-section-actions">
-                        <button onclick="saveLogDirectory()" id="save-log-dir-btn" class="settings-btn-primary" disabled>Save & Restart</button>
+                        <button onclick="saveLogDirectory()" id="save-log-dir-btn" class="settings-btn-primary" disabled data-i18n="settings.save_restart">Save & Restart</button>
                     </div>
                 </section>
             </div>
@@ -438,41 +454,41 @@
     <div id="loot-report-modal" class="modal hidden">
         <div class="modal-content modal-wide">
             <div class="modal-header">
-                <h3>Loot Report</h3>
+                <h3 data-i18n="report.title">Loot Report</h3>
                 <button class="close-btn" onclick="closeLootReportModal()">&times;</button>
             </div>
             <div id="loot-report-body">
                 <div class="report-summary">
                     <div class="report-stat">
-                        <span class="report-stat-label">Gross Value</span>
+                        <span class="report-stat-label" data-i18n="report.gross">Gross Value</span>
                         <span id="report-total-value" class="report-stat-value">--</span>
                     </div>
                     <div id="report-cost-stat" class="report-stat hidden">
-                        <span class="report-stat-label">Map Costs</span>
+                        <span class="report-stat-label" data-i18n="report.map_costs">Map Costs</span>
                         <span id="report-map-costs" class="report-stat-value negative">--</span>
                     </div>
                     <div class="report-stat">
-                        <span class="report-stat-label">Profit</span>
+                        <span class="report-stat-label" data-i18n="report.profit">Profit</span>
                         <span id="report-profit" class="report-stat-value primary">--</span>
                     </div>
                     <div class="report-stat">
-                        <span class="report-stat-label">Runs</span>
+                        <span class="report-stat-label" data-i18n="report.runs">Runs</span>
                         <span id="report-run-count" class="report-stat-value">--</span>
                     </div>
                     <div class="report-stat">
-                        <span class="report-stat-label">Total Time</span>
+                        <span class="report-stat-label" data-i18n="report.total_time">Total Time</span>
                         <span id="report-total-time" class="report-stat-value">--</span>
                     </div>
                     <div class="report-stat">
-                        <span class="report-stat-label">Profit/Hour</span>
+                        <span class="report-stat-label" data-i18n="report.profit_per_hour">Profit/Hour</span>
                         <span id="report-profit-per-hour" class="report-stat-value">--</span>
                     </div>
                     <div class="report-stat">
-                        <span class="report-stat-label">Profit/Map</span>
+                        <span class="report-stat-label" data-i18n="report.profit_per_map">Profit/Map</span>
                         <span id="report-profit-per-map" class="report-stat-value">--</span>
                     </div>
                     <div class="report-stat">
-                        <span class="report-stat-label">Unique Items</span>
+                        <span class="report-stat-label" data-i18n="report.unique_items">Unique Items</span>
                         <span id="report-total-items" class="report-stat-value">--</span>
                     </div>
                 </div>
@@ -483,22 +499,22 @@
                     <table class="report-table">
                         <thead>
                             <tr>
-                                <th>Item</th>
-                                <th>Qty</th>
-                                <th>Unit Price</th>
-                                <th>Total Value</th>
-                                <th>%</th>
+                                <th data-i18n="report.col_item">Item</th>
+                                <th data-i18n="report.col_qty">Qty</th>
+                                <th data-i18n="report.col_unit_price">Unit Price</th>
+                                <th data-i18n="report.col_total_value">Total Value</th>
+                                <th data-i18n="report.col_pct">%</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody id="loot-report-table-body">
-                            <tr><td colspan="6" class="loading">Loading...</td></tr>
+                            <tr><td colspan="6" class="loading" data-i18n="runs.loading">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-actions">
-                    <button onclick="exportLootReportCSV()" class="export-btn">Export CSV</button>
-                    <button onclick="closeLootReportModal()" class="cancel-btn">Close</button>
+                    <button onclick="exportLootReportCSV()" class="export-btn" data-i18n="report.export_csv">Export CSV</button>
+                    <button onclick="closeLootReportModal()" class="cancel-btn" data-i18n="report.close">Close</button>
                 </div>
             </div>
         </div>
@@ -507,7 +523,7 @@
     <div id="update-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Update Available</h3>
+                <h3 data-i18n="update.title">Update Available</h3>
                 <button class="close-btn" onclick="closeUpdateModal()">&times;</button>
             </div>
             <div class="update-body">
@@ -520,18 +536,18 @@
                 </div>
                 <div id="update-install-warning" class="update-install-warning hidden"></div>
                 <div class="update-release-notes">
-                    <h4>Release Notes</h4>
-                    <div id="update-release-notes" class="release-notes-content">Loading...</div>
+                    <h4 data-i18n="update.release_notes">Release Notes</h4>
+                    <div id="update-release-notes" class="release-notes-content" data-i18n="update.loading">Loading...</div>
                 </div>
                 <div class="update-progress hidden" id="update-progress-container">
                     <div class="progress-bar">
                         <div class="progress-fill" id="update-progress-bar" style="width: 0%"></div>
                     </div>
-                    <span class="progress-text" id="update-progress-text">Downloading...</span>
+                    <span class="progress-text" id="update-progress-text" data-i18n="footer.downloading">Downloading...</span>
                 </div>
                 <div class="modal-actions" id="update-actions">
-                    <button onclick="downloadAndInstallUpdate()" class="save-btn" id="update-download-btn">Download & Install</button>
-                    <button onclick="closeUpdateModal()" class="cancel-btn">Later</button>
+                    <button onclick="downloadAndInstallUpdate()" class="save-btn" id="update-download-btn" data-i18n="update.download_install">Download & Install</button>
+                    <button onclick="closeUpdateModal()" class="cancel-btn" data-i18n="update.later">Later</button>
                 </div>
             </div>
         </div>
@@ -540,29 +556,29 @@
     <div id="hide-items-modal" class="modal hidden">
         <div class="modal-content hide-items-modal-content">
             <div class="modal-header">
-                <h3>Hide Items from Inventory</h3>
+                <h3 data-i18n="hide.title">Hide Items from Inventory</h3>
                 <button class="close-btn" onclick="closeHideItemsModal()">&times;</button>
             </div>
             <div class="hide-items-body">
-                <p class="hide-items-hint" id="hide-items-hint-text">Check items to hide from inventory display. Hidden items still count toward net worth.</p>
+                <p class="hide-items-hint" id="hide-items-hint-text" data-i18n="hide.hint">Check items to hide from inventory display. Hidden items still count toward net worth.</p>
                 <div class="hide-items-worth-toggle">
                     <label class="settings-toggle">
                         <input type="checkbox" id="settings-hidden-exclude-worth">
                         <div class="toggle-info">
-                            <span class="toggle-label">Exclude from Net Worth</span>
-                            <span class="toggle-desc">Hidden items will not count toward net worth</span>
+                            <span class="toggle-label" data-i18n="hide.exclude_worth">Exclude from Net Worth</span>
+                            <span class="toggle-desc" data-i18n="hide.exclude_worth_desc">Hidden items will not count toward net worth</span>
                         </div>
                     </label>
                 </div>
-                <input type="text" id="hide-items-search" class="hide-items-search" placeholder="Search items..." oninput="renderHideItemsTable()">
+                <input type="text" id="hide-items-search" class="hide-items-search" data-i18n-placeholder="hide.search" placeholder="Search items..." oninput="renderHideItemsTable()">
                 <div class="hide-items-table-container">
                     <table class="hide-items-table">
                         <thead>
                             <tr>
                                 <th class="hide-col-check"></th>
-                                <th>Item</th>
-                                <th class="sortable" onclick="sortHideItemsTable('quantity')">Qty <span class="sort-indicator" id="hide-sort-quantity"></span></th>
-                                <th class="sortable active desc" onclick="sortHideItemsTable('value')">Value <span class="sort-indicator" id="hide-sort-value"></span></th>
+                                <th data-i18n="hide.col_item">Item</th>
+                                <th class="sortable" onclick="sortHideItemsTable('quantity')"><span data-i18n="hide.col_qty">Qty</span> <span class="sort-indicator" id="hide-sort-quantity"></span></th>
+                                <th class="sortable active desc" onclick="sortHideItemsTable('value')"><span data-i18n="hide.col_value">Value</span> <span class="sort-indicator" id="hide-sort-value"></span></th>
                             </tr>
                         </thead>
                         <tbody id="hide-items-body">
@@ -571,8 +587,8 @@
                 </div>
                 <div class="modal-actions">
                     <span class="hide-items-count" id="hide-items-count"></span>
-                    <button onclick="saveHideItems()" class="save-btn">Save</button>
-                    <button onclick="closeHideItemsModal()" class="cancel-btn">Cancel</button>
+                    <button onclick="saveHideItems()" class="save-btn" data-i18n="hide.save">Save</button>
+                    <button onclick="closeHideItemsModal()" class="cancel-btn" data-i18n="hide.cancel">Cancel</button>
                 </div>
             </div>
         </div>

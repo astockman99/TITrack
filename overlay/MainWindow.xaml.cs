@@ -60,21 +60,34 @@ public partial class MainWindow : Window
     private double _savedNormalLeft = double.NaN;
     private double _savedNormalTop = double.NaN;
 
-    // Micro stat display config
-    private static readonly Dictionary<string, string> MicroStatLabels = new()
+    // Micro stat short labels: keyed by stat id, value is the i18n key. The actual
+    // displayed string is resolved through Localization at render time so the
+    // labels switch immediately when the user changes language.
+    private static readonly Dictionary<string, string> MicroStatLabelKeys = new()
     {
-        { "total_time", "Time" },
-        { "value_per_hour", "FE/hr" },
-        { "total_value", "Total" },
-        { "net_worth", "NW" },
-        { "this_run", "Run" },
-        { "value_per_map", "FE/Map" },
-        { "runs", "Runs" },
-        { "avg_time", "Avg" },
+        { "total_time", "micro.time" },
+        { "value_per_hour", "micro.fe_per_hr" },
+        { "total_value", "micro.total" },
+        { "net_worth", "micro.nw" },
+        { "this_run", "micro.run" },
+        { "value_per_map", "micro.fe_per_map" },
+        { "runs", "micro.runs" },
+        { "avg_time", "micro.avg" },
     };
 
+    private static bool TryGetMicroLabel(string statKey, out string label)
+    {
+        if (MicroStatLabelKeys.TryGetValue(statKey, out var i18nKey))
+        {
+            label = Localization.Tr(i18nKey);
+            return true;
+        }
+        label = string.Empty;
+        return false;
+    }
+
     // Supply alert state
-    private record SupplyItemRecord(int config_base_id, string name, string category, int quantity);
+    private record SupplyItemRecord(int config_base_id, string name, string category, int quantity, string? name_en = null, string? name_cn = null);
     private record SupplyItemsResponse(SupplyItemRecord[] items);
     private readonly HashSet<string> _supplyAlertedItems = new();
     private int _supplyBeaconThreshold = 0;
@@ -131,7 +144,9 @@ public partial class MainWindow : Window
         int quantity,
         string? icon_url,
         double? price_fe,
-        double? total_value_fe
+        double? total_value_fe,
+        string? name_en = null,
+        string? name_cn = null
     );
 
     private record ActiveRunResponse(
@@ -186,6 +201,12 @@ public partial class MainWindow : Window
 
         Loaded += async (s, e) =>
         {
+            // Apply language first so initial labels render in the right language.
+            await LoadLanguageAsync();
+            await Localization.EnsureZoneTranslationsAsync(_httpClient, App.BaseUrl);
+            ApplyLanguageLabels();
+            Localization.LanguageChanged += _ => ApplyLanguageLabels();
+
             await LoadTransparencyAsync();
             await LoadFontScaleAsync();
             await LoadHideLootAsync();
@@ -473,6 +494,67 @@ public partial class MainWindow : Window
         FontIncreaseButton.IsEnabled = _fontScale < MaxFontScale;
         FontDecreaseButton.Opacity = _fontScale > MinFontScale ? 1.0 : 0.4;
         FontIncreaseButton.Opacity = _fontScale < MaxFontScale ? 1.0 : 0.4;
+    }
+
+    /// <summary>
+    /// Read the saved language setting from the backend and apply it via
+    /// <see cref="Localization.SetLang"/>. Triggers <c>LanguageChanged</c> only
+    /// when the value actually changes, so this is cheap to call every refresh.
+    /// </summary>
+    private async Task LoadLanguageAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"{App.BaseUrl}/api/settings/language");
+            if (!response.IsSuccessStatusCode) return;
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.String)
+            {
+                Localization.SetLang(v.GetString());
+                // Make sure the zone table is loaded once we know we may need it.
+                await Localization.EnsureZoneTranslationsAsync(_httpClient, App.BaseUrl);
+            }
+        }
+        catch
+        {
+            // Offline-friendly: keep the previous language.
+        }
+    }
+
+    /// <summary>
+    /// Apply the current language to all static labels, tooltips, and the
+    /// micro-overlay panel. Called once on load and again whenever
+    /// <see cref="Localization.LanguageChanged"/> fires.
+    /// </summary>
+    private void ApplyLanguageLabels()
+    {
+        Title = Localization.Tr("overlay.title");
+        NetWorthLabel.Text = Localization.Tr("overlay.net_worth");
+        // ThisRunLabel is updated dynamically (active vs previous) in UpdateStats;
+        // initialize it here so the first paint shows the right text.
+        ThisRunLabel.Text = Localization.Tr("overlay.this_run");
+        ValuePerHourLabel.Text = Localization.Tr("overlay.fe_per_hour");
+        ValuePerMapLabel.Text = Localization.Tr("overlay.fe_per_map");
+        RunsLabel.Text = Localization.Tr("overlay.runs");
+        AvgTimeLabel.Text = Localization.Tr("overlay.avg_time");
+        TotalTimeLabel.Text = Localization.Tr("overlay.total_time");
+        NoRunText.Text = Localization.Tr("overlay.no_active_run");
+
+        // Tooltips
+        FontDecreaseButton.ToolTip = Localization.Tr("overlay.tip_decrease_text");
+        FontIncreaseButton.ToolTip = Localization.Tr("overlay.tip_increase_text");
+        TransparencyButton.ToolTip = Localization.Tr("overlay.tip_transparency");
+        PauseButton.ToolTip = Localization.Tr("overlay.tip_pause");
+        LockButton.ToolTip = Localization.Tr("overlay.tip_lock");
+        MicroTransparencyButton.ToolTip = Localization.Tr("overlay.tip_transparency");
+        MicroLockButton.ToolTip = Localization.Tr("overlay.tip_lock");
+
+        // Refresh micro panel labels (loop updates label TextBlocks via a rebuild).
+        if (_microMode)
+        {
+            RebuildMicroStats();
+        }
     }
 
     private async Task LoadFontScaleAsync()
@@ -887,7 +969,7 @@ public partial class MainWindow : Window
         for (int i = 0; i < _microStats.Count; i++)
         {
             var key = _microStats[i];
-            if (!MicroStatLabels.TryGetValue(key, out var label))
+            if (!TryGetMicroLabel(key, out var label))
                 continue;
 
             if (isVertical)
@@ -1262,6 +1344,10 @@ public partial class MainWindow : Window
     {
         try
         {
+            // Poll language setting so the overlay follows changes made in the
+            // dashboard's Settings modal without restarting.
+            await LoadLanguageAsync();
+
             var statsTask = FetchAsync<StatsResponse>("/api/runs/stats");
             var activeRunTask = FetchAsync<ActiveRunResponse?>("/api/runs/active");
             var inventoryTask = FetchAsync<InventoryResponse>("/api/inventory");
@@ -1349,7 +1435,7 @@ public partial class MainWindow : Window
 
             if (item.quantity <= threshold && !_supplyAlertedItems.Contains(alertKey))
             {
-                alerts.Add($"\u26a0 Low: {item.name} \u2014 {item.quantity} left");
+                alerts.Add(Localization.Tr("overlay.supply_alert", Localization.PickItemName(item.name_en, item.name_cn, item.name, item.config_base_id), item.quantity));
                 _supplyAlertedItems.Add(alertKey);
             }
             else if (item.quantity > threshold && _supplyAlertedItems.Contains(alertKey))
@@ -1436,12 +1522,12 @@ public partial class MainWindow : Window
                 : (Brush)FindResource("AccentRedBrush");
 
             // Update label based on whether it's active or previous
-            ThisRunLabel.Text = activeRun != null ? "This Run" : "Previous Run";
+            ThisRunLabel.Text = activeRun != null ? Localization.Tr("overlay.this_run") : Localization.Tr("overlay.previous_run");
         }
         else
         {
             ThisRunText.Text = "--";
-            ThisRunLabel.Text = "This Run";
+            ThisRunLabel.Text = Localization.Tr("overlay.this_run");
         }
 
         // Other stats
@@ -1526,7 +1612,7 @@ public partial class MainWindow : Window
         NoRunPanel.Visibility = Visibility.Collapsed;
 
         // Zone name and duration
-        ZoneNameText.Text = displayRun.zone_name ?? "Unknown Zone";
+        ZoneNameText.Text = Localization.TZone(displayRun.zone_name) ?? Localization.Tr("overlay.unknown_zone");
         RunDurationText.Text = $"({FormatDurationShort(displayRun.duration_seconds)})";
 
         // Show/hide pulse indicator based on active vs previous run
@@ -1629,7 +1715,7 @@ public partial class MainWindow : Window
         // Name
         var nameText = new TextBlock
         {
-            Text = item.name ?? $"Unknown ({item.config_base_id})",
+            Text = Localization.PickItemName(item.name_en, item.name_cn, item.name, item.config_base_id),
             Foreground = nameBrush,
             FontSize = 11,
             TextTrimming = TextTrimming.CharacterEllipsis,

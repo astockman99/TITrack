@@ -61,7 +61,19 @@ def get_consumed_supplies(
     repo: Repository = Depends(get_repository),
 ) -> SupplyItemsResponse:
     """Get consumed supply items with current quantities for alerts."""
-    items = repo.get_consumed_supply_items()
+    raw = repo.get_consumed_supply_items()
+    items = []
+    for entry in raw:
+        cid = entry["config_base_id"]
+        item = repo.get_item(cid)
+        items.append({
+            "config_base_id": cid,
+            "name": entry["name"],
+            "name_en": item.name_en if item else None,
+            "name_cn": item.name_cn if item else None,
+            "category": entry["category"],
+            "quantity": entry["quantity"],
+        })
     return SupplyItemsResponse(items=items)
 
 
@@ -133,6 +145,10 @@ def get_inventory(
             InventoryItem(
                 config_base_id=config_id,
                 name=item.name_en if item else f"Unknown {config_id}",
+                name_en=item.name_en if item else None,
+                name_cn=item.name_cn if item else None,
+                url_en=item.url_en if item else None,
+                url_cn=item.url_cn if item else None,
                 quantity=quantity,
                 page_id=page_ids.get(config_id, 0),
                 icon_url=item.icon_url if item else None,

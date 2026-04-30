@@ -40,6 +40,7 @@ ALLOWED_SETTINGS = {
     "low_supply_beacon_threshold",
     "low_supply_compass_threshold",
     "low_supply_resonance_threshold",
+    "language",
 }
 
 # Settings that are read-only via API (can be read but not written)

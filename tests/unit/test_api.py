@@ -724,3 +724,88 @@ class TestIconsEndpoint:
         response = client.get("/api/icons/999888")
         assert response.status_code == 404
         assert "No icon available" in response.json()["detail"]
+
+
+class TestI18nEndpoints:
+    """Internationalization-related API behaviour."""
+
+    def test_zone_translations_endpoint(self, client):
+        """/api/i18n/zones returns the zh-CN zone-name table."""
+        response = client.get("/api/i18n/zones")
+        assert response.status_code == 200
+        data = response.json()
+        assert "zh-CN" in data
+        # Must contain at least a few well-known zone translations
+        assert isinstance(data["zh-CN"], dict)
+        assert len(data["zh-CN"]) > 0
+
+    def test_inventory_returns_bilingual_names(self, db, repo):
+        """Inventory items expose name_en and name_cn (and legacy name)."""
+        from titrack.parser.patterns import FE_CONFIG_BASE_ID
+
+        now = datetime.now()
+        repo.upsert_item(Item(
+            config_base_id=FE_CONFIG_BASE_ID,
+            name_en="Flame Elementium",
+            name_cn="\u521d\u706b\u6e90\u8d28",
+            type_cn=None, icon_url=None, url_en=None, url_cn=None,
+        ))
+        repo.upsert_slot_state(SlotState(
+            page_id=102, slot_id=0, config_base_id=FE_CONFIG_BASE_ID,
+            num=42, updated_at=now,
+        ))
+
+        app = create_app(db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/inventory")
+        assert response.status_code == 200
+        items = response.json()["items"]
+        assert len(items) == 1
+        item = items[0]
+        # Backwards-compat field still present
+        assert item["name"] == "Flame Elementium"
+        # New bilingual fields
+        assert item["name_en"] == "Flame Elementium"
+        assert item["name_cn"] == "\u521d\u706b\u6e90\u8d28"
+
+    def test_run_loot_returns_bilingual_names(self, seeded_db):
+        """Run details include name_en/name_cn for each loot item."""
+        app = create_app(seeded_db, player_info=TEST_PLAYER_INFO)
+        client = TestClient(app)
+        response = client.get("/api/runs/1")
+        assert response.status_code == 200
+        loot = response.json().get("loot", [])
+        assert len(loot) >= 1
+        for entry in loot:
+            assert "name_en" in entry
+            assert "name_cn" in entry
+
+    def test_player_endpoint_returns_bilingual_names(self, client):
+        """Player payload exposes season_name_en/cn and hero_name_en/cn."""
+        response = client.get("/api/player")
+        # The endpoint may 404 when no player is configured; only check shape
+        # when a player is actually returned.
+        if response.status_code == 200:
+            data = response.json()
+            assert "season_name_en" in data
+            assert "season_name_cn" in data
+            assert "hero_name_en" in data
+            assert "hero_name_cn" in data
+
+    def test_language_setting_round_trip(self, client):
+        """The `language` setting can be written and read back."""
+        # Default is empty / unset; PUT a value then GET it back.
+        put_resp = client.put(
+            "/api/settings/language",
+            json={"value": "zh-CN"},
+        )
+        assert put_resp.status_code in (200, 204)
+
+        get_resp = client.get("/api/settings/language")
+        assert get_resp.status_code == 200
+        assert get_resp.json()["value"] == "zh-CN"
+
+        # Switch back to English.
+        client.put("/api/settings/language", json={"value": "en"})
+        assert client.get("/api/settings/language").json()["value"] == "en"
+

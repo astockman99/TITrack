@@ -829,6 +829,42 @@ Cloud sync requires a Supabase backend. The backend is NOT configured by default
 
 Install the Supabase SDK: `pip install titrack[cloud]`
 
+## Internationalization (i18n)
+
+TITrack supports two languages: **English (en)** (default) and **Simplified Chinese (zh-CN)**. The language is selected from Settings → Language and persisted as the `language` setting. Both the web dashboard and the WPF overlay follow this setting.
+
+### Translation surfaces
+
+| Surface | Source |
+|---------|--------|
+| Web UI static strings | `src/titrack/web/static/i18n.js` `TRANSLATIONS` (~145 keys) |
+| Overlay static strings | `overlay/Localization.cs` `Strings` |
+| Item names | `items.name_en` / `items.name_cn` columns (from `tlidb_items_seed_en.json`) |
+| Zone names | `src/titrack/data/zones.py` `ZONE_NAMES` (en) and `ZONE_NAMES_CN` (zh-CN) |
+| Season / hero names | `src/titrack/parser/player_parser.py` `SEASON_NAMES_*` / `HERO_NAMES_*` |
+
+### Selection rules
+
+- Item name: prefer `name_cn` when language is zh-CN and non-empty; else `name_en`; else legacy `name`; else `Unknown ({id})`.
+- Zone name: looked up by English display name. The runtime `(Nightmare)` suffix is preserved/translated separately so any zone can be displayed in Nightmare mode without duplicating entries.
+- FE (Flame Elementium) is rendered as **源质** in zh-CN copy.
+
+### API endpoints
+
+- `GET /api/i18n/zones` — Returns `{ "zh-CN": { "<EnglishName>": "<译名>", ... } }`. Used by the web app and the overlay to translate zone display names client-side.
+- `GET /api/settings/language` / `PUT /api/settings/language` — Round-trips the user's language choice. `language` is whitelisted in `ALLOWED_SETTINGS`.
+
+### Adding a new translation
+
+1. **UI string**: add the key to both language blocks in `src/titrack/web/static/i18n.js` and `overlay/Localization.cs`. Use it in templates via `data-i18n="key"` (web) or `Localization.Tr("key")` (overlay).
+2. **Zone**: add an entry to `ZONE_NAMES_CN` in `src/titrack/data/zones.py`. The endpoint serves the dict as-is.
+3. **Item**: name_cn comes from the seed JSON. Re-seeding pulls fresh translations.
+4. **Season / hero**: extend the `*_NAMES_CN` dicts in `src/titrack/parser/player_parser.py`.
+
+### Overlay behaviour
+
+The overlay polls `/api/settings/language` every refresh tick (~2 s). When the value changes, `Localization.LanguageChanged` fires and `MainWindow.ApplyLanguageLabels()` re-applies all static labels and tooltips in place — no restart required.
+
 ## Known Limitations / TODO
 
 - **Timemark level not tracked**: The game log zone paths are identical regardless of Timemark level (e.g., 7-0 vs 8-0). Runs of the same zone are grouped together. To support per-Timemark tracking, would need to find another log line that indicates the Timemark level (possibly when selecting beacon or starting map) or add manual run tagging in the UI.
